@@ -1,0 +1,5 @@
+node_modules
+*.mp4
+*.jpg
+.package-lock.json
+.DS_Store
