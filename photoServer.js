@@ -107,7 +107,7 @@ function isMedia(name) {
 }
 
 function isVideo(name) {
-  return /.+\.mp4$/.test(name);
+  return /.+\.mp4|avi$/i.test(name);
 }
 
 app.use('/:name', (req, res, next) => {
