@@ -21,4 +21,6 @@ To start as a simple service on ubuntu:
 -- remove blocking code in directory scan
 -- add mime types so files don't get sent as 'text-plain'
 -- add a favicon.ico so that it doesn't get a 404
+-- add a rotate pic icon 
+-- search functionality/filter functionality
 
