@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const express = require('express');
 const app = express();
@@ -101,11 +103,11 @@ function getListings(fullDirPath) {
 
 
 function isMedia(name) {
-  return /.+\.jpg|mp4$/.test(name);
+  return /.+\.jpg|mp4|avi$/i.test(name);
 }
 
 function isVideo(name) {
-  return /.+\.mp4$/.test(name);
+  return /.+\.mp4|avi$/.test(name);
 }
 
 app.use('/:name', (req, res, next) => {
