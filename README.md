@@ -12,3 +12,9 @@ Currently `isMedia` and `isImg` check for `mp4` and `jpg`, but can easily be alt
 
 ## running
 `node photoServer.js` to serve the local directory. The service is made available on port `4000`. 
+
+## todo
+-- remove blocking code in directory scan
+-- add mime types so files don't get sent as 'text-plain'
+-- add a favicon.ico so that it doesn't get a 404
+
