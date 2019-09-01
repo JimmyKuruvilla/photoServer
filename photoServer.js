@@ -103,7 +103,7 @@ function getListings(fullDirPath) {
 
 
 function isMedia(name) {
-  return /.+\.jpg|mp4$/i.test(name);
+  return /.+\.jpg|mp4|avi$/i.test(name);
 }
 
 function isVideo(name) {

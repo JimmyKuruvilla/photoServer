@@ -16,3 +16,13 @@ To start as a simple service on ubuntu:
 0. clone down repo and `npm install`
 1. `crontab -e`
 2. add entry: `@reboot [path to photoServer.js] [path to files to serve] &`
+
+## todo
+-- add a slideshow option
+-- add a random button
+-- remove blocking code in directory scan
+-- add mime types so files don't get sent as 'text-plain'
+-- add a favicon.ico so that it doesn't get a 404
+-- add a rotate pic icon 
+-- search functionality/filter functionality
+
