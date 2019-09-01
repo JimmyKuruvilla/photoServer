@@ -4,6 +4,9 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 let fileRoot = process.argv[2] || __dirname;
+const redirectItem = {
+  webPath: 'random'
+};
 
 const videoSvg = `<svg class="video" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>`;
 
@@ -60,32 +63,52 @@ function template(locals) {
     </head>
     
     <body>
+    <button><a href="/random">Random</a></button>
       <div class="dir section">
-      ${ 
-        locals.dirs.map(i => `<div class="dir"><a href="${i.webPath}"><label>${folderSvg}${i.name}</label></div>`).join('')
-      }
+      ${locals.dirs
+        .map(
+          i =>
+            `<div class="dir"><a href="${i.webPath}"><label>${folderSvg}${
+              i.name
+            }</label></div>`
+        )
+        .join('')}
       </div>
 
       <div class="file section">
-      ${
-        locals.files.map(i => `<div class="file"><a href="${i.webPath}"><label>${i.name}</label></div>`).join('')
-      }
+      ${locals.files
+        .map(
+          i =>
+            `<div class="file"><a href="${i.webPath}"><label>${
+              i.name
+            }</label></div>`
+        )
+        .join('')}
       </div>
 
       <div class="media section">
-      ${
-        locals.media.map(i => `<div class="media"><a href="${i.webPath}"><label>${i.name}</label>${isVideo(i.name) ? videoSvg :`<img src="${i.webPath}" class="pic">`}</div>`).join('')
-      }
+      ${locals.media
+        .map(
+          i =>
+            `<div class="media"><a href="${i.webPath}"><label>${
+              i.name
+            }</label>${
+              isVideo(i.name)
+                ? videoSvg
+                : `<img src="${i.webPath}" class="pic">`
+            }</div>`
+        )
+        .join('')}
       </div>
     </body>
-  </html>`
+  </html>`;
 }
 
 function getListings(fullDirPath) {
   const dirs = [];
   const files = [];
   const media = [];
-  fs.readdirSync(fullDirPath).forEach((nodeName) => {
+  fs.readdirSync(fullDirPath).forEach(nodeName => {
     const isDirectory = fs.statSync(`${fullDirPath}/${nodeName}`).isDirectory();
     let container = isDirectory ? dirs : isMedia(nodeName) ? media : files;
     container.push({
@@ -98,17 +121,91 @@ function getListings(fullDirPath) {
     dirs,
     files,
     media
+  };
+}
+
+function keysOf(obj) {
+  return Object.keys(obj);
+}
+
+function randomNum(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function shouldStopNow() {
+  return Boolean(randomNum(0, 1));
+}
+
+function getRandomKeyFromObj(obj) {
+  // apply bias to dirs
+  // change bias over time?
+  return keysOf(obj)[randomNum(0, keysOf(obj).length - 1)];
+}
+
+function getRandomItemFromArray(arr) {
+  debugger;
+  return arr[randomNum(0, arr.length - 1)];
+}
+
+function returnDisplayable(item, originalArr) {
+  if (isMedia(item.name)) {
+    return item;
+  } else {
+    if (originalArr.length > 0) {
+
+      const names = originalArr.map(i => i.name);
+      const someDisplayablesExist = names.map(isMedia).some(i => i);
+      return someDisplayablesExist ? returnDisplayable(getRandomItemFromArray(originalArr), originalArr) : redirectItem;
+    } else {
+      return redirectItem;
+    }
   }
 }
 
+function genRandom(listings, shouldStop = false) {
+  const entry = getRandomKeyFromObj(listings);
+  if (listings[entry].length > 0) {
+    const item = getRandomItemFromArray(listings[entry]);
+    if (item.isDirectory) {
+      const filesAndMedia = listings['files'].concat(listings['media']);
+      if (shouldStop) {
+        returnDisplayable(getRandomItemFromArray(filesAndMedia), filesAndMedia);
+      } else {
+        return genRandom(
+          getListings(`${fileRoot}/${item.webPath}`),
+          shouldStopNow()
+        );
+      }
+    } else {
+      return returnDisplayable(item, listings[entry]);
+    }
+  } else {
+    delete listings[entry];
+    if (keysOf(listings).length === 0) {
+      return redirectItem;
+    } else {
+      return genRandom(listings, shouldStop);
+    }
+  }
+}
+
+function getRandom(fileRoot) {
+  const listings = getListings(fileRoot);
+  return genRandom(listings);
+}
 
 function isMedia(name) {
-  return /.+\.jpg|mp4|avi$/i.test(name);
+  return /.+\.jpg$|mp4$|avi$/i.test(name);
 }
 
 function isVideo(name) {
-  return /.+\.mp4|avi$/i.test(name);
+  return /.+\.mp4$|avi$/i.test(name);
 }
+
+app.use('/random', (req, res, next) => {
+  const item = getRandom(fileRoot);
+  res.redirect(`/${encodeURIComponent(item.webPath)}`);
+});
 
 app.use('/:name', (req, res, next) => {
   const path = req.originalUrl.replace('/', '');

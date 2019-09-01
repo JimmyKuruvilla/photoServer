@@ -11,7 +11,7 @@ You can pass any directory as the root to serve by `node photoServer.js [PATH]`
 Currently `isMedia` and `isImg` check for `mp4` and `jpg`, but can easily be altered to be whatever is relevant. 
 
 ## running
-`./photoServer.js [PATH]` to serve [PATH] directory. The service is made available on port `4000`. 
+`./photoServer.js [ABSPATH]` to serve [ABSPATH] directory. The service is made available on port `4000`. 
 To start as a simple service on ubuntu:
 0. clone down repo and `npm install`
 1. `crontab -e`
@@ -25,4 +25,4 @@ To start as a simple service on ubuntu:
 -- add a favicon.ico so that it doesn't get a 404
 -- add a rotate pic icon 
 -- search functionality/filter functionality
-
+-- files that are not displayable shouldn't be sent at all, currently gets downloaded. 
