@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/screen -dmS photoServer node photoServer.js /mnt/backup/share/Photos/Slideshow/Recent\ Photos/

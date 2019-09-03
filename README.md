@@ -18,11 +18,10 @@ To start as a simple service on ubuntu:
 2. add entry: `@reboot [path to photoServer.js] [path to files to serve] &`
 
 ## todo
--- add a slideshow option
--- add a random button
+-- add bias for random directory walk or maybe resevoir sampling
+-- random interval for videos should change based on the video's length so that it doesn't get interupted
 -- remove blocking code in directory scan
--- add mime types so files don't get sent as 'text-plain'
--- add a favicon.ico so that it doesn't get a 404
 -- add a rotate pic icon 
--- search functionality/filter functionality
--- files that are not displayable shouldn't be sent at all, currently gets downloaded. 
+-- videoTemplate should support other formats than mp4
+-- add mime types so files don't get sent as 'text-plain'
+-- stop and resume slideshow buttons
