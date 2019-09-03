@@ -12,8 +12,8 @@ const { isRedirectToRandom, isVideo} = require('./src/guards');
 const { getRandom } = require('./src/random');
 const { port } = require('./src/constants');
 
-function generalTemplate(item, url, interval){
-  return isVideo(item.name) ? videoTemplate(item, url, interval) : imgTemplate(item, url, interval);
+function generalTemplate(item, url, interval, random){
+  return isVideo(item.name) ? videoTemplate(item, url, interval) : imgTemplate(item, url, interval, random);
 }
 
 app.get('/favicon.ico/', (req, res, next)=>{
@@ -27,7 +27,7 @@ app.use('/random/slideshow', (req, res, next) => {
   if (isRedirectToRandom(item)) {
     res.redirect(url);
   } else {
-    res.send(generalTemplate(item, url, interval));
+    res.send(generalTemplate(item, url, interval, true));
   }
 });
 
@@ -45,7 +45,7 @@ app.use('/:directory/slideshow', (req, res, next) => {
       if (isRedirectToRandom(item)) {
         res.redirect(url);
       } else {
-        res.send(generalTemplate(item, url, interval));
+        res.send(generalTemplate(item, url, interval, true));
       }
     } else {
       res.send('else: not a directory');
@@ -60,7 +60,7 @@ app.use('/random', (req, res, next) => {
   if (isRedirectToRandom(item)) {
     res.redirect(`/random`);
   } else {
-    res.send(generalTemplate(item));
+    res.send(generalTemplate(item, null, null, true));
   }
 });
 

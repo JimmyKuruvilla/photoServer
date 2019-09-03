@@ -1,3 +1,4 @@
+const path = require('path');
 const { videoSvg, folderSvg } = require('./svgs.js');
 const { isVideo } = require('./guards');
 
@@ -131,7 +132,7 @@ const randomScript = (url, interval) => `
     }, ${interval})
   </script>`;
 
-function imgTemplate(item, url, interval = 3000) {
+function imgTemplate(item, url, interval = 3000, random = false) {
   return `
   <html>
     <head>
@@ -140,7 +141,7 @@ function imgTemplate(item, url, interval = 3000) {
     <body>
       ${generalToolbar}
       <h6>${item.name}</h6>
-      <img src="${item.webPath}" class="pic fullscreen">
+      <img src="${random ? path.join('..', item.webPath) : item.webPath}" class="pic fullscreen">
       ${ url ? randomScript(url, interval): ''}
     </body>
   </html>`;
@@ -156,7 +157,7 @@ function videoTemplate(item, url, interval = 3000) {
       ${generalToolbar}
       <h6>${item.name}</h6>
       <video controls autoplay class="fullscreen" >
-        <source src="${item.webPath}" type="video/mp4">
+        <source src="${random ? path.join('..', item.webPath) : item.webPath}" type="video/mp4">
       </video>
       ${ url ? randomScript(url, interval) : ''}
     </body>
