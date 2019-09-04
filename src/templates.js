@@ -6,20 +6,26 @@ const home = `<button><a href="/">Home</a></button>`;
 const random = `<button><a href="/random">Random</a></button>`;
 const slideshowAll = `<button><a href="/random/slideshow">Slideshow All</a></button>`
 const generalToolbar = `
-    ${home}
-    ${random}
-    ${slideshowAll}`
+<div class="buttons">
+  ${home}
+  ${random}
+  ${slideshowAll}
+</div>`
 const style = `
   <style>
     body{
       font-family: 'Helvetica', 'Arial', sans-serif;
       font-size: 16px;
       background-color: black;
+      display: flex;
+      flex-flow: column nowrap;
     }
     a{
       text-decoration: none;
     }
-    
+    h1,h2,h3,h4,h5,h6 {
+      color: white;
+    }
     li {
       margin: 5px 5px;
     }
@@ -41,19 +47,25 @@ const style = `
       width: 40px;
       height: 40px;
     }
-    .pic.fullscreen, video.fullscreen {
-      width: 100%;
-    }
     .pic, svg.video {
       width: 200px;
       border-radius: 5px;
       transition: transform 200ms;
     }
     .pic:hover, svg.video:hover{
-      border: 3px solid black; 
+      border: 3px solid white; 
       transform: scale(1.5);
     }
-    .section{
+    .pic.fullscreen, video.fullscreen {
+      width: 75vw;
+      max-height: calc(100vh - 100px);
+      margin: 0 auto;
+    }
+    .pic.fullscreen:hover, video.fullscreen:hover {
+      border:none;
+      transform: none;
+    }
+    .section {
       margin: 20px 0;
     }
     .dir {
