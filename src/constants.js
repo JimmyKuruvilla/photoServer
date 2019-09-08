@@ -2,16 +2,12 @@ const filesStr = 'files';
 const dirsStr = 'dirs';
 const mediaStr = 'media';
 const port = 4000;
-
-const redirectItem = {
-  name: 'isRedirectToRandom',
-  webPath: 'random'
-};
+const defaultInterval = 3000;
 
 module.exports = {
   filesStr,
   dirsStr,
   mediaStr,
-  redirectItem,
-  port
+  port,
+  defaultInterval
 };

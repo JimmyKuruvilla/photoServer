@@ -6,47 +6,45 @@ const path = require('path');
 const app = express();
 let webRoot = process.argv[2] || __dirname;
 
-const { dirTemplate, imgTemplate, videoTemplate } = require('./src/templates.js');
+const { dirTemplate, imgVidTemplate } = require('./src/templates.js');
 const { getListings } = require('./src/listings');
-const { isRedirectToRandom, isVideo} = require('./src/guards');
 const { getRandom } = require('./src/random');
-const { port } = require('./src/constants');
+const { port, defaultInterval } = require('./src/constants');
 
-function generalTemplate(item, url, interval, random){
-  return isVideo(item.name) ? videoTemplate(item, url, interval) : imgTemplate(item, url, interval, random);
+function _getRandom(fullPath){
+  let item = null;
+  while (item === null) {
+    item = getRandom(webRoot, fullPath);
+  }
+  return item;
 }
 
 app.get('/favicon.ico/', (req, res, next)=>{
   res.sendFile(path.join(__dirname, 'favicon.ico'));
 })
 
+app.use('/randomUrl', (req, res, next) => {
+  const item = _getRandom(webRoot);
+  res.json(item);
+});
+
+app.use('/:directory/randomUrl', (req, res, next) => {
+  const dirOrFilePath = `${webRoot}/${decodeURIComponent(req.params.directory)}`;
+  const item = _getRandom(dirOrFilePath);
+  res.json(item);
+});
+
 app.use('/random/slideshow', (req, res, next) => {
-  const item = getRandom(webRoot, webRoot);
-  const interval = req.query.interval || 3000;
-  const url = `/random/slideshow?interval=${interval}`;
-  if (isRedirectToRandom(item)) {
-    res.redirect(url);
-  } else {
-    res.send(generalTemplate(item, url, interval, true));
-  }
+  const item = _getRandom(webRoot);
+  res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
 });
 
 app.use('/:directory/slideshow', (req, res, next) => {
-  const path = req.originalUrl.replace('/', '');
-  const dirOrFilePath = `${webRoot}/${decodeURIComponent(
-    path.replace(/slideshow.*$/, '')
-  )}`;
-  
+  const dirOrFilePath = path.join(webRoot, decodeURIComponent(req.params.directory));
   try {
     if (fs.statSync(dirOrFilePath).isDirectory()) {
-      const item = getRandom(webRoot, dirOrFilePath);
-      const interval = req.query.interval || 3000;
-      const url = `/${req.params.directory}/slideshow?interval=${interval}`;
-      if (isRedirectToRandom(item)) {
-        res.redirect(url);
-      } else {
-        res.send(generalTemplate(item, url, interval, true));
-      }
+      const item = _getRandom(dirOrFilePath);
+      res.send(imgVidTemplate(item, req.query.interval || defaultInterval, req.params.directory));
     } else {
       res.send('else: not a directory');
     }
@@ -56,12 +54,8 @@ app.use('/:directory/slideshow', (req, res, next) => {
 });
 
 app.use('/random', (req, res, next) => {
-  const item = getRandom(webRoot, webRoot);
-  if (isRedirectToRandom(item)) {
-    res.redirect(`/random`);
-  } else {
-    res.send(generalTemplate(item, null, null, true));
-  }
+  const item = _getRandom(webRoot);
+    res.send(imgVidTemplate(item));
 });
 
 app.use('/:name', (req, res, next) => {

@@ -1,7 +1,7 @@
 const path = require('path');
-const { dirsStr, mediaStr, redirectItem } = require('./constants');
-const { isRedirectToRandom } = require('./guards');
+const { dirsStr, mediaStr } = require('./constants');
 const { getListings } = require('./listings');
+
 function randomNum(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -15,7 +15,7 @@ function getDirsOrMedia() {
 }
 
 function getRandomOrRedirect(arr) {
-  return arr.length > 0 ? arr[randomNum(0, arr.length - 1)] : redirectItem;
+  return arr.length > 0 ? arr[randomNum(0, arr.length - 1)] : null;
 }
 
 function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
@@ -23,8 +23,8 @@ function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
   const entry = dirsOrMedia || getDirsOrMedia();
   if (listings[entry].length > 0) {
     const item = getRandomOrRedirect(listings[entry]);
-    if (isRedirectToRandom(item)) {
-      return redirectItem;
+    if (item === null) {
+      return null;
     }
 
     if (entry === dirsStr) {
@@ -43,7 +43,7 @@ function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
   } else {
     const altEntry = entry === dirsStr ? mediaStr : dirsStr;
     if (listings[altEntry].length === 0) {
-      return redirectItem;
+      return null;
     } else {
       return getRandom(webRoot, fullPath, shouldStop, altEntry);
     }

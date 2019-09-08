@@ -4,13 +4,15 @@ const { isVideo } = require('./guards');
 
 const home = `<button><a href="/">Home</a></button>`;
 const random = `<button><a href="/random">Random</a></button>`;
-const slideshowAll = `<button><a href="/random/slideshow">Slideshow All</a></button>`
+const slideshowAll = `<button><a href="/random/slideshow">Slideshow All</a></button>`;
+const fullscreen = `<button onclick="goFullScreen()">Fullscreen</button>`;
+
 const generalToolbar = `
-<div class="buttons">
   ${home}
   ${random}
   ${slideshowAll}
-</div>`
+  ${fullscreen}`;
+  
 const style = `
   <style>
     body{
@@ -47,6 +49,12 @@ const style = `
       width: 40px;
       height: 40px;
     }
+    .hidden {
+      display: none;
+    }
+    .shown {
+      display: initial;
+    }
     .pic, svg.video {
       width: 200px;
       border-radius: 5px;
@@ -56,14 +64,23 @@ const style = `
       border: 3px solid white; 
       transform: scale(1.5);
     }
-    .pic.fullscreen, video.fullscreen {
+    .pic.wide, video.wide {
       width: 75vw;
       max-height: calc(100vh - 100px);
       margin: 0 auto;
     }
-    .pic.fullscreen:hover, video.fullscreen:hover {
+    .pic.wide:hover, video.wide:hover {
       border:none;
       transform: none;
+    }
+    @media all and (display-mode: fullscreen) {
+      body {
+        background: blue;
+      }
+      .pic.wide, .video.wide{
+        max-width: 100vw;
+        width: initial;
+      }
     }
     .section {
       margin: 20px 0;
@@ -79,105 +96,142 @@ const style = `
       flex-flow: row wrap;
       justify-content: space-evenly;
     }
-    </style>`
-    
+    </style>`;
+
+const generalScripts = () => `
+    <script>
+
+    function goFullScreen() {
+      document.querySelector('body').requestFullscreen();
+    }
+
+    function isVideo(name) {
+      return /.+\.mp4$|avi$/i.test(name);
+    }
+
+    function replaceOnInterval (contentInterval, directory) {
+      clearInterval(window.contentIntervalId)
+      window.contentIntervalId = setInterval(()=>{
+        replaceContent(directory);
+      }, contentInterval)
+    }
+
+    function replaceContent(directory) {
+      const url  = directory ? \`/\${directory}/randomUrl\` : '/randomUrl';
+      fetch(url)
+      .then((response) => response.json())  
+      .then((item)=> {
+        document.querySelector('.video.content').pause();
+
+        const contentWebPath = directory ? ".." + item.webPath : "../" + item.webPath;
+        replaceOnInterval(isVideo(contentWebPath) ? window.contentInterval * 10 : window.contentInterval, directory);
+
+        document.querySelector('.filename').innerHTML = item.name;
+        const showSelector = isVideo(item.webPath) ? '.video.content' : '.pic.content';
+        const hideSelector = isVideo(item.webPath) ? '.pic.content' : '.video.content';
+        document.querySelector(showSelector).src = contentWebPath;
+        document.querySelector(showSelector).classList.remove('hidden');
+        document.querySelector(hideSelector).classList.add('hidden');
+
+      });
+    }
+
+    </script>
+  `;
+
 function dirTemplate(locals) {
   return `
   <html>
     <head> 
       ${style}
+      ${ generalScripts() }
     </head>
     
     <body>
-    ${generalToolbar}  
-    ${
-      locals.currentDir
-        ? `<button><a href="/${
-            locals.currentDir
-          }/slideshow">Slideshow Here</a></button>`
-        : ''
-    }
-      <div class="dir section">
-      ${locals.dirs
-        .map(
-          i =>
-            `<div class="dir"><a href="${i.webPath}"><label>${folderSvg}${
-              i.name
-            }</label></div>`
-        )
-        .join('')}
-      </div>
+      <div class="buttons">
+        ${generalToolbar}
+        ${
+          locals.currentDir
+            ? `<button><a href="/${
+                locals.currentDir
+              }/slideshow">Slideshow Here</a></button>`
+            : ''
+        }
+        </div>
+        <div class="dir section">
+        ${locals.dirs
+          .map(
+            i =>
+              `<div class="dir"><a href="${i.webPath}"><label>${folderSvg}${
+                i.name
+              }</label></div>`
+          )
+          .join('')}
+        </div>
 
-      <div class="file section">
-      ${locals.files
-        .map(
-          i =>
-            `<div class="file"><a href="${i.webPath}"><label>${
-              i.name
-            }</label></div>`
-        )
-        .join('')}
-      </div>
+        <div class="file section">
+        ${locals.files
+          .map(
+            i =>
+              `<div class="file"><a href="${i.webPath}"><label>${
+                i.name
+              }</label></div>`
+          )
+          .join('')}
+        </div>
 
-      <div class="media section">
-      ${locals.media
-        .map(
-          i =>
-            `<div class="media"><a href="${i.webPath}"><label>${
-              i.name
-            }</label>${
-              isVideo(i.name)
-                ? videoSvg
-                : `<img src="${i.webPath}" class="pic">`
-            }</div>`
-        )
-        .join('')}
-      </div>
+        <div class="media section">
+        ${locals.media
+          .map(
+            i =>
+              `<div class="media"><a href="${i.webPath}"><label>${
+                i.name
+              }</label>${
+                isVideo(i.name)
+                  ? videoSvg
+                  : `<img src="${i.webPath}" class="pic">`
+              }</div>`
+          )
+          .join('')}
+        </div>
     </body>
   </html>`;
 }
 
-const randomScript = (url, interval) => `
-  <script defer="defer">
-  setInterval(()=>{
-    window.location.href = "${url}" 
-    }, ${interval})
-  </script>`;
-
-function imgTemplate(item, url, interval = 3000, random = false) {
+  function imgVidTemplate(item, interval = 3000, directory) {
   return `
-  <html>
-    <head>
-      ${style}
-    </head>
-    <body>
-      ${generalToolbar}
-      <h6>${item.name}</h6>
-      <img src="${random ? path.join('..', item.webPath) : item.webPath}" class="pic fullscreen">
-      ${ url ? randomScript(url, interval): ''}
-    </body>
-  </html>`;
-}
+    <html>
+      <head>
+        ${style}
+        ${ generalScripts() }
+      </head>
 
-function videoTemplate(item, url, interval = 3000) {
-  return `
-  <html>
-    <head>
-      ${style}
-    </head>
-    <body>
-      ${generalToolbar}
-      <h6>${item.name}</h6>
-      <video controls autoplay class="fullscreen" >
-        <source src="${random ? path.join('..', item.webPath) : item.webPath}" type="video/mp4">
-      </video>
-      ${ url ? randomScript(url, interval) : ''}
-    </body>
-  </html>`;
+      <body>
+        <div class="buttons">
+          ${generalToolbar}
+        </div>
+
+        <h6 class="filename">${item.name}</h6>
+        
+        <img src="${interval ? path.join('..', item.webPath) : item.webPath}" class="pic content wide ${isVideo(item.webPath) ? 'hidden':''}">
+        
+        <video controls autoplay class="video content wide ${isVideo(item.webPath) ? '' : 'hidden'}">
+          <source src="${interval ? path.join('..', item.webPath) : item.webPath}" type="video/mp4">
+        </video>
+        
+        <script>
+        if(${interval}){
+          window.contentInterval = ${interval};
+          replaceOnInterval(${interval}, "${directory || ''}");
+        }
+        </script>
+
+      </body>
+    </html>
+    `;
 }
 
 module.exports = {
   dirTemplate,
-  imgTemplate,
-  videoTemplate
+  imgVidTemplate
 };
