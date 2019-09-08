@@ -124,7 +124,7 @@ const generalScripts = () => `
         document.querySelector('.video.content').pause();
 
         const contentWebPath = directory ? ".." + item.webPath : "../" + item.webPath;
-        replaceOnInterval(isVideo(contentWebPath) ? window.contentInterval * 10 : window.contentInterval, directory);
+        replaceOnInterval(isVideo(contentWebPath) ? item.duration + 1000 : window.contentInterval, directory);
 
         document.querySelector('.filename').innerHTML = item.name;
         const showSelector = isVideo(item.webPath) ? '.video.content' : '.pic.content';

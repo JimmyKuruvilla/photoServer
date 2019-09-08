@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const { promisify } = require('util');
+const statAsync = promisify(fs.stat);
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -11,40 +13,54 @@ const { getListings } = require('./src/listings');
 const { getRandom } = require('./src/random');
 const { port, defaultInterval } = require('./src/constants');
 
-function _getRandom(fullPath){
+async function _getRandom(fullPath) {
   let item = null;
   while (item === null) {
-    item = getRandom(webRoot, fullPath);
+    item = await getRandom(webRoot, fullPath);
   }
   return item;
 }
 
-app.get('/favicon.ico/', (req, res, next)=>{
+app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'favicon.ico'));
-})
+});
 
-app.use('/randomUrl', (req, res, next) => {
-  const item = _getRandom(webRoot);
+app.use('/randomUrl', async (req, res, next) => {
+  const item = await _getRandom(webRoot);
   res.json(item);
 });
 
-app.use('/:directory/randomUrl', (req, res, next) => {
-  const dirOrFilePath = `${webRoot}/${decodeURIComponent(req.params.directory)}`;
-  const item = _getRandom(dirOrFilePath);
+app.use('/:directory/randomUrl', async (req, res, next) => {
+  const dirOrFilePath = `${webRoot}/${decodeURIComponent(
+    req.params.directory
+  )}`;
+  const item = await _getRandom(dirOrFilePath);
+
   res.json(item);
 });
 
-app.use('/random/slideshow', (req, res, next) => {
-  const item = _getRandom(webRoot);
+app.use('/random/slideshow', async (req, res, next) => {
+  const item = await _getRandom(webRoot);
   res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
 });
 
-app.use('/:directory/slideshow', (req, res, next) => {
-  const dirOrFilePath = path.join(webRoot, decodeURIComponent(req.params.directory));
+app.use('/:directory/slideshow', async (req, res, next) => {
+  const dirOrFilePath = path.join(
+    webRoot,
+    decodeURIComponent(req.params.directory)
+  );
+
   try {
-    if (fs.statSync(dirOrFilePath).isDirectory()) {
-      const item = _getRandom(dirOrFilePath);
-      res.send(imgVidTemplate(item, req.query.interval || defaultInterval, req.params.directory));
+    const node = await statAsync(dirOrFilePath);
+    if (node.isDirectory()) {
+      const item = await _getRandom(dirOrFilePath);
+      res.send(
+        imgVidTemplate(
+          item,
+          req.query.interval || defaultInterval,
+          req.params.directory
+        )
+      );
     } else {
       res.send('else: not a directory');
     }
@@ -53,17 +69,19 @@ app.use('/:directory/slideshow', (req, res, next) => {
   }
 });
 
-app.use('/random', (req, res, next) => {
-  const item = _getRandom(webRoot);
-    res.send(imgVidTemplate(item));
+app.use('/random', async (req, res, next) => {
+  const item = await _getRandom(webRoot);
+  res.send(imgVidTemplate(item));
 });
 
-app.use('/:name', (req, res, next) => {
+app.use('/:name', async (req, res, next) => {
   const dirOrFilePath = path.join(webRoot, decodeURIComponent(req.originalUrl));
-  if (fs.statSync(dirOrFilePath).isDirectory()) {
+  const node = await statAsync(dirOrFilePath);
+  if (node.isDirectory()) {
+    const listings = await getListings(webRoot, dirOrFilePath);
     res.send(
       dirTemplate(
-        Object.assign({}, getListings(webRoot, dirOrFilePath), {
+        Object.assign({}, listings, {
           currentDir: req.params.name
         })
       )
@@ -73,10 +91,11 @@ app.use('/:name', (req, res, next) => {
   }
 });
 
-app.use('/', (req, res, next) => {
+app.use('/', async (req, res, next) => {
+  const listings = await getListings(webRoot, webRoot);
   res.send(
     dirTemplate(
-      Object.assign({}, getListings(webRoot, webRoot), {
+      Object.assign({}, listings, {
         currentDir: ''
       })
     )

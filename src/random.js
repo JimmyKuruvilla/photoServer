@@ -18,8 +18,8 @@ function getRandomOrRedirect(arr) {
   return arr.length > 0 ? arr[randomNum(0, arr.length - 1)] : null;
 }
 
-function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
-  const listings = getListings(webRoot, fullPath);
+async function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
+  const listings = await getListings(webRoot, fullPath);
   const entry = dirsOrMedia || getDirsOrMedia();
   if (listings[entry].length > 0) {
     const item = getRandomOrRedirect(listings[entry]);
@@ -31,11 +31,12 @@ function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
       if (shouldStop) {
         return getRandomOrRedirect(listings[mediaStr]);
       } else {
-        return getRandom(
+        const randomItem = await getRandom(
           webRoot,
           path.join(webRoot, item.webPath),
           shouldStopNow()
         );
+        return randomItem;
       }
     } else {
       return getRandomOrRedirect(listings[mediaStr]);
@@ -45,7 +46,8 @@ function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
     if (listings[altEntry].length === 0) {
       return null;
     } else {
-      return getRandom(webRoot, fullPath, shouldStop, altEntry);
+      const randomItem = await getRandom(webRoot, fullPath, shouldStop, altEntry);
+      return randomItem;
     }
   }
 }
