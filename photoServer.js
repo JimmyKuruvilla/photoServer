@@ -13,6 +13,7 @@ const { getListings } = require('./src/listings');
 const { getRandom } = require('./src/random');
 const { port, defaultInterval } = require('./src/constants');
 
+const occurences = {};
 async function _getRandom(fullPath) {
   let item = null;
   while (item === null) {
@@ -20,6 +21,10 @@ async function _getRandom(fullPath) {
   }
   return item;
 }
+
+app.use('/occurences', async (req, res, next) => {
+  res.json(occurences);
+});
 
 app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'favicon.ico'));
@@ -35,7 +40,11 @@ app.use('/:directory/randomUrl', async (req, res, next) => {
     req.params.directory
   )}`;
   const item = await _getRandom(dirOrFilePath);
-
+  if (occurences[item.webPath]) {
+    occurences[item.webPath] += 1;
+  } else {
+    occurences[item.webPath] = 1;
+  }
   res.json(item);
 });
 
