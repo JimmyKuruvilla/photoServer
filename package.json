@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./"
+    "dev": "nodemon ./",
+    "migrate": "npm run knex migrate:latest",
+    "knex": "knex"
   },
   "author": "",
   "license": "ISC",

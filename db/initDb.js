@@ -1,4 +1,17 @@
-const initDb = () => {
+const dockerDb = () => {
+  return require('knex')({
+    client: 'pg',
+    connection: {
+      host: 'db',
+      port: '5432',
+      user: 'postgres',
+      password: 'example',
+      database: 'postgres'
+    }
+  });
+};
+
+const localDb = () => {
   return require('knex')({
     client: 'pg',
     connection: {
@@ -12,5 +25,6 @@ const initDb = () => {
 };
 
 module.exports = {
-  initDb
+  dockerDb,
+  localDb
 };

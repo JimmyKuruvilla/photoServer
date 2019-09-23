@@ -123,7 +123,7 @@ const generalScripts = () => `
       .then((item)=> {
         document.querySelector('.video.content').pause();
 
-        const contentWebPath = directory ? ".." + item.webPath : "../" + item.webPath;
+        const contentWebPath = "../" + item.webPath;
         replaceOnInterval(isVideo(contentWebPath) ? item.duration + 1000 : window.contentInterval, directory);
 
         document.querySelector('.filename').innerHTML = item.name;
@@ -198,7 +198,7 @@ function dirTemplate(locals) {
   </html>`;
 }
 
-  function imgVidTemplate(item, interval = 3000, directory) {
+  function imgVidTemplate(item, interval, directory) {
   return `
     <html>
       <head>

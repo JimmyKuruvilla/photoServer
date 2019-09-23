@@ -1,2 +1,5 @@
 #!/bin/bash
-/usr/bin/screen -dmS photoServer node photoServer.js /mnt/backup/share/Photos/Slideshow/Recent\ Photos/
+# /usr/bin/screen -dmS photoServer node photoServer.js /mnt/backup/share/Photos/Slideshow/Recent\ Photos/
+mount --bind /mnt/backup/share/Photos/ /home/j/scripts/photoServer/share
+cd /home/j/scripts/photoServer
+/usr/local/bin/docker-compose up -d

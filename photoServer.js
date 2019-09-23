@@ -10,41 +10,36 @@ let webRoot = process.argv[2] || __dirname;
 
 const { dirTemplate, imgVidTemplate } = require('./src/templates.js');
 const { getListings, constructItemFromPath } = require('./src/listings');
-const { getRandom, getRandomFromDb } = require('./src/random');
+const { getRandomFromDb } = require('./src/random');
 const { port, defaultInterval } = require('./src/constants');
-const { initDb } = require('./db/initDb.js');
+const { dockerDb } = require('./db/initDb.js');
 
-const db = initDb();
-
-async function _getRandom(fullPath) {
-  let item = null;
-  while (item === null) {
-    item = await getRandom(webRoot, fullPath);
-  }
-  return item;
-}
+const db = dockerDb();
 
 app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'favicon.ico'));
 });
 
 app.use('/randomUrl', async (req, res, next) => {
-  const path = await getRandomFromDb(db);
-  const item = constructItemFromPath(path, webRoot)
+  const filePath = await getRandomFromDb(db, webRoot);
+  const item = constructItemFromPath(filePath, webRoot)
   res.json(item);
 });
 
 app.use('/:directory/randomUrl', async (req, res, next) => {
-  const dirOrFilePath = `${webRoot}/${decodeURIComponent(
-    req.params.directory
-  )}`;
-  const item = await _getRandom(dirOrFilePath);
+  const dirOrFilePath = path.join(
+    webRoot,
+    decodeURIComponent(req.params.directory)
+  );
+
+  const filePath = await getRandomFromDb(db, dirOrFilePath);
+  const item = constructItemFromPath(filePath, webRoot);
   res.json(item);
 });
 
 app.use('/random/slideshow', async (req, res, next) => {
-  const path = await getRandomFromDb(db);
-  const item = constructItemFromPath(path, webRoot)
+  const filePath = await getRandomFromDb(db, webRoot);
+  const item = constructItemFromPath(filePath, webRoot);
   res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
 });
 
@@ -54,27 +49,14 @@ app.use('/:directory/slideshow', async (req, res, next) => {
     decodeURIComponent(req.params.directory)
   );
 
-  try {
-    const node = await statAsync(dirOrFilePath);
-    if (node.isDirectory()) {
-      const item = await _getRandom(dirOrFilePath);
-      res.send(
-        imgVidTemplate(
-          item,
-          req.query.interval || defaultInterval,
-          req.params.directory
-        )
-      );
-    } else {
-      res.send('else: not a directory');
-    }
-  } catch (e) {
-    res.send('catch: not a directory');
-  }
+  const filePath = await getRandomFromDb(db, dirOrFilePath);
+  const item = constructItemFromPath(filePath, webRoot);
+  res.send(imgVidTemplate(item, req.query.interval || defaultInterval, req.params.directory));
 });
 
 app.use('/random', async (req, res, next) => {
-  const item = await _getRandom(webRoot);
+  const filePath = await getRandomFromDb(db, webRoot);
+  const item = constructItemFromPath(filePath, webRoot);
   res.send(imgVidTemplate(item));
 });
 

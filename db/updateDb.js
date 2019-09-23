@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const { recursiveTraverseDir } = require('./src/listings');
-const { initDb } = require('./db/initDb.js');
+const { recursiveTraverseDir } = require('../src/listings');
+const { localDb } = require('./initDb.js');
 
-const db = initDb();
+const db = localDb();
 
 async function insertFilePathIntoDb(filepath) {
   const trx = await db.transaction();

@@ -5,12 +5,22 @@ services:
   db:
     image: postgres
     restart: always
-    container_name: "pg"
+    container_name: "db"
     ports:
       - "54320:5432"
-
     environment:
       POSTGRES_PASSWORD: example
-
     volumes:
       - ./db/data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: "web"
+    command: sh -c "npm run migrate && node photoServer.js /mnt/backup/share/Photos/"
+    volumes:
+      - .:/usr/app/
+      - ./share:/mnt/backup/share/Photos/
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db

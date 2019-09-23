@@ -59,7 +59,7 @@ function constructItemFromPath(fullFilePath, webRoot) {
   const name = fullFilePath.replace(/.*\//, '');
   return {
     name: name,
-    webPath: fullFilePath.replace(webRoot, '').slice(1),
+    webPath: fullFilePath.replace(webRoot, ''),
     isDirectory: false,
     duration: undefined
   };
