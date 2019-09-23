@@ -46,10 +46,23 @@ async function getRandom(webRoot, fullPath, shouldStop = false, dirsOrMedia) {
     if (listings[altEntry].length === 0) {
       return null;
     } else {
-      const randomItem = await getRandom(webRoot, fullPath, shouldStop, altEntry);
+      const randomItem = await getRandom(
+        webRoot,
+        fullPath,
+        shouldStop,
+        altEntry
+      );
       return randomItem;
     }
   }
+}
+
+async function getRandomFromDb(db) {
+  const countResult = await db('images').count('id');
+  const randomResult = await db.raw(
+    `SELECT * FROM images OFFSET floor(random()*${countResult[0].count}) LIMIT 1;`
+  );
+  return randomResult.rows[0].path;
 }
 
 module.exports = {
@@ -57,5 +70,6 @@ module.exports = {
   shouldStopNow,
   getDirsOrMedia,
   getRandomOrRedirect,
-  getRandom
+  getRandom,
+  getRandomFromDb
 };

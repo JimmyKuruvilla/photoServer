@@ -55,6 +55,36 @@ async function getListings(webRoot, fullAbsDirPath) {
   };
 }
 
+function constructItemFromPath(fullFilePath, webRoot) {
+  const name = fullFilePath.replace(/.*\//, '');
+  return {
+    name: name,
+    webPath: fullFilePath.replace(webRoot, '').slice(1),
+    isDirectory: false,
+    duration: undefined
+  };
+}
+
+async function recursiveTraverseDir(fullAbsDirPath, fileCallbackFn = (nodePath) => {}) {
+  let count = 0;
+  const nodes = await readdirAsync(fullAbsDirPath);
+  count += nodes.length;
+
+  for (let nodeName of nodes) {
+    const nodePath = path.join(fullAbsDirPath, nodeName);
+    const nodeStats = await statAsync(nodePath);
+
+    if (nodeStats.isDirectory()) {
+      count += await recursiveTraverseDir(nodePath, fileCallbackFn);
+    } else {
+      await fileCallbackFn(nodePath);
+    }
+  }
+  return count;
+}
+
 module.exports = {
-  getListings
+  getListings,
+  recursiveTraverseDir,
+  constructItemFromPath
 };

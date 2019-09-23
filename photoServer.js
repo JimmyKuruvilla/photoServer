@@ -9,11 +9,13 @@ const app = express();
 let webRoot = process.argv[2] || __dirname;
 
 const { dirTemplate, imgVidTemplate } = require('./src/templates.js');
-const { getListings } = require('./src/listings');
-const { getRandom } = require('./src/random');
+const { getListings, constructItemFromPath } = require('./src/listings');
+const { getRandom, getRandomFromDb } = require('./src/random');
 const { port, defaultInterval } = require('./src/constants');
+const { initDb } = require('./db/initDb.js');
 
-const occurences = {};
+const db = initDb();
+
 async function _getRandom(fullPath) {
   let item = null;
   while (item === null) {
@@ -22,16 +24,13 @@ async function _getRandom(fullPath) {
   return item;
 }
 
-app.use('/occurences', async (req, res, next) => {
-  res.json(occurences);
-});
-
 app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'favicon.ico'));
 });
 
 app.use('/randomUrl', async (req, res, next) => {
-  const item = await _getRandom(webRoot);
+  const path = await getRandomFromDb(db);
+  const item = constructItemFromPath(path, webRoot)
   res.json(item);
 });
 
@@ -40,16 +39,12 @@ app.use('/:directory/randomUrl', async (req, res, next) => {
     req.params.directory
   )}`;
   const item = await _getRandom(dirOrFilePath);
-  if (occurences[item.webPath]) {
-    occurences[item.webPath] += 1;
-  } else {
-    occurences[item.webPath] = 1;
-  }
   res.json(item);
 });
 
 app.use('/random/slideshow', async (req, res, next) => {
-  const item = await _getRandom(webRoot);
+  const path = await getRandomFromDb(db);
+  const item = constructItemFromPath(path, webRoot)
   res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
 });
 
