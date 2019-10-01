@@ -121,18 +121,9 @@ const generalScripts = () => `
       fetch(url)
       .then((response) => response.json())  
       .then((item)=> {
-        document.querySelector('.video.content').pause();
-
-        const contentWebPath = "../" + item.webPath;
-        replaceOnInterval(isVideo(contentWebPath) ? item.duration + 1000 : window.contentInterval, directory);
-
+        replaceOnInterval(item.duration ? item.duration + 1000 : window.contentInterval, directory);
         document.querySelector('.filename').innerHTML = item.name;
-        const showSelector = isVideo(item.webPath) ? '.video.content' : '.pic.content';
-        const hideSelector = isVideo(item.webPath) ? '.pic.content' : '.video.content';
-        document.querySelector(showSelector).src = contentWebPath;
-        document.querySelector(showSelector).classList.remove('hidden');
-        document.querySelector(hideSelector).classList.add('hidden');
-
+        document.querySelector('.content-wrapper').innerHTML = item.html;
       });
     }
 
@@ -198,7 +189,15 @@ function dirTemplate(locals) {
   </html>`;
 }
 
-  function imgVidTemplate(item, interval, directory) {
+function getMediaHtml(item, interval) {
+  if (isVideo(item.webPath)) {
+    return `<video controls autoplay class="video content wide"><source src="${interval ? path.join('..', item.webPath): item.webPath}" type="video/mp4"></video>`
+  } else {
+    return `<img src="${interval ? path.join('..', item.webPath) : item.webPath}" class="pic content wide">`
+  }
+}
+
+function imgVidTemplate(item, interval, directory) {
   return `
     <html>
       <head>
@@ -212,13 +211,11 @@ function dirTemplate(locals) {
         </div>
 
         <h6 class="filename">${item.name}</h6>
-        
-        <img src="${interval ? path.join('..', item.webPath) : item.webPath}" class="pic content wide ${isVideo(item.webPath) ? 'hidden':''}">
-        
-        <video controls autoplay class="video content wide ${isVideo(item.webPath) ? '' : 'hidden'}">
-          <source src="${interval ? path.join('..', item.webPath) : item.webPath}" type="video/mp4">
-        </video>
-        
+      
+        <div class="content-wrapper">
+          ${ getMediaHtml(item, interval) }
+        </div>
+
         <script>
         if(${interval}){
           window.contentInterval = ${interval};
@@ -233,5 +230,6 @@ function dirTemplate(locals) {
 
 module.exports = {
   dirTemplate,
-  imgVidTemplate
+  imgVidTemplate,
+  getMediaHtml
 };

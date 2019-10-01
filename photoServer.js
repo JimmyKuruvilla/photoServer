@@ -8,22 +8,33 @@ const path = require('path');
 const app = express();
 let webRoot = process.argv[2] || __dirname;
 
+
 const { dirTemplate, imgVidTemplate } = require('./src/templates.js');
+const { getMediaHtml } = require('./src/templates.js');
 const { getListings, constructItemFromPath } = require('./src/listings');
 const { getRandomFromDb } = require('./src/random');
 const { port, defaultInterval } = require('./src/constants');
 const { dockerDb } = require('./db/initDb.js');
-
+const fakeInterval = defaultInterval;
 const db = dockerDb();
 
 app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'favicon.ico'));
 });
 
+// these should be renamed to randomMedia or soemthign
+// videos only random mode
+// more than 1 directory deep doesn't work!
+// --should take all directory pieces of path. 
+// spacebar should pause any slideshow. 
+// EXIF based image rotation
+// some photos are bad aspect ratio -- too wide
+// remove media html `content` classes
+
 app.use('/randomUrl', async (req, res, next) => {
   const filePath = await getRandomFromDb(db, webRoot);
-  const item = constructItemFromPath(filePath, webRoot)
-  res.json(item);
+  const item = await constructItemFromPath(filePath, webRoot)
+  res.json({...item,  html: getMediaHtml(item, fakeInterval) });
 });
 
 app.use('/:directory/randomUrl', async (req, res, next) => {
@@ -33,13 +44,13 @@ app.use('/:directory/randomUrl', async (req, res, next) => {
   );
 
   const filePath = await getRandomFromDb(db, dirOrFilePath);
-  const item = constructItemFromPath(filePath, webRoot);
-  res.json(item);
+  const item = await constructItemFromPath(filePath, webRoot);
+  res.json({ ...item, html: getMediaHtml(item, fakeInterval) });
 });
 
 app.use('/random/slideshow', async (req, res, next) => {
   const filePath = await getRandomFromDb(db, webRoot);
-  const item = constructItemFromPath(filePath, webRoot);
+  const item = await constructItemFromPath(filePath, webRoot);
   res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
 });
 
@@ -50,13 +61,13 @@ app.use('/:directory/slideshow', async (req, res, next) => {
   );
 
   const filePath = await getRandomFromDb(db, dirOrFilePath);
-  const item = constructItemFromPath(filePath, webRoot);
+  const item = await constructItemFromPath(filePath, webRoot);
   res.send(imgVidTemplate(item, req.query.interval || defaultInterval, req.params.directory));
 });
 
 app.use('/random', async (req, res, next) => {
   const filePath = await getRandomFromDb(db, webRoot);
-  const item = constructItemFromPath(filePath, webRoot);
+  const item = await constructItemFromPath(filePath, webRoot);
   res.send(imgVidTemplate(item));
 });
 

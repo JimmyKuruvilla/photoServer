@@ -55,13 +55,18 @@ async function getListings(webRoot, fullAbsDirPath) {
   };
 }
 
-function constructItemFromPath(fullFilePath, webRoot) {
+async function constructItemFromPath(fullFilePath, webRoot) {
   const name = fullFilePath.replace(/.*\//, '');
+  let duration = 0;
+  if (isVideo(fullFilePath)){
+    const videoInfo = await getVideoInfo(fullFilePath);
+    duration = Number(videoInfo.streams[0].duration * 1000);
+  }
   return {
     name: name,
     webPath: fullFilePath.replace(webRoot, ''),
     isDirectory: false,
-    duration: undefined
+    duration
   };
 }
 
