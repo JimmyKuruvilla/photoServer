@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   db:
-    image: postgres
+    image: postgres:11
     restart: always
     container_name: "db"
     ports:
@@ -16,11 +16,19 @@ services:
   web:
     build: .
     container_name: "web"
-    command: sh -c "npm run migrate && node photoServer.js /mnt/backup/share/Photos/"
+    command: sh -c "npm run migrate && node photoServer.js /Users/jkuruvilla/jimmy/photoSite/share"
     volumes:
       - .:/usr/app/
-      - ./share:/mnt/backup/share/Photos/
+      - ./share:/Users/jkuruvilla/jimmy/photoSite/share
     ports:
       - "4000:4000"
     depends_on:
       - db
+
+
+
+    # healthcheck:
+    #   test: ["CMD", "pg_isready"]
+    #   interval: 1s
+    #   timeout: 5s
+    #   retries: 15

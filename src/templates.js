@@ -6,12 +6,14 @@ const home = `<button><a href="/">Home</a></button>`;
 const random = `<button><a href="/random">Random</a></button>`;
 const slideshowAll = `<button><a href="/random/slideshow">Slideshow All</a></button>`;
 const fullscreen = `<button onclick="goFullScreen()">Fullscreen</button>`;
+const pause = `<button onclick="pauseSlideShow()">Pause</button>`;
 
 const generalToolbar = `
   ${home}
   ${random}
   ${slideshowAll}
-  ${fullscreen}`;
+  ${fullscreen}
+  ${pause}`;
   
 const style = `
   <style>
@@ -100,6 +102,11 @@ const style = `
 
 const generalScripts = () => `
     <script>
+
+    
+    function pauseSlideShow() {
+       clearInterval(window.contentIntervalId);
+    }
 
     function goFullScreen() {
       document.querySelector('body').requestFullscreen();

@@ -22,15 +22,6 @@ app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'favicon.ico'));
 });
 
-// these should be renamed to randomMedia or soemthign
-// videos only random mode
-// more than 1 directory deep doesn't work!
-// --should take all directory pieces of path. 
-// spacebar should pause any slideshow. 
-// EXIF based image rotation
-// some photos are bad aspect ratio -- too wide
-// remove media html `content` classes
-
 app.use('/randomUrl', async (req, res, next) => {
   const filePath = await getRandomFromDb(db, webRoot);
   const item = await constructItemFromPath(filePath, webRoot)
