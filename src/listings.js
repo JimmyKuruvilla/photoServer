@@ -44,7 +44,9 @@ async function getListings(webRoot, fullAbsDirPath) {
       name: nodeName,
       webPath: path.join(`${fullAbsDirPath.replace(webRoot, '')}`, nodeName),
       isDirectory: nodeStats.isDirectory(),
-      duration
+      duration, 
+      id: null,
+      favorite: null
     });
   }
 
@@ -55,7 +57,8 @@ async function getListings(webRoot, fullAbsDirPath) {
   };
 }
 
-async function constructItemFromPath(fullFilePath, webRoot) {
+async function constructItemFromDb(dbItem, webRoot) {
+  const fullFilePath = dbItem.path;
   const name = fullFilePath.replace(/.*\//, '');
   let duration = 0;
   if (isVideo(fullFilePath)){
@@ -66,7 +69,9 @@ async function constructItemFromPath(fullFilePath, webRoot) {
     name: name,
     webPath: fullFilePath.replace(webRoot, ''),
     isDirectory: false,
-    duration
+    duration, 
+    id: dbItem.id,
+    favorite: dbItem.favorite
   };
 }
 
@@ -91,5 +96,5 @@ async function recursiveTraverseDir(fullAbsDirPath, fileCallbackFn = (nodePath) 
 module.exports = {
   getListings,
   recursiveTraverseDir,
-  constructItemFromPath
+  constructItemFromDb
 };

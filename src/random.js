@@ -14,7 +14,7 @@ async function getRandomFromDb(db, parentPath) {
       LIMIT 1
       `
       );
-    return randomResult.rows[0].path;
+    return randomResult.rows[0];
 }
 
 module.exports = {

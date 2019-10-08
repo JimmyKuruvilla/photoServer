@@ -2,7 +2,7 @@
   "name": "photosite",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "photoServer.js",
   "scripts": {
     "dev": "nodemon ./",
     "migrate": "npm run knex migrate:latest",
