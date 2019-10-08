@@ -8,11 +8,19 @@ const path = require('path');
 const app = express();
 let webRoot = process.argv[2] || __dirname;
 
+const { port, defaultInterval } = require('./src/constants');
 const { dirTemplate, imgVidTemplate } = require('./src/templates.js');
 const { getMediaHtmlFragment } = require('./src/templates.js');
-const { getListings, constructItemFromDb } = require('./src/listings');
-const { getRandomFromDb } = require('./src/random');
-const { port, defaultInterval } = require('./src/constants');
+const {
+  getListings,
+  constructItemFromDb,
+  constructMediaListingsFromDb
+} = require('./src/listings');
+const {
+  getRandomFromDb,
+  getFavoritesFromDb,
+  getItemViaPath
+} = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
 const fakeInterval = defaultInterval;
 const isDockerDb = process.env.DOCKERDB;
@@ -32,13 +40,13 @@ app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'src/assets/favicon.ico'));
 });
 
-app.use('/randomUrl', async (req, res, next) => {
+app.get('/randomUrl', async (req, res, next) => {
   const dbItem = await getRandomFromDb(db, webRoot);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.json({ ...item, html: getMediaHtmlFragment(item, fakeInterval) });
 });
 
-app.use('/:directory/randomUrl', async (req, res, next) => {
+app.get('/:directory/randomUrl', async (req, res, next) => {
   const dirOrFilePath = path.join(
     webRoot,
     decodeURIComponent(req.params.directory)
@@ -49,13 +57,13 @@ app.use('/:directory/randomUrl', async (req, res, next) => {
   res.json({ ...item, html: getMediaHtmlFragment(item, fakeInterval) });
 });
 
-app.use('/random/slideshow', async (req, res, next) => {
+app.get('/random/slideshow', async (req, res, next) => {
   const dbItem = await getRandomFromDb(db, webRoot);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
 });
 
-app.use('/:directory/slideshow', async (req, res, next) => {
+app.get('/:directory/slideshow', async (req, res, next) => {
   const dirOrFilePath = path.join(
     webRoot,
     decodeURIComponent(req.params.directory)
@@ -72,19 +80,32 @@ app.use('/:directory/slideshow', async (req, res, next) => {
   );
 });
 
-app.use('/random', async (req, res, next) => {
+app.get('/random', async (req, res, next) => {
   const dbItem = await getRandomFromDb(db, webRoot);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.send(imgVidTemplate(item));
 });
 
-app.patch('/photos/:id/favorite', async (req, res, next) => {
+app.get('/media/path', async (req, res, next) => {
+  const dbItem = await getItemViaPath(db, req.query.fullpath);
+  const item = await constructItemFromDb(dbItem, webRoot);
+  res.send(imgVidTemplate(item));
+});
+
+app.get('/media/favorites', async (req, res, next) => {
+  const dbItems = await getFavoritesFromDb(db);
+  const listings = constructMediaListingsFromDb(dbItems, webRoot);
+  res.send(dirTemplate(listings));
+});
+
+app.patch('/media/:id/favorite', async (req, res, next) => {
   if (req.body.favorite !== undefined) {
     db('images')
       .where({ id: req.params.id })
       .update({ favorite: req.body.favorite })
-      .then(() => {
-        res.sendStatus(200);
+      .returning(['favorite'])
+      .then(dbRes => {
+        res.status(200).json(dbRes[0]);
       })
       .catch(e => {
         res.send(e);
@@ -111,7 +132,7 @@ app.use('/:name', async (req, res, next) => {
   }
 });
 
-app.use('/', async (req, res, next) => {
+app.get('/', async (req, res, next) => {
   const listings = await getListings(webRoot, webRoot);
   res.send(
     dirTemplate(

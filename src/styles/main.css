@@ -1,13 +1,17 @@
+/* $bg: rgba(51, 47, 38, 1);
+$brightblue: rgba(42, 179, 221, 1);
+$teal: rgba(82, 206, 234, 1);
+$greenyblue: rgba(84, 191, 166, 1);
+$whitish: rgba(244, 247, 252, 1); */
+
 body {
-  font-family: 'Helvetica', 'Arial', sans-serif;
+  font-family: monospace;
   font-size: 16px;
   background-color: black;
   display: flex;
   flex-flow: column nowrap;
 }
-a {
-  text-decoration: none;
-}
+
 h1,
 h2,
 h3,
@@ -15,75 +19,138 @@ h4,
 h5,
 h6 {
   color: white;
+  margin: 0;
 }
+
+.webpath {
+  font-size: 18px;
+  font-weight: 400;
+}
+
 li {
   margin: 5px 5px;
 }
+
 label {
   cursor: pointer;
   display: block;
   color: white;
 }
+
 label:hover {
-  background-color: rebeccapurple;
+  background-color: rgba(42, 179, 221, 1);
 }
+
+a {
+  text-decoration: none;
+  color: rgba(42, 179, 221, 1);
+}
+
+button {
+  padding: 8px 8px;
+  font-size: 20px;
+  border-radius: 4px;
+  background-color: #191917;
+  color: rgba(42, 179, 221, 1);
+  border: none;
+}
+
+button:hover {
+  background-color: rgba(42, 179, 221, 1);
+  color: white;
+  cursor: pointer;
+}
+
+button:hover a {
+  background-color: rgba(42, 179, 221, 1);
+  color: white;
+}
+
 svg {
   vertical-align: middle;
   background-color: white;
   border-radius: 10px;
   margin-right: 20px;
 }
+
 svg.folder {
   width: 40px;
   height: 40px;
 }
+
 .hidden {
   display: none;
 }
+
 .shown {
   display: initial;
 }
+
 .pic,
 svg.video {
   width: 200px;
   border-radius: 5px;
   transition: transform 200ms;
 }
+
 .pic:hover,
 svg.video:hover {
   border: 3px solid white;
   transform: scale(1.5);
 }
+
 .pic.wide,
 video.wide {
-  width: 75vw;
+  width: 100vw;
   max-height: calc(100vh - 100px);
   margin: 0 auto;
 }
+
 .pic.wide:hover,
 video.wide:hover {
   border: none;
   transform: none;
 }
+
 @media all and (display-mode: fullscreen) {
   body {
     background: blue;
   }
+
   .pic.wide,
   .video.wide {
     max-width: 100vw;
     width: initial;
   }
 }
+
 .section {
   margin: 20px 0;
 }
+
 .dir {
   margin: 5px 0;
 }
-.media {
-  margin: 20 px 0;
+
+.media label,
+.dir label,
+.file label {
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+
+.media {
+  margin: 20px 0;
+}
+
+.media a {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
 .media.section {
   display: flex;
   flex-flow: row wrap;

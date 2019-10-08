@@ -8,6 +8,13 @@ const ffprobeStatic = require('ffprobe-static');
 
 const { isMedia, isVideo } = require('./guards');
 
+const getInfoFromDbItem = (dbItem, webRoot) => {
+  const fullFilePath = dbItem.path;
+  const name = fullFilePath.replace(/.*\//, '');
+  const webPath = fullFilePath.replace(webRoot, '');
+  return [fullFilePath, webPath, name];
+};
+
 async function getVideoInfo(absPath) {
   try {
     const info = await ffprobe(absPath, {
@@ -43,8 +50,9 @@ async function getListings(webRoot, fullAbsDirPath) {
     container.push({
       name: nodeName,
       webPath: path.join(`${fullAbsDirPath.replace(webRoot, '')}`, nodeName),
+      fullPath: path.join(fullAbsDirPath, nodeName),
       isDirectory: nodeStats.isDirectory(),
-      duration, 
+      duration,
       id: null,
       favorite: null
     });
@@ -57,25 +65,48 @@ async function getListings(webRoot, fullAbsDirPath) {
   };
 }
 
+function constructMediaListingsFromDb(dbItems, webRoot) {
+  return {
+    dirs: [],
+    files: [],
+    media: dbItems.map(dbItem => {
+      const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
+
+      return {
+        name: name,
+        webPath: webPath,
+        fullPath: fullFilePath,
+        id: dbItem.id,
+        favorite: dbItem.favorite,
+        isDirectory: false,
+        duration: null
+      };
+    })
+  };
+}
+
 async function constructItemFromDb(dbItem, webRoot) {
-  const fullFilePath = dbItem.path;
-  const name = fullFilePath.replace(/.*\//, '');
+  const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
   let duration = 0;
-  if (isVideo(fullFilePath)){
+  if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
     duration = Number(videoInfo.streams[0].duration * 1000);
   }
   return {
     name: name,
-    webPath: fullFilePath.replace(webRoot, ''),
+    webPath,
+    fullPath: fullFilePath,
     isDirectory: false,
-    duration, 
+    duration,
     id: dbItem.id,
     favorite: dbItem.favorite
   };
 }
 
-async function recursiveTraverseDir(fullAbsDirPath, fileCallbackFn = (nodePath) => {}) {
+async function recursiveTraverseDir(
+  fullAbsDirPath,
+  fileCallbackFn = nodePath => {}
+) {
   let count = 0;
   const nodes = await readdirAsync(fullAbsDirPath);
   count += nodes.length;
@@ -96,5 +127,6 @@ async function recursiveTraverseDir(fullAbsDirPath, fileCallbackFn = (nodePath) 
 module.exports = {
   getListings,
   recursiveTraverseDir,
-  constructItemFromDb
+  constructItemFromDb,
+  constructMediaListingsFromDb
 };

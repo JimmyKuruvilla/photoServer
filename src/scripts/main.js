@@ -1,9 +1,23 @@
+$ = selector => document.querySelector(selector);
+$$ = selector => document.querySelectorAll(selector);
+
+const share = {
+  set pause(pause) {
+    this.paused = pause;
+    $('.toolbar button.pause').innerText = share.pause ? 'Paused' : 'Pause';
+    clearInterval(share.contentIntervalId);
+  },
+  get pause() {
+    return this.paused;
+  }
+};
+
 function pauseSlideShow() {
-  clearInterval(window.contentIntervalId);
+  share.pause = true;
 }
 
 function goFullScreen() {
-  document.querySelector('body').requestFullscreen();
+  $('body').requestFullscreen();
 }
 
 function isVideo(name) {
@@ -11,24 +25,39 @@ function isVideo(name) {
 }
 
 function replaceOnInterval(contentInterval, directory) {
-  clearInterval(window.contentIntervalId);
-  window.contentIntervalId = setInterval(() => {
+  clearInterval(share.contentIntervalId);
+  share.contentIntervalId = setInterval(() => {
+    share.pause = false;
     replaceContent(directory);
   }, contentInterval);
 }
 
 function replaceContent(directory) {
   const url = directory ? `/${directory}/randomUrl` : '/randomUrl';
-  fetch(url)
-    .then(response => response.json())
-    .then(item => {
-      replaceOnInterval(
-        item.duration ? item.duration + 1000 : window.contentInterval,
-        directory
-      );
-      document.querySelector('.filename').innerHTML = item.name;
-      document.querySelector('.content-wrapper').innerHTML = item.html;
-    });
+
+  fatch(url).then(item => {
+    share.photoItem = item;
+    replaceOnInterval(
+      item.duration ? item.duration + 1000 : share.contentInterval,
+      directory
+    );
+    $('.webpath').innerHTML = item.webPath;
+    $('.content-wrapper').innerHTML = item.html;
+  });
+}
+
+function toggleFavorite() {
+  pauseSlideShow();
+  fatch(`/media/${share.photoItem.id}/favorite`, 'patch', {
+    favorite: !share.photoItem.favorite
+  }).then(resp => {
+    share.photoItem.favorite = resp.favorite;
+    updateFavoriteButton(resp);
+  });
+}
+
+function updateFavoriteButton(o) {
+  $('.toolbar button.favorite').innerText = `Favorite: ${o.favorite}`;
 }
 
 const fatch = async (
@@ -37,13 +66,6 @@ const fatch = async (
   body,
   headers = { 'Content-Type': 'application/json; charset=utf-8' }
 ) => {
-  const patch = (url, body, headers) => {
-    return fetch(url, {
-      headers,
-      method: 'PATCH',
-      body: JSON.stringify(body)
-    });
-  };
   let fetchFn;
 
   try {
@@ -64,4 +86,12 @@ const fatch = async (
       error.message
     );
   }
+};
+
+const patch = (url, body, headers) => {
+  return fetch(url, {
+    headers,
+    method: 'PATCH',
+    body: JSON.stringify(body)
+  });
 };

@@ -1,19 +1,7 @@
 const path = require('path');
 const { videoSvg, folderSvg } = require('./svgs.js');
 const { isVideo } = require('./guards');
-
-const home = `<button><a href="/">Home</a></button>`;
-const random = `<button><a href="/random">Random</a></button>`;
-const slideshowAll = `<button><a href="/random/slideshow">Slideshow All</a></button>`;
-const fullscreen = `<button onclick="goFullScreen()">Fullscreen</button>`;
-const pause = `<button onclick="pauseSlideShow()">Pause</button>`;
-
-const generalToolbar = `
-  ${home}
-  ${random}
-  ${slideshowAll}
-  ${fullscreen}
-  ${pause}`;
+const { generalToolbar } = require('./toolbar');
 
 const cssAndJs = () => `
   <link rel="stylesheet" type="text/css" href="main.css">
@@ -29,7 +17,7 @@ function dirTemplate(locals) {
     
     <body>
       <div class="buttons">
-        ${generalToolbar}
+        ${generalToolbar()}
         ${
           locals.currentDir
             ? `<button><a href="/${locals.currentDir}/slideshow">Slideshow Here</a></button>`
@@ -58,7 +46,7 @@ function dirTemplate(locals) {
         ${locals.media
           .map(
             i =>
-              `<div class="media"><a href="${i.webPath}"><label>${
+              `<div class="media"><a href="/media/path?fullpath=${i.fullPath}"><label>${
                 i.name
               }</label>${
                 isVideo(i.name)
@@ -74,13 +62,13 @@ function dirTemplate(locals) {
 
 function getMediaHtmlFragment(item, interval) {
   if (isVideo(item.webPath)) {
-    return `<video controls autoplay class="video content wide"><source src="${
+    return `<video controls autoplay class="video wide"><source src="${
       interval ? path.join('..', item.webPath) : item.webPath
     }" type="video/mp4"></video>`;
   } else {
     return `<img src="${
       interval ? path.join('..', item.webPath) : item.webPath
-    }" class="pic content wide">`;
+    }" class="pic wide">`;
   }
 }
 
@@ -92,12 +80,11 @@ function imgVidTemplate(item, interval, directory) {
       </head>
 
       <body>
-        <div class="buttons">
-          ${generalToolbar}
+        <div class="toolbar">
+          ${generalToolbar(item)}
         </div>
 
-        <h6 class="filename">${item.name}</h6>
-        <h6 class="favorite">${item.favorite}</h6>
+        <h6 class="webpath">${item.webPath}</h6>
       
         <div class="content-wrapper">
           ${getMediaHtmlFragment(item, interval)}
@@ -105,9 +92,10 @@ function imgVidTemplate(item, interval, directory) {
 
         <script>
         if(${interval}){
-          window.contentInterval = ${interval};
+          share.contentInterval = ${interval};
           replaceOnInterval(${interval}, "${directory || ''}");
         }
+        share.photoItem = ${JSON.stringify(item)};
         </script>
 
       </body>
