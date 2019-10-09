@@ -17,6 +17,7 @@ services:
 
   web:
     build: .
+    restart: always
     container_name: "web"
     command: sh -c "npm run migrate && node photoServer.js /Users/jkuruvilla/jimmy/photoSite/share"
     volumes:
