@@ -41,7 +41,7 @@ app.get('/favicon.ico/', (req, res, next) => {
 });
 
 app.get('/randomUrl', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot);
+  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.json({ ...item, html: getMediaHtmlFragment(item, fakeInterval) });
 });
@@ -52,15 +52,17 @@ app.get('/:directory/randomUrl', async (req, res, next) => {
     decodeURIComponent(req.params.directory)
   );
 
-  const dbItem = await getRandomFromDb(db, dirOrFilePath);
+  const dbItem = await getRandomFromDb(db, dirOrFilePath, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.json({ ...item, html: getMediaHtmlFragment(item, fakeInterval) });
 });
 
 app.get('/random/slideshow', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot);
+  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
-  res.send(imgVidTemplate(item, req.query.interval || defaultInterval));
+  res.send(
+    imgVidTemplate(item, req.query.type, req.query.interval || defaultInterval)
+  );
 });
 
 app.get('/:directory/slideshow', async (req, res, next) => {
@@ -69,11 +71,12 @@ app.get('/:directory/slideshow', async (req, res, next) => {
     decodeURIComponent(req.params.directory)
   );
 
-  const dbItem = await getRandomFromDb(db, dirOrFilePath);
+  const dbItem = await getRandomFromDb(db, dirOrFilePath, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.send(
     imgVidTemplate(
       item,
+      req.query.type,
       req.query.interval || defaultInterval,
       req.params.directory
     )
@@ -81,7 +84,7 @@ app.get('/:directory/slideshow', async (req, res, next) => {
 });
 
 app.get('/random', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot);
+  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.send(imgVidTemplate(item));
 });

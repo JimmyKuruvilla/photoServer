@@ -24,16 +24,17 @@ function isVideo(name) {
   return /.+\.mp4$|avi$/i.test(name);
 }
 
-function replaceOnInterval(contentInterval, directory) {
+function replaceOnInterval(contentInterval, type, directory) {
   clearInterval(share.contentIntervalId);
   share.contentIntervalId = setInterval(() => {
     share.pause = false;
-    replaceContent(directory);
+    replaceContent(type, directory);
   }, contentInterval);
 }
 
-function replaceContent(directory) {
-  const url = directory ? `/${directory}/randomUrl` : '/randomUrl';
+function replaceContent(type, directory) {
+  const url = directory ? `/${directory}/randomUrl?type=${type}` : `/randomUrl?type=${type}`;
+  //  maybe it shows up as undefined here?
 
   fatch(url).then(item => {
     share.photoItem = item;

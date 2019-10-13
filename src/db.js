@@ -1,12 +1,12 @@
 const { dbMediaExts } = require('./guards');
 
-async function getRandomFromDb(db, parentPath) {
+async function getRandomFromDb(db, parentPath, type) {
   const randomResult = await db.raw(
     `
     SELECT * FROM images 
-    WHERE path SIMILAR TO '${parentPath}%${dbMediaExts()}' 
+    WHERE path SIMILAR TO '${parentPath}%${dbMediaExts(type)}' 
     OFFSET floor(
-      random() * (SELECT COUNT (*) from images WHERE path SIMILAR TO '${parentPath}%${dbMediaExts()}')) 
+      random() * (SELECT COUNT (*) from images WHERE path SIMILAR TO '${parentPath}%${dbMediaExts(type)}')) 
       LIMIT 1
       `
   );

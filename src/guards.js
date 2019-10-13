@@ -2,8 +2,15 @@ function isMedia(name) {
   return isPic(name) || isVideo(name);
 }
 
-function dbMediaExts() {
-  return `(jpg|jpeg|JPG|JPEG|avi|AVI|mp4|MP4)`
+function dbMediaExts(type) {
+  const video = `avi|AVI|mp4|MP4`;
+  const images = `jpg|jpeg|JPG|JPEG`;
+  const defaults = `(${video}|${images})`;
+  if (type) {
+    return type === 'video' ? `(${video})` : `(${images})`;
+  } else {
+    return defaults;
+  }
 }
 
 function isPic(name) {
@@ -20,3 +27,9 @@ module.exports = {
   isVideo,
   dbMediaExts
 };
+
+// SELECT * FROM images
+//   knex:query     WHERE path SIMILAR TO '/Users/jkuruvilla/jimmy/photoSite%avi|AVI|mp4|MP4'
+//   knex:query     OFFSET floor(
+//   knex:query       random() * (SELECT COUNT (*) from images WHERE path SIMILAR TO '/Users/jkuruvilla/jimmy/photoSite%avi|AVI|mp4|MP4'))
+//   knex:query       LIMIT 1

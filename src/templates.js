@@ -46,9 +46,9 @@ function dirTemplate(locals) {
         ${locals.media
           .map(
             i =>
-              `<div class="media"><a href="/media/path?fullpath=${i.fullPath}"><label>${
-                i.name
-              }</label>${
+              `<div class="media"><a href="/media/path?fullpath=${
+                i.fullPath
+              }"><label>${i.name}</label>${
                 isVideo(i.name)
                   ? videoSvg
                   : `<img src="${i.webPath}" class="pic">`
@@ -72,7 +72,7 @@ function getMediaHtmlFragment(item, interval) {
   }
 }
 
-function imgVidTemplate(item, interval, directory) {
+function imgVidTemplate(item, type, interval, directory) {
   return `
     <html>
       <head>
@@ -93,7 +93,7 @@ function imgVidTemplate(item, interval, directory) {
         <script>
         if(${interval}){
           share.contentInterval = ${interval};
-          replaceOnInterval(${interval}, "${directory || ''}");
+          replaceOnInterval(${interval}, ${type}, "${directory || ''}");
         }
         share.photoItem = ${JSON.stringify(item)};
         </script>
