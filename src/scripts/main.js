@@ -33,8 +33,9 @@ function replaceOnInterval(contentInterval, type, directory) {
 }
 
 function replaceContent(type, directory) {
-  const url = directory ? `/${directory}/randomUrl?type=${type}` : `/randomUrl?type=${type}`;
-  //  maybe it shows up as undefined here?
+  const url = directory
+    ? `/${directory}/randomUrl?type=${type}`
+    : `/randomUrl?type=${type}`;
 
   fatch(url).then(item => {
     share.photoItem = item;
@@ -44,6 +45,11 @@ function replaceContent(type, directory) {
     );
     $('.webpath').innerHTML = item.webPath;
     $('.content-wrapper').innerHTML = item.html;
+    window.history.pushState(
+      {},
+      '',
+      `/media/path?fullpath=${item.fullPath}`
+    );
   });
 }
 
