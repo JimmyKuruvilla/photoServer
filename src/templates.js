@@ -46,7 +46,7 @@ function dirTemplate(locals) {
         ${locals.media
           .map(
             i =>
-              `<div class="media"><a href="/media/path?fullpath=${
+              `<div class="media"><a href="/media?fullpath=${
                 i.fullPath
               }"><label>${i.name}</label>${
                 isVideo(i.name)
@@ -96,6 +96,11 @@ function imgVidTemplate(item, type, interval, directory) {
           replaceOnInterval(${interval}, ${type}, "${directory || ''}");
         }
         share.photoItem = ${JSON.stringify(item)};
+        window.onpopstate = function(event) {
+          clearInterval(share.contentIntervalId);
+          console.log('cleared')
+        };
+
         </script>
 
       </body>

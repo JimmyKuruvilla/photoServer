@@ -27,9 +27,3 @@ module.exports = {
   isVideo,
   dbMediaExts
 };
-
-// SELECT * FROM images
-//   knex:query     WHERE path SIMILAR TO '/Users/jkuruvilla/jimmy/photoSite%avi|AVI|mp4|MP4'
-//   knex:query     OFFSET floor(
-//   knex:query       random() * (SELECT COUNT (*) from images WHERE path SIMILAR TO '/Users/jkuruvilla/jimmy/photoSite%avi|AVI|mp4|MP4'))
-//   knex:query       LIMIT 1

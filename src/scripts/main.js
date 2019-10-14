@@ -48,7 +48,7 @@ function replaceContent(type, directory) {
     window.history.pushState(
       {},
       '',
-      `/media/path?fullpath=${item.fullPath}`
+      `/media?fullpath=${item.fullPath}`
     );
   });
 }

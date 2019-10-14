@@ -89,7 +89,7 @@ app.get('/random', async (req, res, next) => {
   res.send(imgVidTemplate(item));
 });
 
-app.get('/media/path', async (req, res, next) => {
+app.get('/media', async (req, res, next) => {
   const dbItem = await getItemViaPath(db, req.query.fullpath);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.send(imgVidTemplate(item));
