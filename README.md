@@ -14,6 +14,9 @@ run `docker-compose up` to bring up the db and the webserver.
 run `node updateDb.js YOURFILES_DIR` to populate the db with the file paths. YOURFILES_DIR must be an absolute path, and must *also* be passed as a volume to docker-compose. 
 The web server is made available on port `4000`.
 
+## Clients
+Any browser can be used to view the media by navigating to the url. However low power devices like raspberry pis can also use the framebuffer to display slideshow images using the `slideshow.sh` script. It pulls a random file, using `fim` to show it and then kills the process on a loop. 
+
 ## NOTE
 If you have a remote share, docker will refuse to make it available as a volume so you will have to bind-mount it first:
 `sudo mount --bind /mnt/backup/share/Photos/ ./share` -- now it's "local."
@@ -26,11 +29,7 @@ volumes:
 
 
 ## todo
--- star button to add to a list of db favorites
 -- spacebar to be pause start and then stop. 
--- list starred items view
 -- read EXIF data and rotate photos accoringly. 
 -- update exif buttons.
-// these should be renamed to randomMedia or soemthign
-// videos only random mode
 // remove media html `content` classes

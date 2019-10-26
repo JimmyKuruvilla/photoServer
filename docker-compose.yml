@@ -19,10 +19,10 @@ services:
     build: .
     restart: always
     container_name: "web"
-    command: sh -c "npm run migrate && node photoServer.js /Users/jkuruvilla/jimmy/photoSite/share"
+    command: sh -c "npm run migrate && node photoServer.js /mnt/backup/share/Photos"
     volumes:
       - .:/usr/app/
-      - ./share:/Users/jkuruvilla/jimmy/photoSite/share
+      - ./share:/mnt/backup/share/Photos
     ports:
       - "4000:4000"
     environment:
