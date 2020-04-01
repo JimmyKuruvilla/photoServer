@@ -32,4 +32,7 @@ volumes:
 -- spacebar to be pause start and then stop. 
 -- read EXIF data and rotate photos accoringly. 
 -- update exif buttons.
-// remove media html `content` classes
+-- convert avi to mp4
+-- auto backup db
+-- add last updated column for purging db. 
+-- remove media html `content` classes

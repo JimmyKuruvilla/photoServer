@@ -11,14 +11,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "express": "^4.16.4",
-    "nodemon": "^1.18.8"
+    "express": "^4.17.1",
+    "nodemon": "^2.0.2"
   },
   "dependencies": {
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
-    "knex": "^0.19.4",
+    "image-thumbnail": "^1.0.7",
+    "knex": "^0.20.13",
     "md5-file": "^4.0.0",
-    "pg": "^7.12.1"
+    "pg": "^8.0"
   }
 }

@@ -15,13 +15,13 @@ services:
     environment:
       POSTGRES_PASSWORD: example
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - /mnt/data/photoDb:/var/lib/postgresql/data
 
   web:
     build: .
     restart: always
     container_name: "web"
-    command: sh -c "npm run migrate && node photoServer.js /mnt/backup/share/Photos"
+    command: sh -c "rm -rf node_modules/sharp && npm install && npm run migrate && node photoServer.js /mnt/backup/share/Photos"
     volumes:
       - .:/usr/app/
       - ./share:/mnt/backup/share/Photos

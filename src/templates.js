@@ -51,7 +51,7 @@ function dirTemplate(locals) {
               }"><label>${i.name}</label>${
                 isVideo(i.name)
                   ? videoSvg
-                  : `<img src="${i.webPath}" class="pic">`
+                  : `<img src="${i.thumbnail}" class="pic">`
               }</div>`
           )
           .join('')}

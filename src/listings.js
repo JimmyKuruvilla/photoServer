@@ -3,16 +3,22 @@ const path = require('path');
 const { promisify } = require('util');
 const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
+const imageThumbnail = require('image-thumbnail');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
 
-const { isMedia, isVideo } = require('./guards');
+const { isMedia, isVideo, isPic } = require('./guards');
+const { getItemViaPath } = require('./db');
+
+const { dockerDb, localDb } = require('../db/initDb');
+const isDockerDb = process.env.DOCKERDB;
+const db = isDockerDb ? dockerDb() : localDb();
 
 const getInfoFromDbItem = (dbItem, webRoot) => {
   const fullFilePath = dbItem.path;
   const name = fullFilePath.replace(/.*\//, '');
   const webPath = fullFilePath.replace(webRoot, '');
-  return [fullFilePath, webPath, name];
+  return [fullFilePath, webPath, name, dbItem.thumbnail];
 };
 
 async function getVideoInfo(absPath) {
@@ -30,6 +36,7 @@ async function getListings(webRoot, fullAbsDirPath) {
   const dirs = [];
   const files = [];
   const media = [];
+  let thumbnail;
 
   const nodes = await readdirAsync(fullAbsDirPath);
 
@@ -38,19 +45,26 @@ async function getListings(webRoot, fullAbsDirPath) {
     let container = nodeStats.isDirectory()
       ? dirs
       : isMedia(nodeName)
-      ? media
-      : files;
+        ? media
+        : files;
 
     let duration = 0;
-    if (!nodeStats.isDirectory() && isVideo(nodeName)) {
-      const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
-      duration = Number(videoInfo.streams[0].duration * 1000);
+    if (!nodeStats.isDirectory()) {
+      if (isVideo(nodeName)) {
+        const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
+        duration = Number(videoInfo.streams[0].duration * 1000);
+      }
+      else if (isPic(nodeName)) {
+        const img = await getItemViaPath(db, path.join(fullAbsDirPath, nodeName));
+        thumbnail = img.thumbnail;
+      }
     }
 
     container.push({
       name: nodeName,
       webPath: path.join(`${fullAbsDirPath.replace(webRoot, '')}`, nodeName),
       fullPath: path.join(fullAbsDirPath, nodeName),
+      thumbnail: thumbnail,
       isDirectory: nodeStats.isDirectory(),
       duration,
       id: null,
@@ -70,12 +84,13 @@ function constructMediaListingsFromDb(dbItems, webRoot) {
     dirs: [],
     files: [],
     media: dbItems.map(dbItem => {
-      const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
+      const [fullFilePath, webPath, name, thumbnail] = getInfoFromDbItem(dbItem, webRoot);
 
       return {
         name: name,
         webPath: webPath,
         fullPath: fullFilePath,
+        thumbnail,
         id: dbItem.id,
         favorite: dbItem.favorite,
         isDirectory: false,
@@ -86,7 +101,7 @@ function constructMediaListingsFromDb(dbItems, webRoot) {
 }
 
 async function constructItemFromDb(dbItem, webRoot) {
-  const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
+  const [fullFilePath, webPath, name, thumbnail] = getInfoFromDbItem(dbItem, webRoot);
   let duration = 0;
   if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
@@ -96,6 +111,7 @@ async function constructItemFromDb(dbItem, webRoot) {
     name: name,
     webPath,
     fullPath: fullFilePath,
+    thumbnail,
     isDirectory: false,
     duration,
     id: dbItem.id,
@@ -105,7 +121,7 @@ async function constructItemFromDb(dbItem, webRoot) {
 
 async function recursiveTraverseDir(
   fullAbsDirPath,
-  fileCallbackFn = nodePath => {}
+  fileCallbackFn = nodePath => { }
 ) {
   let count = 0;
   const nodes = await readdirAsync(fullAbsDirPath);
