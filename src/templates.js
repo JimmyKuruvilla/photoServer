@@ -1,5 +1,5 @@
 const path = require('path');
-const { videoSvg, folderSvg } = require('./svgs.js');
+const { videoSvg, folderSvg, circleSvg } = require('./svgs.js');
 const { isVideo } = require('./guards');
 const { generalToolbar } = require('./toolbar');
 
@@ -19,9 +19,8 @@ function dirTemplate(locals) {
       <div class="buttons">
         ${generalToolbar()}
         ${
-          locals.currentDir
-            ? `<button><a href="/${locals.currentDir}/slideshow">Slideshow Here</a></button>`
-            : ''
+          locals.currentDir ? `<a href="/${locals.currentDir}/slideshow"><button>Slideshow Here</button></a>`
+          : ''
         }
         </div>
         <div class="dir section">
@@ -51,7 +50,7 @@ function dirTemplate(locals) {
               }"><label>${i.name}</label>${
                 isVideo(i.name)
                   ? videoSvg
-                  : `<img src="${i.thumbnail}" class="pic">`
+                  : i.thumbnail ? `<img src="${i.thumbnail}" class="thumbnail">` : circleSvg
               }</div>`
           )
           .join('')}
@@ -62,13 +61,13 @@ function dirTemplate(locals) {
 
 function getMediaHtmlFragment(item, interval) {
   if (isVideo(item.webPath)) {
-    return `<video controls autoplay class="video wide"><source src="${
+    return `<video controls autoplay class="video"><source src="${
       interval ? path.join('..', item.webPath) : item.webPath
     }" type="video/mp4"></video>`;
   } else {
     return `<img src="${
       interval ? path.join('..', item.webPath) : item.webPath
-    }" class="pic wide">`;
+    }" class="pic">`;
   }
 }
 
@@ -76,7 +75,7 @@ function imgVidTemplate(item, type, interval, directory) {
   return `
     <html>
       <head>
-      ${cssAndJs()}
+        ${cssAndJs()}
       </head>
 
       <body>
@@ -91,15 +90,13 @@ function imgVidTemplate(item, type, interval, directory) {
         </div>
 
         <script>
-        if(${interval}){
-          share.contentInterval = ${interval};
-          replaceOnInterval(${interval}, ${type}, "${directory || ''}");
-        }
-        share.photoItem = ${JSON.stringify(item)};
-        window.onpopstate = function(event) {
-          clearInterval(share.contentIntervalId);
-          console.log('cleared')
-        };
+          if(${interval}){
+            share.contentInterval = ${interval};
+            replaceOnInterval(${interval}, ${type}, "${directory || ''}");
+          }
+          share.photoItem = ${JSON.stringify(item)};
+
+          window.history.replaceState({}, '', '/media?fullpath=${item.fullPath}');
 
         </script>
 

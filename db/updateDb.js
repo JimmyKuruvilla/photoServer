@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const imageThumbnail = require('image-thumbnail');
+const imageThumbnail = require('../src/libs/image-thumbnail/image-thumbnail');
 const { recursiveTraverseDir } = require('../src/listings');
 const { localDb } = require('./initDb.js');
 const { isPic } = require('../src/guards');
@@ -39,19 +39,22 @@ async function _updateThumbnailIfNotExists(trx, filepath, dbResult) {
   if (isPic(filepath) && dbResult[0] && !dbResult[0].thumbnail) {
     const thumbnail = await _getThumbnail(filepath);
     try {
-      await trx('images').where('path', filepath).update({ thumbnail });
-      _logThumbnail(filepath, thumbnail);
+      if (thumbnail) {
+        await trx('images').where('path', filepath).update({ thumbnail });
+        _logThumbnail(filepath, thumbnail);
+      }
       await trx.commit();
     } catch (e) {
       console.log(`DB matched: error: ${e}`);
       await trx.rollback();
     }
-  } else {
+  }
+  else {
     await trx.commit();
   }
 }
 
-async function _getThumbnail(fullPath, options = { percentage: 10, responseType: 'base64', jpegOptions: { force: true, quality: 20 } }) {
+async function _getThumbnail(fullPath, options = { percentage: 10, responseType: 'base64', jpegOptions: { force: false, quality: 20 } }) {
   try {
     thumbnail = 'data:image/png;base64,';
     thumbnail += await imageThumbnail(fullPath, options);

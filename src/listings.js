@@ -3,7 +3,6 @@ const path = require('path');
 const { promisify } = require('util');
 const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
-const imageThumbnail = require('image-thumbnail');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
 
@@ -18,7 +17,7 @@ const getInfoFromDbItem = (dbItem, webRoot) => {
   const fullFilePath = dbItem.path;
   const name = fullFilePath.replace(/.*\//, '');
   const webPath = fullFilePath.replace(webRoot, '');
-  return [fullFilePath, webPath, name, dbItem.thumbnail];
+  return [fullFilePath, webPath, name];
 };
 
 async function getVideoInfo(absPath) {
@@ -84,15 +83,16 @@ function constructMediaListingsFromDb(dbItems, webRoot) {
     dirs: [],
     files: [],
     media: dbItems.map(dbItem => {
-      const [fullFilePath, webPath, name, thumbnail] = getInfoFromDbItem(dbItem, webRoot);
+      const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
 
       return {
         name: name,
         webPath: webPath,
         fullPath: fullFilePath,
-        thumbnail,
+        thumbnail: dbItem.thumbnail,
         id: dbItem.id,
         favorite: dbItem.favorite,
+        marked: dbItem.marked,
         isDirectory: false,
         duration: null
       };
@@ -101,7 +101,7 @@ function constructMediaListingsFromDb(dbItems, webRoot) {
 }
 
 async function constructItemFromDb(dbItem, webRoot) {
-  const [fullFilePath, webPath, name, thumbnail] = getInfoFromDbItem(dbItem, webRoot);
+  const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
   let duration = 0;
   if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
@@ -111,11 +111,12 @@ async function constructItemFromDb(dbItem, webRoot) {
     name: name,
     webPath,
     fullPath: fullFilePath,
-    thumbnail,
+    thumbnail: dbItem.thumbnail,
     isDirectory: false,
     duration,
     id: dbItem.id,
-    favorite: dbItem.favorite
+    favorite: dbItem.favorite,
+    marked: dbItem.marked
   };
 }
 

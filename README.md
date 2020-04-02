@@ -29,10 +29,18 @@ volumes:
 
 
 ## todo
--- spacebar to be pause start and then stop. 
--- read EXIF data and rotate photos accoringly. 
--- update exif buttons.
--- convert avi to mp4
+
+-- clickign random, leaves url as RANDOM instead of changing it to a bookmarkable one. 
+-- random/slideshow does the same thing and you can't go back!
 -- auto backup db
+-- handle better scaling of images based on device orientation
+-- search!
 -- add last updated column for purging db. 
+-- make buttons bigger on touch devices
+-- convert avi to mp4
+ -- delete old
+ -- delete old from s3
+
+-- spacebar to be pause start and then stop. 
+-- read EXIF data and rotate photos accordingly. 
 -- remove media html `content` classes

@@ -19,7 +19,9 @@ const {
 const {
   getRandomFromDb,
   getFavoritesFromDb,
-  getItemViaPath
+  getMarkedFromDb,
+  getItemViaPath,
+  updateFieldById
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
 const fakeInterval = defaultInterval;
@@ -66,6 +68,8 @@ app.get('/random/slideshow', async (req, res, next) => {
 });
 
 app.get('/:directory/slideshow', async (req, res, next) => {
+  // doesn't work for nested directories like : 
+  // http://192.168.2.123:4000/Slideshow/Recent%20Photos/2019-09-01/slideshow
   const dirOrFilePath = path.join(
     webRoot,
     decodeURIComponent(req.params.directory)
@@ -103,18 +107,33 @@ app.get('/media/favorites', async (req, res, next) => {
 
 app.patch('/media/:id/favorite', async (req, res, next) => {
   if (req.body.favorite !== undefined) {
-    db('images')
-      .where({ id: req.params.id })
-      .update({ favorite: req.body.favorite })
-      .returning(['favorite'])
-      .then(dbRes => {
-        res.status(200).json(dbRes[0]);
-      })
-      .catch(e => {
-        res.send(e);
-      });
+    try {
+      const dbRes = await updateFieldById(db, req.params.id, 'favorite', req.body['favorite']);
+      res.status(200).json(dbRes[0]);
+    } catch (e) {
+      res.send(e)
+    }
   } else {
     res.status(422).send('favorite:boolean not in json');
+  }
+});
+
+app.get('/media/marked', async (req, res, next) => {
+  const dbItems = await getMarkedFromDb(db);
+  const listings = constructMediaListingsFromDb(dbItems, webRoot);
+  res.send(dirTemplate(listings));
+});
+
+app.patch('/media/:id/marked', async (req, res, next) => {
+  if (req.body.marked !== undefined) {
+    try {
+      const dbRes = await updateFieldById(db, req.params.id, 'marked', req.body['marked']);
+      res.status(200).json(dbRes[0]);
+    } catch (e) {
+      res.send(e)
+    }
+  } else {
+    res.status(422).send('marked:boolean not in json');
   }
 });
 

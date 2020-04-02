@@ -86,7 +86,7 @@ svg.folder {
   display: initial;
 }
 
-.pic,
+.thumbnail,
 svg.video {
   width: 200px;
   border-radius: 5px;
@@ -97,38 +97,26 @@ svg.video {
   height: 100px;
 }
 
-.pic:hover,
+.thumbnail:hover,
 svg.video:hover {
   border: 3px solid white;
   transform: scale(1.5);
 }
 
-.pic.wide,
-video.wide {
-  /* max-width: 100vw;
-  max-height: calc(100vh - 100px); */
-  width: 100%;
-  height: calc(100vh - 100px);
+.pic,
+video {
+  max-width: 100vw;
+  max-height: calc(100vh - 100px);
   margin: 0 auto;
 }
 
-.pic.wide:hover,
-video.wide:hover {
+.pic:hover,
+video:hover {
   border: none;
   transform: none;
 }
 
-@media all and (display-mode: fullscreen) {
-  body {
-    background: blue;
-  }
-
-  .pic.wide,
-  .video.wide {
-    max-width: 100vw;
-    width: initial;
-  }
-}
+@media all and (display-mode: fullscreen) {}
 
 .section {
   margin: 20px 0;

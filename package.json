@@ -17,9 +17,10 @@
   "dependencies": {
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
-    "image-thumbnail": "^1.0.7",
+    "sharp": "^0.23.4",
+    "image-size": "^0.8.3",
     "knex": "^0.20.13",
     "md5-file": "^4.0.0",
-    "pg": "^8.0"
+    "pg": "^7.18.2"
   }
 }

@@ -1,6 +1,10 @@
 $ = selector => document.querySelector(selector);
 $$ = selector => document.querySelectorAll(selector);
 
+window.onpopstate = function (event) {
+  clearInterval(share.contentIntervalId);
+};
+
 const share = {
   set pause(pause) {
     this.paused = pause;
@@ -41,6 +45,7 @@ function replaceContent(type, directory) {
     share.photoItem = item;
     replaceOnInterval(
       item.duration ? item.duration + 1000 : share.contentInterval,
+      type,
       directory
     );
     $('.webpath').innerHTML = item.webPath;
@@ -63,8 +68,22 @@ function toggleFavorite() {
   });
 }
 
+function toggleMarked() {
+  pauseSlideShow();
+  fatch(`/media/${share.photoItem.id}/marked`, 'patch', {
+    marked: !share.photoItem.marked
+  }).then(resp => {
+    share.photoItem.marked = resp.marked;
+    updateMarkedButton(resp);
+  });
+}
+
 function updateFavoriteButton(o) {
   $('.toolbar button.favorite').innerText = `Favorite: ${o.favorite}`;
+}
+
+function updateMarkedButton(o) {
+  $('.toolbar button.marked').innerText = `Marked: ${o.marked}`;
 }
 
 const fatch = async (
