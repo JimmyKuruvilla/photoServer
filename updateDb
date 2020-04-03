@@ -4,4 +4,4 @@ set -euxo
 rm -rf node_modules/sharp
 npm install
 cd /home/j/scripts/photoServer/db
-node updateDb.js /mnt/backup/share/Photos
+node updateDb.js /mnt/backup/share/Photos | tee /home/j/scripts/photoServer/updateDb.log

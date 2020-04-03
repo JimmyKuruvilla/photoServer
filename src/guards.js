@@ -3,7 +3,8 @@ function isMedia(name) {
 }
 
 function dbMediaExts(type) {
-  const video = `avi|AVI|mp4|MP4`;
+  const oldVideo = `avi|AVI|mp4|MP4`;
+  const video = `mp4|MP4`;
   const images = `jpg|jpeg|JPG|JPEG`;
   const defaults = `(${video}|${images})`;
   if (type) {
