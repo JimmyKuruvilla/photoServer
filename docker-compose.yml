@@ -21,10 +21,10 @@ services:
     build: .
     restart: always
     container_name: "web"
-    command: sh -c "rm -rf node_modules/sharp && npm install && npm run migrate && node photoServer.js /mnt/backup/share/Photos"
+    command: sh -c "rm -rf node_modules/sharp && npm install && npm run migrate && node photoServer.js /mnt/backup/media"
     volumes:
       - .:/usr/app/
-      - ./share:/mnt/backup/share/Photos
+      - ./share:/mnt/backup/media
     ports:
       - "4000:4000"
     environment:

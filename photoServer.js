@@ -87,17 +87,31 @@ app.get('/:directory/slideshow', async (req, res, next) => {
   );
 });
 
+async function getBeforeAndAfterItems(fullPath) {
+  const fullAbsDirPath = fullPath.substring(0, fullPath.lastIndexOf('/'))
+  const listings = await getListings(webRoot, fullAbsDirPath);
+  const itemIndex = listings.media.findIndex(m => m.fullPath === fullPath)
+  const beforeItem = listings.media[itemIndex - 1 > -1 ? itemIndex - 1 : 0]
+  const afterItem = listings.media[itemIndex + 1 < listings.media.length ? itemIndex + 1 : listings.media.length - 1]
+
+  return [beforeItem, afterItem]
+}
+
 app.get('/random', async (req, res, next) => {
   const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
-  res.send(imgVidTemplate(item));
+  const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
+  
+  res.send(imgVidTemplate(item, null, null, null, beforeItem, afterItem));
 });
 
 app.get('/media', async (req, res, next) => {
   try {
     const dbItem = await getItemViaPath(db, req.query.fullpath);
     const item = await constructItemFromDb(dbItem, webRoot);
-    res.send(imgVidTemplate(item));
+    const [beforeItem, afterItem] = await getBeforeAndAfterItems(req.query.fullpath)
+
+    res.send(imgVidTemplate(item, null, null, null, beforeItem, afterItem));
   }
   catch (e) {
     res.status(400).send('Error: file may not be in db yet');
