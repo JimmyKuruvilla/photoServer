@@ -25,8 +25,9 @@ const {
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
 const fakeInterval = defaultInterval;
-const isDockerDb = process.env.DOCKERDB;
-const db = isDockerDb ? dockerDb() : localDb();
+// const isDockerDb = process.env.DOCKERDB;
+// const db = isDockerDb ? dockerDb() : localDb();
+const db = localDb();
 
 app.use(express.json());
 

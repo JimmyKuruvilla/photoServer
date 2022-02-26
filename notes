@@ -1,0 +1,1 @@
+root runs the updatedb script so it has to have access to node/npm. To do that it must have it installed globally. I've installed it with nvm, so I had to symlink the binaries to /user/local/bin/node

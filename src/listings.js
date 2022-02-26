@@ -10,8 +10,9 @@ const { isMedia, isVideo, isPic } = require('./guards');
 const { getItemViaPath } = require('./db');
 
 const { dockerDb, localDb } = require('../db/initDb');
-const isDockerDb = process.env.DOCKERDB;
-const db = isDockerDb ? dockerDb() : localDb();
+// const isDockerDb = process.env.DOCKERDB;
+// const db = isDockerDb ? dockerDb() : localDb();
+const db = localDb();
 
 const getInfoFromDbItem = (dbItem, webRoot) => {
   const fullFilePath = dbItem.path;

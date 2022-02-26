@@ -16,26 +16,3 @@ services:
       POSTGRES_PASSWORD: example
     volumes:
       - /mnt/data/photoDb:/var/lib/postgresql/data
-
-  web:
-    build: .
-    restart: always
-    container_name: "web"
-    command: sh -c "rm -rf node_modules/sharp && npm install && npm run migrate && node photoServer.js /mnt/backup/media"
-    volumes:
-      - .:/usr/app/
-      - ./share:/mnt/backup/media
-    ports:
-      - "4000:4000"
-    environment:
-      DOCKERDB: 1
-    depends_on:
-      - db
-
-
-
-    # healthcheck:
-    #   test: ["CMD", "pg_isready"]
-    #   interval: 1s
-    #   timeout: 5s
-    #   retries: 15

@@ -25,6 +25,7 @@ function dirTemplate(locals) {
         </div>
         <div class="dir section">
         ${locals.dirs
+          .reverse()
           .map(
             i =>
               `<div class="dir"><a href="${i.webPath}"><label>${folderSvg}${i.name}</label></div>`
