@@ -1,0 +1,2 @@
+# pm2 start this line
+#/home/j/scripts/photoServer/photoServer.js /mnt/backup/media

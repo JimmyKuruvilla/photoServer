@@ -1,1 +1,5 @@
-root runs the updatedb script so it has to have access to node/npm. To do that it must have it installed globally. I've installed it with nvm, so I had to symlink the binaries to /user/local/bin/node
+- install postfix to get crontab logs, install mutt for better mail handling
+
+- use pm2 to manage the js service
+- use restart:always in the docker-compose.yml to have the pg container restart
+- relies on systemd to ensure db first, then pm2 service. No guarantee the connection will be available - fix later

@@ -14,8 +14,9 @@ const dockerDb = () => {
 const localDb = () => {
   return require('knex')({
     client: 'pg',
+    pool: { min: 0, max: 7 },
     connection: {
-      host: '0.0.0.0',
+      host: '127.0.0.1',
       port: '54320',
       user: 'postgres',
       password: 'example',

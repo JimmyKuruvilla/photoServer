@@ -5,6 +5,7 @@ const { promisify } = require('util');
 const statAsync = promisify(fs.stat);
 const express = require('express');
 const path = require('path');
+const morgan = require('morgan')
 const app = express();
 let webRoot = process.argv[2] || __dirname;
 
@@ -24,11 +25,12 @@ const {
   updateFieldById
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
+
 const fakeInterval = defaultInterval;
-// const isDockerDb = process.env.DOCKERDB;
-// const db = isDockerDb ? dockerDb() : localDb();
+
 const db = localDb();
 
+app.use(morgan('dev'))
 app.use(express.json());
 
 app.get(/.*[/]{1,1}(.*)\.css$/, (req, res, next) => {
@@ -115,7 +117,7 @@ app.get('/media', async (req, res, next) => {
     res.send(imgVidTemplate(item, null, null, null, beforeItem, afterItem));
   }
   catch (e) {
-    res.status(400).send('Error: file may not be in db yet');
+    res.status(404).send('Error: file may not be in db yet');
   }
 });
 

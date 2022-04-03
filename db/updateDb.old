@@ -1,4 +1,0 @@
-set -euxo
-# 0 6 * * *  in crontab must be in root due to permissions
-#!/bin/bash
-node updateDb.js /mnt/backup/media | tee /home/j/scripts/photoServer/updateDb.log

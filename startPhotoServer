@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# npm run migrate
-cd /home/j/scripts/photoServer
-/usr/local/bin/docker-compose up -d
-/usr/bin/screen -dmS photoServer node photoServer.js /mnt/backup/media

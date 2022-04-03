@@ -1,4 +1,4 @@
 set -euxo
-# 0 6 * * *  in crontab must be in root due to permissions
 #!/bin/bash
-echo "did it potato" >> /home/j/scripts/photoServer/updateDb.log
+#node updateDb.js /mnt/backup/media | tee /home/j/scripts/photoServer/updateDb.log
+/home/j/.nvm/versions/node/v16.14.0/bin/node /home/j/scripts/photoServer/db/updateDb.js /mnt/backup/media 

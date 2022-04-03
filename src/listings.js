@@ -56,7 +56,7 @@ async function getListings(webRoot, fullAbsDirPath) {
       }
       else if (isPic(nodeName)) {
         const img = await getItemViaPath(db, path.join(fullAbsDirPath, nodeName));
-        thumbnail = img.thumbnail;
+        thumbnail = img?.thumbnail;
       }
     }
 
