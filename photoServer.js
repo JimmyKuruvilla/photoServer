@@ -18,6 +18,7 @@ const {
   constructMediaListingsFromDb
 } = require('./src/listings');
 const {
+  getAnyRandomFromDb,
   getRandomFromDb,
   getFavoritesFromDb,
   getMarkedFromDb,
@@ -63,7 +64,7 @@ app.get('/:directory/randomUrl', async (req, res, next) => {
 });
 
 app.get('/random/slideshow', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
+  const dbItem = await getAnyRandomFromDb(db);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.send(
     imgVidTemplate(item, req.query.type, req.query.interval || defaultInterval)
@@ -101,7 +102,7 @@ async function getBeforeAndAfterItems(fullPath) {
 }
 
 app.get('/random', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
+  const dbItem = await getAnyRandomFromDb(db);
   const item = await constructItemFromDb(dbItem, webRoot);
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
   
