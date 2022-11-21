@@ -1,5 +1,13 @@
 const { dbMediaExts } = require('./guards');
 
+async function getAnyRandomFromDb(db) {
+  const randomResult = await db.raw(
+    `SELECT * FROM images TABLESAMPLE SYSTEM (1) LIMIT 1;`
+  );
+
+  return randomResult.rows[0];
+}
+
 async function getRandomFromDb(db, parentPath, type) {
   const randomResult = await db.raw(
     `
@@ -45,6 +53,7 @@ async function updateFieldById(db, id, field, value) {
 }
 
 module.exports = {
+  getAnyRandomFromDb,
   getRandomFromDb,
   getFavoritesFromDb,
   getMarkedFromDb,
