@@ -22,6 +22,22 @@ async function getRandomFromDb(db, parentPath, type) {
   return randomResult.rows[0];
 }
 
+async function getById(db, id) {
+  const result = await db.raw(`SELECT * FROM images where id=${id}`);
+  return result.rows[0];
+}
+
+async function getFirstId(db) {
+  const result = await db.raw(`SELECT id FROM images ORDER BY id ASC LIMIT 1;`);
+  return result.rows[0];
+}
+
+async function getLastId(db) {
+  const result = await db.raw(`SELECT id FROM images ORDER BY id DESC LIMIT 1;`);
+
+  return result.rows[0];
+}
+
 async function getFavoritesFromDb(db) {
   const result = await db('images').where({ favorite: true });
   return result;
@@ -58,5 +74,8 @@ module.exports = {
   getFavoritesFromDb,
   getMarkedFromDb,
   getItemViaPath,
-  updateFieldById
+  updateFieldById,
+  getFirstId,
+  getLastId,
+  getById
 };

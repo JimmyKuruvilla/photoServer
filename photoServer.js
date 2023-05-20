@@ -22,13 +22,38 @@ const {
   getFavoritesFromDb,
   getMarkedFromDb,
   getItemViaPath,
-  updateFieldById
+  updateFieldById,
+  getFirstId,
+  getLastId,
+  getById
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
 
 const fakeInterval = defaultInterval;
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
+
+let lastId;
+let firstId;
+const ONE_DAY_SECS = 86400;
+
+const setIdRange = async () => {
+  lastId = (await getLastId(db)).id
+  firstId = (await getFirstId(db)).id;
+
+  console.log(`first ${firstId}, last ${lastId}`)
+}
+
 const db = localDb();
+
+(async ()=>{
+  await setIdRange();
+  setInterval(setIdRange, ONE_DAY_SECS*1000)
+})();
 
 app.use(morgan('dev'))
 app.use(express.json());
@@ -101,7 +126,11 @@ async function getBeforeAndAfterItems(fullPath) {
 }
 
 app.get('/random', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
+  // this method is too slow - takes over 1s to get a record back
+  // const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
+
+  // this method retrieves random by id and is much faster. 
+  const dbItem = await getById(db, getRandomInt(firstId, lastId));
   const item = await constructItemFromDb(dbItem, webRoot);
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
   
