@@ -26,10 +26,10 @@ const path = require('path');
 const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
 const readFile = promisify(fs.readFile);
+const mkdir = promisify(fs.mkdir);
 const ExifReader = require('exifreader');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
-const { recursiveTraverseDir } = require('../src/listings');
 const { isPic, isVideo } = require('../src/guards');
 
 // returns 2023-05-24 given UTC date
@@ -42,9 +42,22 @@ const createDatePath = (targetDir, date, filename) => `${path.join(targetDir, da
 
 const isHidden = (filename) => filename[0] === '.'
 
+const createDir = async (path) => {
+  try {
+    await mkdir(path)
+  }
+  catch (e) {
+    if (e.code === 'EEXIST') {
+      console.log('DIRECTORY_ALREADY_EXISTS', path);
+    } else {
+      console.log('CANNOT_CREATE_DIR', e.message);
+    }
+  }
+}
+
 const move = async (source, target) => {
-  console.log(source, `moving/renaming to ${target}`)
-  // await renameAsync(fullAbsSourcePath, fullAbsTargetPath);
+  console.log(`MOVING from ${source} to \n ${target}`);
+  await renameAsync(source, target);
 }
 
 const movePic = async (fullAbsSourcePath, targetDir, filename) => {
@@ -58,12 +71,17 @@ const movePic = async (fullAbsSourcePath, targetDir, filename) => {
     if (creationTime) {
       const formattedDate = creationTime.split(' ')[0].replaceAll(':', '-');
       const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
+
+      await createDir(path.join(targetDir, formattedDate));
       await move(fullAbsSourcePath, fullAbsTargetPath);
+      return fullAbsTargetPath;
     } else {
       console.log('EXIFREADER_NO_CREATION_TIME, cannot move file', fullAbsSourcePath)
+      return null;
     }
   } catch (e) {
     console.log('EXIFREADER_ERROR', e.message);
+    return null;
   }
 }
 
@@ -77,12 +95,16 @@ const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
       const formattedDate = formatToLocalDateString(creationTime);
       const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
 
+      await createDir(path.join(targetDir, formattedDate));
       await move(fullAbsSourcePath, fullAbsTargetPath);
+      return fullAbsTargetPath;
     } else {
-      console.log('FFPROBE_NO_CREATION_TIME, cannot move file', fullAbsSourcePath)
+      console.log('FFPROBE_NO_CREATION_TIME, cannot move file', fullAbsSourcePath);
+      return null;
     }
   } catch (e) {
     console.log('FFPROBE_ERROR', e.message);
+    return null;
   }
 }
 
@@ -90,29 +112,19 @@ const moveFileByCreationDate = (targetDir) => async (fullAbsSourcePath) => {
   const filename = path.basename(fullAbsSourcePath);
   if (!isHidden(filename)) {
     if (isPic(filename)) {
-      await movePic(fullAbsSourcePath, targetDir, filename);
+      return movePic(fullAbsSourcePath, targetDir, filename);
     } else if (isVideo(filename)) {
-      await moveVideo(fullAbsSourcePath, targetDir, filename);
-    } else { console.log('NOT_A_MEDIA_FILE, skipping') }
+      return moveVideo(fullAbsSourcePath, targetDir, filename);
+    } else {
+      console.log('NOT_A_MEDIA_FILE, skipping')
+      return null;
+    }
   } else {
-    console.log('SKIPPING_HIDDEN_FILE', fullAbsSourcePath)
+    console.log('SKIPPING_HIDDEN_FILE', fullAbsSourcePath);
+    return null;
   }
 }
 
-
-(async () => {
-  const sourceDir = process.argv[2];
-  const targetDir = process.argv[3];
-
-  if (!sourceDir || !targetDir) {
-    throw new Error('Need both source and target dirs');
-  }
-
-  const count = await recursiveTraverseDir(
-    sourceDir,
-    moveFileByCreationDate(targetDir)
-  );
-
-  console.log(`files seen ${count}`);
-  process.exit();
-})();
+module.exports = {
+  moveFileByCreationDate
+}

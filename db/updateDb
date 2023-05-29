@@ -1,4 +1,0 @@
-set -euxo
-#!/bin/bash
-#node updateDb.js /mnt/backup/media | tee /home/j/scripts/photoServer/updateDb.log
-/home/j/.nvm/versions/node/v16.14.0/bin/node /home/j/scripts/photoServer/db/updateDb.js /mnt/backup/media 
