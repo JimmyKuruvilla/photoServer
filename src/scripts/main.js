@@ -5,10 +5,25 @@ window.onpopstate = function (event) {
   clearInterval(share.contentIntervalId);
 };
 
-document.addEventListener("DOMContentLoaded",(event) => { 
+const dispatchReadyEvent = () => {
+    window.document.dispatchEvent(new Event("DOMContentLoaded", {
+    bubbles: true,
+    cancelable: true
+  }));
+}
+
+const animateIn = () => {
   $('.pic')?.classList.add('transition-opacity');
   $('.video')?.classList.add('transition-opacity');
-});
+}
+
+if(document.readyState !== 'loading') {
+  animateIn();
+} else {
+  document.addEventListener("DOMContentLoaded",(event) => { 
+    animateIn();
+  })
+};
 
 const share = {
   set pause(pause) {
@@ -55,6 +70,7 @@ function replaceContent(type, directory) {
     );
     $('.webpath').innerHTML = item.webPath;
     $('.content-wrapper').innerHTML = item.html;
+    dispatchReadyEvent();
     window.history.pushState(
       {},
       '',
