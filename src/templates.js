@@ -71,16 +71,16 @@ function getMediaHtmlFragment(item, interval, beforeItem, afterItem) {
       }" class="pic">`
   }
 
-  const nameSection = `/${item.name}`
-  return `<a href="${item.webPath.replace(nameSection, '')}"> FOLDER </a>
+  return `
   <div class="content-and-controls">
-    <a class="left arrow" href="/media?fullpath=${beforeItem.fullPath}"> << </a>
+    <a class="left arrow" href="/media?fullpath=${beforeItem?.fullPath}"> << </a>
     ${html}
-    <a class="right arrow" href="/media?fullpath=${afterItem.fullPath}"> >> </a>
+    <a class="right arrow" href="/media?fullpath=${afterItem?.fullPath}"> >> </a>
   </div>`
 }
 
 function imgVidTemplate(item, type, interval, directory, beforeItem, afterItem) {
+  const nameSection = `/${item.name}`;
   return `
     <html>
       <head>
@@ -92,7 +92,9 @@ function imgVidTemplate(item, type, interval, directory, beforeItem, afterItem) 
           ${generalToolbar(item)}
         </div>
 
-        <h6 class="webpath">${item.webPath}</h6>
+        <a href="${item.webPath.replace(nameSection, '')}"> 
+          <h6 class="webpath">${item.webPath}</h6>
+        </a>
       
         <div class="content-wrapper">
           ${getMediaHtmlFragment(item, interval, beforeItem, afterItem)}
