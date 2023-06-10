@@ -1,5 +1,4 @@
 const path = require('path');
-const { videoSvg, folderSvg, circleSvg } = require('./svgs.js');
 const { isVideo } = require('./guards');
 const { generalToolbar } = require('./toolbar');
 
@@ -28,7 +27,7 @@ function dirTemplate(locals) {
           .reverse()
           .map(
             i =>
-              `<div class="dir"><a href="${i.webPath}"><label>${folderSvg}${i.name}</label></div>`
+              `<div class="dir"><a href="${i.webPath}"><label>📁${i.name}</label></div>`
           )
           .join('')}
         </div>
@@ -50,8 +49,8 @@ function dirTemplate(locals) {
                 i.fullPath
               }"><label>${i.name}</label>${
                 isVideo(i.name)
-                  ? videoSvg
-                  : i.thumbnail ? `<img src="${i.thumbnail}" class="thumbnail">` : circleSvg
+                  ? "🎞️"
+                  : i.thumbnail ? `<img src="${i.thumbnail}" class="thumbnail">` : "⚪"
               }</div>`
           )
           .join('')}
