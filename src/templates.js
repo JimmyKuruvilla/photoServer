@@ -16,10 +16,10 @@ function dirTemplate(locals) {
     </head>
     
     <body>
-      <div class="buttons">
+      <div class="toolbar">
         ${generalToolbar()}
         ${
-          locals.currentDir ? `<a href="/${locals.currentDir}/slideshow"><button>Slideshow Here</button></a>`
+          locals.currentDir ? `<a href="/${locals.currentDir}/slideshow"><button>📽️🔽</button></a>`
           : ''
         }
         </div>
@@ -93,7 +93,7 @@ function imgVidTemplate(item, type, interval, directory, beforeItem, afterItem) 
         </div>
 
         <a href="${item.webPath.replace(nameSection, '')}"> 
-          <h6 class="webpath">${item.webPath}</h6>
+          <h6 class="webpath">${item.webPath} ↗</h6>
         </a>
       
         <div class="content-wrapper">

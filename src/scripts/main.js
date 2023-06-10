@@ -5,10 +5,15 @@ window.onpopstate = function (event) {
   clearInterval(share.contentIntervalId);
 };
 
+document.addEventListener("DOMContentLoaded",(event) => { 
+  $('.pic')?.classList.add('transition-opacity');
+  $('.video')?.classList.add('transition-opacity');
+});
+
 const share = {
   set pause(pause) {
     this.paused = pause;
-    $('.toolbar button.pause').innerText = share.pause ? 'Paused' : 'Pause';
+    $('.toolbar button.pause').innerText = share.pause ? "💀" : "⏸️";
     clearInterval(share.contentIntervalId);
   },
   get pause() {

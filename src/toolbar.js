@@ -1,5 +1,5 @@
 const home = `<a href="/" title="go home"><button>🏠↗</button></a>`;
-const random = `<a href="/random" title="random photo"><button>🔀</button></a>`;
+const random = `<a href="/random" title="random photo"><button>🔄</button></a>`;
 const slideshowAll = `<a href="/random/slideshow" title="slideshow"><button>📽️</button></a>`;
 const fullscreen = `<button onclick="goFullScreen()" title="go fullscreen">⛰️</button>`;
 const pause = `<button class="pause" onclick="pauseSlideShow()" title=
@@ -14,9 +14,9 @@ const marked = `<a href="/media/marked" title="go to marked"><button>💣↗</bu
 const generalToolbar = o => `
 
   ${home}
-  ${random}
   ${favorites}
   ${marked}
+  ${random}
   ${slideshowAll}
   ${pause}
   ${o ? favorite(o) : ''}
