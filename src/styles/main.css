@@ -54,6 +54,8 @@ button {
   background-color: #191917;
   color: rgba(42, 179, 221, 1);
   border: none;
+  height: 100%;
+  margin: 0 3px;
 }
 
 button:hover {
@@ -85,6 +87,13 @@ svg.folder {
 
 .shown {
   display: initial;
+}
+
+.toolbar {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-items: center;
 }
 
 .thumbnail,

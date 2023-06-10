@@ -79,11 +79,11 @@ function toggleMarked() {
 }
 
 function updateFavoriteButton(o) {
-  $('.toolbar button.favorite').innerText = `Favorite: ${o.favorite}`;
+  $('.toolbar button.favorite').innerText = o.favorite ? "❤️" : "🖤" ;
 }
 
 function updateMarkedButton(o) {
-  $('.toolbar button.marked').innerText = `Marked: ${o.marked}`;
+  $('.toolbar button.marked').innerText = o.marked ? "💣" : "👍";
 }
 
 const fatch = async (
