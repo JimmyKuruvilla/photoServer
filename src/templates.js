@@ -73,9 +73,11 @@ function getMediaHtmlFragment(item, interval, beforeItem, afterItem) {
 
   const nameSection = `/${item.name}`
   return `<a href="${item.webPath.replace(nameSection, '')}"> FOLDER </a>
-  <a href="/media?fullpath=${beforeItem.fullPath}"> << </a>
-  <a href="/media?fullpath=${afterItem.fullPath}"> >> </a>
-  ${html}`
+  <div class="content-and-controls">
+    <a class="left arrow" href="/media?fullpath=${beforeItem.fullPath}"> << </a>
+    ${html}
+    <a class="right arrow" href="/media?fullpath=${afterItem.fullPath}"> >> </a>
+  </div>`
 }
 
 function imgVidTemplate(item, type, interval, directory, beforeItem, afterItem) {

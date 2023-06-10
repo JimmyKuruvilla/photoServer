@@ -93,7 +93,7 @@ svg.video {
   transition: transform 200ms;
 }
 
-.svg.video{
+.svg.video {
   height: 100px;
 }
 
@@ -106,6 +106,42 @@ svg.video:hover {
 .content-wrapper {
   display: flex;
   flex-flow: column nowrap;
+}
+
+.content-wrapper .content-and-controls {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  position: relative;
+}
+
+.content-wrapper .content-and-controls .arrow {
+  text-decoration: none;
+  z-index: 10;
+  height: 100%;
+  position: absolute;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  color: white;
+  font-size: 100px;
+  opacity: 10%;
+}
+
+.content-wrapper .content-and-controls .arrow.left {
+  left: 0;
+  justify-content: right;
+  display: flex;
+}
+
+.content-wrapper .content-and-controls .arrow.right {
+  right: 0;
+}
+
+.content-wrapper .content-and-controls .arrow:hover {
+  background-color: transparent;
+  opacity: 100%;
 }
 
 .pic,
