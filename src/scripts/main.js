@@ -5,13 +5,36 @@ window.onpopstate = function (event) {
   clearInterval(share.contentIntervalId);
 };
 
+const share = {
+  rotation: 0,
+  set pause(pause) {
+    this.paused = pause;
+    $('.toolbar button.pause').innerText = share.pause ? "💀" : "⏸️";
+    clearInterval(share.contentIntervalId);
+  },
+  get pause() {
+    return this.paused;
+  },
+  set slideshowMode(mode) {
+    this._slideshowMode = mode;
+    window.sessionStorage.slideshowMode = mode;
+    if (mode === 'image') {
+      $('.slideshow-mode-toggle').innerHTML = "🖼️";
+    } else {
+      $('.slideshow-mode-toggle').innerHTML = "📼"
+    }
+  },
+  get slideshowMode() {
+    return this._slideshowMode;
+  },
+};
+
 const dispatchReadyEvent = () => {
   window.document.dispatchEvent(new Event("DOMContentLoaded", {
     bubbles: true,
     cancelable: true
   }));
 }
-
 
 function pauseSlideShow() {
   share.pause = true;
@@ -135,28 +158,17 @@ const toggleSlideshowMode = () => {
   share.slideshowMode = share.slideshowMode === 'image' ? 'video' : 'image';
 }
 
-const share = {
-  set pause(pause) {
-    this.paused = pause;
-    $('.toolbar button.pause').innerText = share.pause ? "💀" : "⏸️";
-    clearInterval(share.contentIntervalId);
-  },
-  get pause() {
-    return this.paused;
-  },
-  set slideshowMode(mode) {
-    this._slideshowMode = mode;
-    window.sessionStorage.slideshowMode = mode;
-    if (mode === 'image') {
-      $('.slideshow-mode-toggle').innerHTML = "🖼️";
-    } else {
-      $('.slideshow-mode-toggle').innerHTML = "📼"
-    }
-  },
-  get slideshowMode() {
-    return this._slideshowMode;
-  },
-};
+const rotateRight = () => {
+  share.rotation = share.rotation + 0.25;
+  
+  if ($('.pic')) {
+    $('.pic').style.transform = `rotate(${share.rotation}turn)`;
+  };
+
+  if ($('.video')) {
+    $('.video').style.transform = `rotate(${share.rotation}turn)`;
+  };
+}
 
 if (document.readyState !== 'loading') {
   initState();
@@ -165,3 +177,4 @@ if (document.readyState !== 'loading') {
     initState();
   })
 };
+

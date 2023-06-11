@@ -68,6 +68,7 @@ function getMediaHtmlFragment(item, interval, beforeItem, afterItem) {
 
   return `
   <div class="content-and-controls">
+    <button class="rotate-right" onclick="rotateRight()"> 🌪️ </button>
     <a class="left arrow" href="/media?fullpath=${beforeItem?.fullPath}"> << </a>
     ${html}
     <a class="right arrow" href="/media?fullpath=${afterItem?.fullPath}"> >> </a>

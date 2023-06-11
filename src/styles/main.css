@@ -150,6 +150,14 @@ video {
   opacity: 1;
 }
 
+.rotate-right{
+  position: absolute;
+  top: 0;
+  right: -20px;
+  z-index: 20;
+  background-color: transparent;
+}
+
 .pic:hover,
 video:hover {
   border: none;
