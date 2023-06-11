@@ -150,10 +150,10 @@ video {
   opacity: 1;
 }
 
-.rotate-right{
+.rotate-right {
   position: absolute;
   top: 0;
-  right: -20px;
+  right: -10px;
   z-index: 20;
   background-color: transparent;
 }
@@ -164,7 +164,11 @@ video:hover {
   transform: none;
 }
 
-@media all and (display-mode: fullscreen) {}
+@media all and (display-mode: fullscreen) {
+  .toolbar {
+    display: none;
+  }
+}
 
 .section {
   margin: 20px 0;
