@@ -17,10 +17,6 @@ function dirTemplate(locals) {
     <body>
       <div class="toolbar">
         ${generalToolbar()}
-        ${
-          locals.currentDir ? `<a href="/${locals.currentDir}/slideshow"><button>📽️🔽</button></a>`
-          : ''
-        }
         </div>
         <div class="dir section">
         ${locals.dirs
@@ -78,7 +74,7 @@ function getMediaHtmlFragment(item, interval, beforeItem, afterItem) {
   </div>`
 }
 
-function imgVidTemplate(item, type, interval, directory, beforeItem, afterItem) {
+function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
   const nameSection = `/${item.name}`;
   return `
     <html>
@@ -102,7 +98,7 @@ function imgVidTemplate(item, type, interval, directory, beforeItem, afterItem) 
         <script>
           if(${interval}){
             share.contentInterval = ${interval};
-            replaceOnInterval(${interval}, ${type}, "${directory || ''}");
+            replaceOnInterval(${interval}, "${type}");
           }
           share.photoItem = ${JSON.stringify(item)};
 

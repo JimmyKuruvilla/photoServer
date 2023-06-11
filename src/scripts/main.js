@@ -6,35 +6,12 @@ window.onpopstate = function (event) {
 };
 
 const dispatchReadyEvent = () => {
-    window.document.dispatchEvent(new Event("DOMContentLoaded", {
+  window.document.dispatchEvent(new Event("DOMContentLoaded", {
     bubbles: true,
     cancelable: true
   }));
 }
 
-const animateIn = () => {
-  $('.pic')?.classList.add('transition-opacity');
-  $('.video')?.classList.add('transition-opacity');
-}
-
-if(document.readyState !== 'loading') {
-  animateIn();
-} else {
-  document.addEventListener("DOMContentLoaded",(event) => { 
-    animateIn();
-  })
-};
-
-const share = {
-  set pause(pause) {
-    this.paused = pause;
-    $('.toolbar button.pause').innerText = share.pause ? "💀" : "⏸️";
-    clearInterval(share.contentIntervalId);
-  },
-  get pause() {
-    return this.paused;
-  }
-};
 
 function pauseSlideShow() {
   share.pause = true;
@@ -48,25 +25,22 @@ function isVideo(name) {
   return /.+\.mp4$|avi$/i.test(name);
 }
 
-function replaceOnInterval(contentInterval, type, directory) {
+function replaceOnInterval(contentInterval, type) {
   clearInterval(share.contentIntervalId);
   share.contentIntervalId = setInterval(() => {
     share.pause = false;
-    replaceContent(type, directory);
+    replaceContent(type);
   }, contentInterval);
 }
 
-function replaceContent(type, directory) {
-  const url = directory
-    ? `/${directory}/randomUrl?type=${type}`
-    : `/randomUrl?type=${type}`;
+function replaceContent(type) {
+  const url = `/randomUrl?type=${type}`;
 
   fatch(url).then(item => {
     share.photoItem = item;
     replaceOnInterval(
       item.duration ? item.duration + 1000 : share.contentInterval,
-      type,
-      directory
+      type
     );
     $('.webpath').innerHTML = item.webPath;
     $('.content-wrapper').innerHTML = item.html;
@@ -100,7 +74,7 @@ function toggleMarked() {
 }
 
 function updateFavoriteButton(o) {
-  $('.toolbar button.favorite').innerText = o.favorite ? "❤️" : "🖤" ;
+  $('.toolbar button.favorite').innerText = o.favorite ? "❤️" : "🖤";
 }
 
 function updateMarkedButton(o) {
@@ -141,4 +115,53 @@ const patch = (url, body, headers) => {
     method: 'PATCH',
     body: JSON.stringify(body)
   });
+};
+
+const startSlideshowAll = () => {
+  window.location.href = `/random/slideshow?type=${share.slideshowMode}`;
+}
+
+const animateIn = () => {
+  $('.pic')?.classList.add('transition-opacity');
+  $('.video')?.classList.add('transition-opacity');
+}
+
+const initState = () => {
+  share.slideshowMode = window.sessionStorage.slideshowMode ?? 'image';
+  animateIn();
+}
+
+const toggleSlideshowMode = () => {
+  share.slideshowMode = share.slideshowMode === 'image' ? 'video' : 'image';
+}
+
+const share = {
+  set pause(pause) {
+    this.paused = pause;
+    $('.toolbar button.pause').innerText = share.pause ? "💀" : "⏸️";
+    clearInterval(share.contentIntervalId);
+  },
+  get pause() {
+    return this.paused;
+  },
+  set slideshowMode(mode) {
+    this._slideshowMode = mode;
+    window.sessionStorage.slideshowMode = mode;
+    if (mode === 'image') {
+      $('.slideshow-mode-toggle').innerHTML = "🖼️";
+    } else {
+      $('.slideshow-mode-toggle').innerHTML = "📼"
+    }
+  },
+  get slideshowMode() {
+    return this._slideshowMode;
+  },
+};
+
+if (document.readyState !== 'loading') {
+  initState();
+} else {
+  document.addEventListener("DOMContentLoaded", (event) => {
+    initState();
+  })
 };

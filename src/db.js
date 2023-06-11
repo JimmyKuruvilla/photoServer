@@ -1,25 +1,36 @@
-const { dbMediaExts } = require('./guards');
+const path = require('path');
+const { isPic, isVideo } = require('./guards');
 
-async function getAnyRandomFromDb(db) {
-  const randomResult = await db.raw(
-    `SELECT * FROM images TABLESAMPLE SYSTEM (1) LIMIT 1;`
-  );
+let lastId;
+let firstId;
 
-  return randomResult.rows[0];
+const setIdRange = async (db) => {
+  lastId = (await getLastId(db)).id
+  firstId = (await getFirstId(db)).id;
+
+  console.log(`first ${firstId}, last ${lastId}`)
 }
 
-async function getRandomFromDb(db, parentPath, type) {
-  const randomResult = await db.raw(
-    `
-    SELECT * FROM images 
-    WHERE path SIMILAR TO '${parentPath}%${dbMediaExts(type)}' AND marked=false
-    OFFSET floor(
-      random() * (SELECT COUNT (*) from images WHERE path SIMILAR TO '${parentPath}%${dbMediaExts(type)}' AND marked=false)) 
-      LIMIT 1
-      `
-  );
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
 
-  return randomResult.rows[0];
+// dumb but fast
+async function getRandomFromDb(db, type = 'image') {
+  const filterFn = type === 'image' ? isPic : isVideo;
+  let isMatch = false;
+  let dbItem;
+
+  while (!isMatch) {
+    dbItem = await getById(db, getRandomInt(firstId, lastId));
+    if (!dbItem.marked && filterFn(dbItem.path)) {
+      isMatch = true;
+    }
+  }
+  
+  return dbItem;
 }
 
 async function getById(db, id) {
@@ -69,7 +80,7 @@ async function updateFieldById(db, id, field, value) {
 }
 
 module.exports = {
-  getAnyRandomFromDb,
+  setIdRange,
   getRandomFromDb,
   getFavoritesFromDb,
   getMarkedFromDb,

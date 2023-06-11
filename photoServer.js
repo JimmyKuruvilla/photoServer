@@ -18,41 +18,22 @@ const {
   constructMediaListingsFromDb
 } = require('./src/listings');
 const {
-  getAnyRandomFromDb,
+  setIdRange,
   getRandomFromDb,
   getFavoritesFromDb,
   getMarkedFromDb,
   getItemViaPath,
   updateFieldById,
-  getFirstId,
-  getLastId,
   getById
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
 
 const fakeInterval = defaultInterval;
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
-}
-
-let lastId;
-let firstId;
+const db = localDb();
 const ONE_DAY_SECS = 86400;
 
-const setIdRange = async () => {
-  lastId = (await getLastId(db)).id
-  firstId = (await getFirstId(db)).id;
-
-  console.log(`first ${firstId}, last ${lastId}`)
-}
-
-const db = localDb();
-
 (async ()=>{
-  await setIdRange();
+  await setIdRange(db);
   setInterval(setIdRange, ONE_DAY_SECS*1000)
 })();
 
@@ -71,48 +52,30 @@ app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'src/assets/favicon.ico'));
 });
 
+//called by UI when requesting new random resource as html
+app.get('/random', async (req, res, next) => {
+  const dbItem = await getRandomFromDb(db, req.query.type);
+  const item = await constructItemFromDb(dbItem, webRoot);
+  const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
+  
+  res.send(imgVidTemplate(item, null, null, beforeItem, afterItem));
+});
+
+//called by slideshow and fbi when getting json response with new json
 app.get('/randomUrl', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
+  const dbItem = await getRandomFromDb(db, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
   res.json({ ...item, html: getMediaHtmlFragment(item, fakeInterval) });
 });
 
-app.get('/:directory/randomUrl', async (req, res, next) => {
-  const dirOrFilePath = path.join(
-    webRoot,
-    decodeURIComponent(req.params.directory)
-  );
-
-  const dbItem = await getRandomFromDb(db, dirOrFilePath, req.query.type);
-  const item = await constructItemFromDb(dbItem, webRoot);
-  res.json({ ...item, html: getMediaHtmlFragment(item, fakeInterval) });
-});
-
+//called by ui for random all
 app.get('/random/slideshow', async (req, res, next) => {
-  const dbItem = await getAnyRandomFromDb(db);
+  const dbItem = await getRandomFromDb(db, req.query.type || 'image');
   const item = await constructItemFromDb(dbItem, webRoot);
+  const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
+  
   res.send(
-    imgVidTemplate(item, req.query.type, req.query.interval || defaultInterval)
-  );
-});
-
-app.get('/:directory/slideshow', async (req, res, next) => {
-  // doesn't work for nested directories like : 
-  // http://192.168.2.123:4000/Slideshow/Recent%20Photos/2019-09-01/slideshow
-  const dirOrFilePath = path.join(
-    webRoot,
-    decodeURIComponent(req.params.directory)
-  );
-
-  const dbItem = await getRandomFromDb(db, dirOrFilePath, req.query.type);
-  const item = await constructItemFromDb(dbItem, webRoot);
-  res.send(
-    imgVidTemplate(
-      item,
-      req.query.type,
-      req.query.interval || defaultInterval,
-      req.params.directory
-    )
+    imgVidTemplate(item, req.query.type, req.query.interval || defaultInterval, beforeItem, afterItem)
   );
 });
 
@@ -126,25 +89,13 @@ async function getBeforeAndAfterItems(fullPath) {
   return [beforeItem, afterItem]
 }
 
-app.get('/random', async (req, res, next) => {
-  // this method is too slow - takes over 1s to get a record back
-  // const dbItem = await getRandomFromDb(db, webRoot, req.query.type);
-
-  // this method retrieves random by id and is much faster. 
-  const dbItem = await getById(db, getRandomInt(firstId, lastId));
-  const item = await constructItemFromDb(dbItem, webRoot);
-  const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
-  
-  res.send(imgVidTemplate(item, null, null, null, beforeItem, afterItem));
-});
-
 app.get('/media', async (req, res, next) => {
   try {
     const dbItem = await getItemViaPath(db, req.query.fullpath);
     const item = await constructItemFromDb(dbItem, webRoot);
     const [beforeItem, afterItem] = await getBeforeAndAfterItems(req.query.fullpath)
 
-    res.send(imgVidTemplate(item, null, null, null, beforeItem, afterItem));
+    res.send(imgVidTemplate(item, null, null, beforeItem, afterItem));
   }
   catch (e) {
     res.status(404).send('Error: file may not be in db yet');
