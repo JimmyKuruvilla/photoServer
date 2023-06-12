@@ -1,5 +1,5 @@
 const home = `<a href="/" title="go home"><button>🏠↗</button></a>`;
-const random = `<a href="/random" title="random photo"><button>🔄</button></a>`;
+const random = `<button class="get-random" onclick="getRandomResource()" title="random resource">🔄</button>`;
 const slideshowAll = `<button onclick="startSlideshowAll()">📽️</button>`;
 const fullscreen = `<button onclick="goFullScreen()" title="go fullscreen">⛰️</button>`;
 const pause = `<button class="pause" onclick="pauseSlideShow()" title=
@@ -10,7 +10,7 @@ const favorites = `<a href="/media/favorites" title="go to favorites"><button>�
 const mark = o =>
   `<button class="marked" onclick="toggleMarked()" title="toggle marked">${o.marked ? "💣" : "👍" }</button>`;
 const marked = `<a href="/media/marked" title="go to marked"><button>💣↗</button></a>`;
-const slideshowMode = `<button class="slideshow-mode-toggle" onclick="toggleSlideshowMode()" title="toggle slideshow mode"></button>`;
+const resourceMode = `<button class="slideshow-mode-toggle" onclick="toggleResourceMode()" title="toggle slideshow mode"></button>`;
 const generalToolbar = o => `
 
   ${home}
@@ -18,7 +18,7 @@ const generalToolbar = o => `
   ${marked}
   ${random}
   ${slideshowAll}
-  ${slideshowMode}
+  ${resourceMode}
   ${pause}
   ${o ? favorite(o) : ''}
   ${o ? mark(o) : ''}

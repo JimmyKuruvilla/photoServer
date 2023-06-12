@@ -15,17 +15,17 @@ const share = {
   get pause() {
     return this.paused;
   },
-  set slideshowMode(mode) {
-    this._slideshowMode = mode;
-    window.sessionStorage.slideshowMode = mode;
+  set resourceMode(mode) {
+    this._resourceMode = mode;
+    window.sessionStorage.resourceMode = mode;
     if (mode === 'image') {
       $('.slideshow-mode-toggle').innerHTML = "🖼️";
     } else {
       $('.slideshow-mode-toggle').innerHTML = "📼"
     }
   },
-  get slideshowMode() {
-    return this._slideshowMode;
+  get resourceMode() {
+    return this._resourceMode;
   },
 };
 
@@ -141,7 +141,11 @@ const patch = (url, body, headers) => {
 };
 
 const startSlideshowAll = () => {
-  window.location.href = `/random/slideshow?type=${share.slideshowMode}`;
+  window.location.href = `/random/slideshow?type=${share.resourceMode}`;
+}
+
+const getRandomResource = () => {
+  window.location.href = `/random?type=${share.resourceMode}`;
 }
 
 const animateIn = () => {
@@ -150,12 +154,12 @@ const animateIn = () => {
 }
 
 const initState = () => {
-  share.slideshowMode = window.sessionStorage.slideshowMode ?? 'image';
+  share.resourceMode = window.sessionStorage.resourceMode ?? 'image';
   animateIn();
 }
 
-const toggleSlideshowMode = () => {
-  share.slideshowMode = share.slideshowMode === 'image' ? 'video' : 'image';
+const toggleResourceMode = () => {
+  share.resourceMode = share.resourceMode === 'image' ? 'video' : 'image';
 }
 
 const rotateRight = () => {
