@@ -1,3 +1,3 @@
 # pm2 start, pm2 save, pm2 startup
-#/home/j/scripts/photoServer/photoServer.js -- /mnt/backup/media
+# pm2 start /home/j/scripts/photoServer/photoServer.js -- /mnt/backup/media
 # pm2 start /home/j/scripts/photoServer/scripts/runDropProcessor.js --log="/mnt/backup/media/__logs/dropProcessor.log" -- /mnt/backup/media/__dropoff /mnt/backup/media

@@ -31,6 +31,7 @@ const ExifReader = require('exifreader');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
 const { isPic, isVideo } = require('../src/guards');
+const { log } = require('./log');
 
 // returns 2023-05-24 given UTC date
 const formatToLocalDateString = (isoDateStr) => {
@@ -48,15 +49,15 @@ const createDir = async (path) => {
   }
   catch (e) {
     if (e.code === 'EEXIST') {
-      console.log('DIRECTORY_ALREADY_EXISTS', path);
+      log('DIRECTORY_ALREADY_EXISTS', path);
     } else {
-      console.log('CANNOT_CREATE_DIR', e.message);
+      log('CANNOT_CREATE_DIR', e.message);
     }
   }
 }
 
 const move = async (source, target) => {
-  console.log(`MOVING from ${source} to \n ${target}`);
+  log(`MOVING from ${source} to \n ${target}`);
   await renameAsync(source, target);
 }
 
@@ -76,11 +77,11 @@ const movePic = async (fullAbsSourcePath, targetDir, filename) => {
       await move(fullAbsSourcePath, fullAbsTargetPath);
       return fullAbsTargetPath;
     } else {
-      console.log('EXIFREADER_NO_CREATION_TIME, cannot move file', fullAbsSourcePath)
+      log('EXIFREADER_NO_CREATION_TIME, cannot move file', fullAbsSourcePath)
       return null;
     }
   } catch (e) {
-    console.log('EXIFREADER_ERROR', e.message);
+    log('EXIFREADER_ERROR', e.message);
     return null;
   }
 }
@@ -99,11 +100,11 @@ const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
       await move(fullAbsSourcePath, fullAbsTargetPath);
       return fullAbsTargetPath;
     } else {
-      console.log('FFPROBE_NO_CREATION_TIME, cannot move file', fullAbsSourcePath);
+      log('FFPROBE_NO_CREATION_TIME, cannot move file', fullAbsSourcePath);
       return null;
     }
   } catch (e) {
-    console.log('FFPROBE_ERROR', e.message);
+    log('FFPROBE_ERROR', e.message);
     return null;
   }
 }
@@ -116,11 +117,11 @@ const moveFileByCreationDate = (targetDir) => async (fullAbsSourcePath) => {
     } else if (isVideo(filename)) {
       return moveVideo(fullAbsSourcePath, targetDir, filename);
     } else {
-      console.log('NOT_A_MEDIA_FILE, skipping')
+      log('NOT_A_MEDIA_FILE, skipping')
       return null;
     }
   } else {
-    console.log('SKIPPING_HIDDEN_FILE', fullAbsSourcePath);
+    log('SKIPPING_HIDDEN_FILE', fullAbsSourcePath);
     return null;
   }
 }

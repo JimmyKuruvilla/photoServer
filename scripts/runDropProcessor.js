@@ -2,8 +2,7 @@ const path = require('path');
 const chokidar = require('chokidar');
 const { moveFileByCreationDate } = require('./moveByDate');
 const { createOrUpdateFromFilePath } = require('./updateDb');
-
-const log = console.log.bind(console);
+const { log } = require('./log');
 
 (async () => {
   const sourceDir = process.argv[2];
