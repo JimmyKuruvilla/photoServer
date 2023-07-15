@@ -1,3 +1,3 @@
 set -euxo
 #!/bin/bash
-env node /home/j/scripts/photoServer/db/updateDb.js /mnt/backup/media 
+env node /home/j/scripts/photoServer/scripts/runUpdateDb.js /mnt/backup/media 

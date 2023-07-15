@@ -4,7 +4,7 @@
   "description": "",
   "main": "photoServer.js",
   "scripts": {
-    "dev": "nodemon ./",
+    "dev": "nodemon ./ -- /mnt/backup/media",
     "migrate": "npm run knex migrate:latest",
     "knex": "knex"
   },

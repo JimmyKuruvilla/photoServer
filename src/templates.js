@@ -75,6 +75,13 @@ function getMediaHtmlFragment(item, interval, beforeItem, afterItem) {
   </div>`
 }
 
+const createTagEl = (tag) => `
+<div class="tag-group">
+  <button class="delete-tag" data-tag-id=${tag.id} onclick="deleteTag(event)">⊖</button> 
+  <button class="edit-tag" data-tag-id=${tag.id} onclick="editTag(event)">‣</button> 
+  <div>${tag.value}</div>
+</div>`;
+
 function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
   const nameSection = `/${item.name}`;
   return `
@@ -91,9 +98,15 @@ function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
         <a href="${item.webPath.replace(nameSection, '')}"> 
           <h6 class="webpath">${item.webPath} ↗</h6>
         </a>
-      
+        
         <div class="content-wrapper">
           ${getMediaHtmlFragment(item, interval, beforeItem, afterItem)}
+        </div>
+
+        
+        <div class="tags">
+          <button class="add-tag" onclick="addTag()">⊕</button> 
+          ${item.tags.map(createTagEl)}
         </div>
 
         <script>

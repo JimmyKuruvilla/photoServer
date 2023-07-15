@@ -1,5 +1,6 @@
 const path = require('path');
 const { isPic, isVideo } = require('./guards');
+const { TABLES } = require('./constants');
 
 let lastId;
 let firstId;
@@ -29,50 +30,86 @@ async function getRandomFromDb(db, type = 'image') {
       isMatch = true;
     }
   }
-  
+
   return dbItem;
 }
 
-async function getById(db, id) {
-  const result = await db.raw(`SELECT * FROM images where id=${id}`);
-  return result.rows[0];
+async function getById(db, tableName, id) {
+  const result = await db(tableName).select('*').where({ id: parseInt(id, 10) });
+  return result;
 }
 
 async function getFirstId(db) {
-  const result = await db.raw(`SELECT id FROM images ORDER BY id ASC LIMIT 1;`);
+  const result = await db.raw(`SELECT id FROM ${TABLES.IMAGES} ORDER BY id ASC LIMIT 1;`);
   return result.rows[0];
 }
 
 async function getLastId(db) {
-  const result = await db.raw(`SELECT id FROM images ORDER BY id DESC LIMIT 1;`);
+  const result = await db.raw(`SELECT id FROM ${TABLES.IMAGES} ORDER BY id DESC LIMIT 1;`);
 
   return result.rows[0];
 }
 
 async function getFavoritesFromDb(db) {
-  const result = await db('images').where({ favorite: true });
+  const result = await db(TABLES.IMAGES).where({ favorite: true });
   return result;
 }
 
 async function getMarkedFromDb(db) {
-  const result = await db('images').where({ marked: true });
+  const result = await db(TABLES.IMAGES).where({ marked: true });
   return result;
 }
 
 async function getItemViaPath(db, fullFilePath) {
-  const result = await db('images').where({ path: fullFilePath });
-  return result[0];
+  const result = await db.raw(`SELECT
+    images.id,
+    path,
+    favorite,
+    marked,
+    thumbnail,
+    json_agg(json_build_object('id', it.id, 'value', it.value)) as tags
+  FROM
+    ${TABLES.IMAGES}
+    left join image_tags as it on it.images_id = images.id
+  WHERE 
+    images.path = '${fullFilePath}'
+  GROUP BY
+    images.id;
+`);
+
+  return result.rows[0];
 }
 
-async function updateFieldById(db, id, field, value) {
+async function updateFieldById(db, tableName, id, field, value) {
   const updateItem = {};
   updateItem[field] = value;
 
   try {
-    const dbRes = await db('images')
+    const dbRes = await db(tableName)
       .where({ id })
       .update(updateItem)
       .returning([field]);
+    return dbRes;
+  } catch (e) {
+    throw e
+  }
+}
+
+async function deleteById(db, tableName, id) {
+  try {
+    const dbRes = await db(tableName)
+      .where({ id })
+      .delete();
+    return dbRes;
+  } catch (e) {
+    throw e
+  }
+}
+
+async function createTag(db, mediaId, tagValue) {
+  try {
+    const dbRes = await db('image_tags')
+      .insert({ value: tagValue, images_id: mediaId }, ['id'])
     return dbRes;
   } catch (e) {
     throw e
@@ -86,7 +123,9 @@ module.exports = {
   getMarkedFromDb,
   getItemViaPath,
   updateFieldById,
+  deleteById,
   getFirstId,
   getLastId,
-  getById
+  getById,
+  createTag
 };

@@ -9,7 +9,7 @@ const morgan = require('morgan')
 const app = express();
 let webRoot = process.argv[2] || __dirname;
 
-const { port, defaultInterval } = require('./src/constants');
+const { port, defaultInterval, TABLES } = require('./src/constants');
 const { dirTemplate, imgVidTemplate } = require('./src/templates.js');
 const { getMediaHtmlFragment } = require('./src/templates.js');
 const {
@@ -24,6 +24,8 @@ const {
   getMarkedFromDb,
   getItemViaPath,
   updateFieldById,
+  deleteById,
+  createTag,
   getById
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
@@ -32,9 +34,9 @@ const fakeInterval = defaultInterval;
 const db = localDb();
 const ONE_DAY_SECS = 86400;
 
-(async ()=>{
+(async () => {
   await setIdRange(db);
-  setInterval(setIdRange, ONE_DAY_SECS*1000)
+  setInterval(setIdRange, ONE_DAY_SECS * 1000)
 })();
 
 app.use(morgan('dev'))
@@ -57,7 +59,7 @@ app.get('/random', async (req, res, next) => {
   const dbItem = await getRandomFromDb(db, req.query.type);
   const item = await constructItemFromDb(dbItem, webRoot);
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
-  
+
   res.send(imgVidTemplate(item, null, null, beforeItem, afterItem));
 });
 
@@ -73,7 +75,7 @@ app.get('/random/slideshow', async (req, res, next) => {
   const dbItem = await getRandomFromDb(db, req.query.type || 'image');
   const item = await constructItemFromDb(dbItem, webRoot);
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
-  
+
   res.send(
     imgVidTemplate(item, req.query.type, req.query.interval || defaultInterval, beforeItem, afterItem)
   );
@@ -98,7 +100,7 @@ app.get('/media', async (req, res, next) => {
     res.send(imgVidTemplate(item, null, null, beforeItem, afterItem));
   }
   catch (e) {
-    res.status(404).send('Error: file may not be in db yet');
+    res.status(404).send({ error: e.message });
   }
 });
 
@@ -111,7 +113,7 @@ app.get('/media/favorites', async (req, res, next) => {
 app.patch('/media/:id/favorite', async (req, res, next) => {
   if (req.body.favorite !== undefined) {
     try {
-      const dbRes = await updateFieldById(db, req.params.id, 'favorite', req.body['favorite']);
+      const dbRes = await updateFieldById(db, TABLES.IMAGES, req.params.id, 'favorite', req.body.favorite);
       res.status(200).json(dbRes[0]);
     } catch (e) {
       res.send(e)
@@ -130,13 +132,51 @@ app.get('/media/marked', async (req, res, next) => {
 app.patch('/media/:id/marked', async (req, res, next) => {
   if (req.body.marked !== undefined) {
     try {
-      const dbRes = await updateFieldById(db, req.params.id, 'marked', req.body['marked']);
+      const dbRes = await updateFieldById(db, TABLES.IMAGES, req.params.id, 'marked', req.body.marked);
       res.status(200).json(dbRes[0]);
     } catch (e) {
       res.send(e)
     }
   } else {
     res.status(422).send('marked:boolean not in json');
+  }
+});
+
+app.get('/media/tags', async (req, res, next) => { });
+
+app.post('/media/tags', async (req, res, next) => {
+  try {
+    const dbRes = await createTag(db, req.body.mediaId, req.body.tagValue);
+    res.status(200).json(dbRes[0]);
+  } catch (e) {
+    res.send(e)
+  }
+});
+
+app.get('/media/tags/:tagId', async (req, res, next) => {
+  try {
+    const dbRes = await getById(db, TABLES.TAGS, req.params.tagId);
+    dbRes.length === 0 ? res.sendStatus(404) : res.status(200).json(dbRes[0]);
+  } catch (e) {
+    res.send(e)
+  }
+});
+
+app.patch('/media/tags/:tagId', async (req, res, next) => {
+  try {
+    const dbRes = await updateFieldById(db, TABLES.TAGS, req.params.tagId, 'value', req.body.tagValue);
+    res.status(200).json(dbRes[0]);
+  } catch (e) {
+    res.send(e)
+  }
+});
+
+app.delete('/media/tags/:tagId', async (req, res, next) => {
+  try {
+    const dbRes = await deleteById(db, TABLES.TAGS, req.params.tagId);
+    res.status(200).json(dbRes[0]);
+  } catch (e) {
+    res.send(e)
   }
 });
 

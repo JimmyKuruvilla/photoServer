@@ -96,6 +96,21 @@ button:hover a {
   transform: scale(1.5);
 }
 
+.tags {
+  color: white;
+}
+
+.tags button {
+  padding: 0;
+  height: 10px;
+  font-size: 15px;
+}
+
+.tag-group {
+  display:flex;
+}
+
+
 .content-wrapper {
   display: flex;
   flex-flow: column nowrap;

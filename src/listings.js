@@ -117,7 +117,8 @@ async function constructItemFromDb(dbItem, webRoot) {
     duration,
     id: dbItem.id,
     favorite: dbItem.favorite,
-    marked: dbItem.marked
+    marked: dbItem.marked,
+    tags: dbItem.tags
   };
 }
 

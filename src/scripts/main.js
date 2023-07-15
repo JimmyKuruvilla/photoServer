@@ -96,6 +96,18 @@ function toggleMarked() {
   });
 }
 
+function addTag(evt) {
+  console.log(share.photoItem.id, evt.currentTarget.dataset.tagId)
+}
+
+function editTag(evt) {
+  console.log(share.photoItem.id, evt.currentTarget.dataset.tagId)
+}
+
+function deleteTag(evt) {
+  console.log(share.photoItem.id, evt.currentTarget.dataset.tagId)
+}
+
 function updateFavoriteButton(o) {
   $('.toolbar button.favorite').innerText = o.favorite ? "❤️" : "🖤";
 }
