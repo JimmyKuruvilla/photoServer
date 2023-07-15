@@ -11,6 +11,8 @@ const mark = o =>
   `<button class="marked" onclick="toggleMarked()" title="toggle marked">${o.marked ? "💣" : "👍" }</button>`;
 const marked = `<a href="/media/marked" title="go to marked"><button>💣↗</button></a>`;
 const resourceMode = `<button class="slideshow-mode-toggle" onclick="toggleResourceMode()" title="toggle slideshow mode"></button>`;
+const searchByTag = `<button class="toolbar-search-by-tag" onclick="searchByTag('.toolbar-search-tag-input')">🔎</button>
+<input class="toolbar-search-tag-input" type="text" placeholder="search by tag"></input>`
 const generalToolbar = o => `
 
   ${home}
@@ -23,6 +25,7 @@ const generalToolbar = o => `
   ${o ? favorite(o) : ''}
   ${o ? mark(o) : ''}
   ${fullscreen}
+  ${searchByTag}
   `;
 
 module.exports = {

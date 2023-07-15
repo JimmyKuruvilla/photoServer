@@ -97,15 +97,38 @@ function toggleMarked() {
 }
 
 function addTag(evt) {
-  console.log(share.photoItem.id, evt.currentTarget.dataset.tagId)
+  fatch(`/media/tags`, 'post', {
+    tagValue: $('.add-tag-input').value,
+    mediaId: share.photoItem.id
+  }).then(resp => {
+    location.reload();
+  });
 }
 
 function editTag(evt) {
-  console.log(share.photoItem.id, evt.currentTarget.dataset.tagId)
+  fatch(`/media/tags/${evt.currentTarget.dataset.tagId}`, 'patch', {
+    "tagValue": $('.add-tag-input').value
+  }).then(resp => {
+    location.reload();
+  });
 }
 
 function deleteTag(evt) {
-  console.log(share.photoItem.id, evt.currentTarget.dataset.tagId)
+  fatch(`/media/tags/${evt.currentTarget.dataset.tagId}`, 'delete').then(resp => {
+    location.reload();
+  });
+}
+
+function search(query) {
+  fatch(`/media/tags?search=${query}`).then((data) => {
+    $('html').innerHTML = data.html
+  }).catch((e) => {
+    console.log(e)
+  });
+}
+
+function searchByTag(inputLocator) {
+  search($(inputLocator).value)
 }
 
 function updateFavoriteButton(o) {
@@ -131,6 +154,12 @@ const fatch = async (
     if (method === 'patch') {
       fetchFn = () => patch(url, body, headers);
     }
+    if (method === 'post') {
+      fetchFn = () => post(url, body, headers);
+    }
+    if (method === 'delete') {
+      fetchFn = () => del(url, headers);
+    }
     const response = await fetchFn();
     if (!response.ok) {
       throw new Error('Network response was not ok.');
@@ -149,6 +178,21 @@ const patch = (url, body, headers) => {
     headers,
     method: 'PATCH',
     body: JSON.stringify(body)
+  });
+};
+
+const post = (url, body, headers) => {
+  return fetch(url, {
+    headers,
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+};
+
+const del = (url, headers) => {
+  return fetch(url, {
+    headers,
+    method: 'DELETE'
   });
 };
 
@@ -176,7 +220,7 @@ const toggleResourceMode = () => {
 
 const rotateRight = () => {
   share.rotation = share.rotation + 0.25;
-  
+
   if ($('.pic')) {
     $('.pic').style.transform = `rotate(${share.rotation}turn)`;
   };

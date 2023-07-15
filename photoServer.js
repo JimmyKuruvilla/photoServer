@@ -26,7 +26,8 @@ const {
   updateFieldById,
   deleteById,
   createTag,
-  getById
+  getById,
+  searchOnTags
 } = require('./src/db');
 const { dockerDb, localDb } = require('./db/initDb.js');
 
@@ -56,11 +57,14 @@ app.get('/favicon.ico/', (req, res, next) => {
 
 //called by UI when requesting new random resource as html
 app.get('/random', async (req, res, next) => {
-  const dbItem = await getRandomFromDb(db, req.query.type);
-  const item = await constructItemFromDb(dbItem, webRoot);
-  const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
-
-  res.send(imgVidTemplate(item, null, null, beforeItem, afterItem));
+  try{
+    const dbItem = await getRandomFromDb(db, req.query.type);
+    const item = await constructItemFromDb(dbItem, webRoot);
+    const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
+    res.send(imgVidTemplate(item, null, null, beforeItem, afterItem));
+  }catch(e){
+    next(e);
+  }
 });
 
 //called by slideshow and fbi when getting json response with new json
@@ -142,7 +146,13 @@ app.patch('/media/:id/marked', async (req, res, next) => {
   }
 });
 
-app.get('/media/tags', async (req, res, next) => { });
+
+app.get('/media/tags', async (req, res, next) => {
+  const dbItems = await searchOnTags(db, req.query.search);
+  const listings = constructMediaListingsFromDb(dbItems, webRoot);
+  const noResults =`<html><body><div class="no-search-results"> no results for ${req.query.search}</div></body></html>`
+  res.json({ html: listings.media.length ? dirTemplate(listings) : noResults });
+});
 
 app.post('/media/tags', async (req, res, next) => {
   try {
@@ -174,7 +184,7 @@ app.patch('/media/tags/:tagId', async (req, res, next) => {
 app.delete('/media/tags/:tagId', async (req, res, next) => {
   try {
     const dbRes = await deleteById(db, TABLES.TAGS, req.params.tagId);
-    res.status(200).json(dbRes[0]);
+    res.status(200).json({});
   } catch (e) {
     res.send(e)
   }
@@ -207,5 +217,9 @@ app.get('/', async (req, res, next) => {
     )
   );
 });
+
+app.get(async (err, req, res, next) => {
+  res.json({error: err.message})
+})
 
 app.listen(port);

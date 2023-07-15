@@ -1,6 +1,7 @@
 const path = require('path');
 const { isVideo } = require('./guards');
 const { generalToolbar } = require('./toolbar');
+const NL = '\n';
 
 const cssAndJs = () => `
   <link rel="stylesheet" type="text/css" href="main.css">
@@ -79,7 +80,7 @@ const createTagEl = (tag) => `
 <div class="tag-group">
   <button class="delete-tag" data-tag-id=${tag.id} onclick="deleteTag(event)">⊖</button> 
   <button class="edit-tag" data-tag-id=${tag.id} onclick="editTag(event)">‣</button> 
-  <div>${tag.value}</div>
+  <div class="tag-text">${tag.value}</div>
 </div>`;
 
 function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
@@ -105,8 +106,13 @@ function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
 
         
         <div class="tags">
-          <button class="add-tag" onclick="addTag()">⊕</button> 
-          ${item.tags.map(createTagEl)}
+          <div class="tag-group">
+            <button class="add-tag" onclick="addTag()">⊕</button>
+            <button class="search-by-tag" onclick="searchByTag('.add-tag-input')">🔎</button>
+            <input class="add-tag-input" type="text" placeholder="add or edit a tag"></input>
+          </div>
+
+          ${item.tags.map(createTagEl).join(NL)}
         </div>
 
         <script>

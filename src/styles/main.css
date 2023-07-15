@@ -98,18 +98,23 @@ button:hover a {
 
 .tags {
   color: white;
+  margin-top: 10px;
 }
 
 .tags button {
   padding: 0;
-  height: 10px;
+  height: 20px;
+  min-width: 20px;
   font-size: 15px;
 }
 
 .tag-group {
-  display:flex;
+  display: flex;
 }
 
+.tag-group .add-tag-input {
+  width: 100%;
+}
 
 .content-wrapper {
   display: flex;

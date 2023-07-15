@@ -108,6 +108,16 @@ async function constructItemFromDb(dbItem, webRoot) {
     const videoInfo = await getVideoInfo(fullFilePath);
     duration = Number(videoInfo.streams[0].duration * 1000);
   }
+  
+  /*
+  db returns {id: null, tagValue: null} when none found
+  random doesn't join on tags so we set to empty
+  */
+  let tags =[];
+  if (dbItem.tags && dbItem.tags.length){
+    tags = dbItem.tags[0].id === null ? [] : dbItem.tags 
+  }
+  
   return {
     name: name,
     webPath,
@@ -118,7 +128,7 @@ async function constructItemFromDb(dbItem, webRoot) {
     id: dbItem.id,
     favorite: dbItem.favorite,
     marked: dbItem.marked,
-    tags: dbItem.tags
+    tags
   };
 }
 

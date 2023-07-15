@@ -25,7 +25,7 @@ async function getRandomFromDb(db, type = 'image') {
   let dbItem;
 
   while (!isMatch) {
-    dbItem = await getById(db, getRandomInt(firstId, lastId));
+    dbItem = (await getById(db, TABLES.IMAGES, getRandomInt(firstId, lastId)))[0];
     if (!dbItem.marked && filterFn(dbItem.path)) {
       isMatch = true;
     }
@@ -51,11 +51,13 @@ async function getLastId(db) {
 }
 
 async function getFavoritesFromDb(db) {
+  // currently doesn't support tags
   const result = await db(TABLES.IMAGES).where({ favorite: true });
   return result;
 }
 
 async function getMarkedFromDb(db) {
+  // currently doesn't support tags
   const result = await db(TABLES.IMAGES).where({ marked: true });
   return result;
 }
@@ -70,7 +72,7 @@ async function getItemViaPath(db, fullFilePath) {
     json_agg(json_build_object('id', it.id, 'value', it.value)) as tags
   FROM
     ${TABLES.IMAGES}
-    left join image_tags as it on it.images_id = images.id
+    left join ${TABLES.TAGS} as it on it.images_id = images.id
   WHERE 
     images.path = '${fullFilePath}'
   GROUP BY
@@ -108,8 +110,21 @@ async function deleteById(db, tableName, id) {
 
 async function createTag(db, mediaId, tagValue) {
   try {
-    const dbRes = await db('image_tags')
+    const dbRes = await db(TABLES.TAGS)
       .insert({ value: tagValue, images_id: mediaId }, ['id'])
+    return dbRes;
+  } catch (e) {
+    throw e
+  }
+}
+
+async function searchOnTags(db, searchParam) {
+  try {
+    const dbRes = await db(TABLES.TAGS)
+      .select('*')
+      .whereILike('value', `%${searchParam}%`)
+      .innerJoin(TABLES.IMAGES, 'images.id', 'image_tags.images_id')
+
     return dbRes;
   } catch (e) {
     throw e
@@ -127,5 +142,6 @@ module.exports = {
   getFirstId,
   getLastId,
   getById,
-  createTag
+  createTag,
+  searchOnTags
 };
