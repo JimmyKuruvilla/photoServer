@@ -117,7 +117,6 @@ async function constructItemFromDb(dbItem, webRoot) {
   if (dbItem.tags && dbItem.tags.length){
     tags = dbItem.tags[0].id === null ? [] : dbItem.tags 
   }
-  
   return {
     name: name,
     webPath,

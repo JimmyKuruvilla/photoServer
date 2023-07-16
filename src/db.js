@@ -26,7 +26,7 @@ async function getRandomFromDb(db, type = 'image') {
 
   while (!isMatch) {
     dbItem = (await getById(db, TABLES.IMAGES, getRandomInt(firstId, lastId)))[0];
-    if (!dbItem.marked && filterFn(dbItem.path)) {
+    if (dbItem &&!dbItem.marked && filterFn(dbItem.path)) {
       isMatch = true;
     }
   }
@@ -121,9 +121,9 @@ async function createTag(db, mediaId, tagValue) {
 async function searchOnTags(db, searchParam) {
   try {
     const dbRes = await db(TABLES.TAGS)
-      .select('*')
-      .whereILike('value', `%${searchParam}%`)
-      .innerJoin(TABLES.IMAGES, 'images.id', 'image_tags.images_id')
+    .whereILike('value', `%${searchParam}%`)
+    .innerJoin(TABLES.IMAGES, 'images.id', 'image_tags.images_id')
+    .distinctOn('images.id')
 
     return dbRes;
   } catch (e) {
