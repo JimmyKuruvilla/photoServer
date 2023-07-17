@@ -63,6 +63,8 @@ async function getMarkedFromDb(db) {
 }
 
 async function getItemViaPath(db, fullFilePath) {
+  const path  = fullFilePath.replaceAll("'", "''");
+
   const result = await db.raw(`SELECT
     images.id,
     path,
@@ -74,7 +76,7 @@ async function getItemViaPath(db, fullFilePath) {
     ${TABLES.IMAGES}
     left join ${TABLES.TAGS} as it on it.images_id = images.id
   WHERE 
-    images.path = '${fullFilePath}'
+    images.path = '${path}'
   GROUP BY
     images.id;
 `);
