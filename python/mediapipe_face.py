@@ -18,8 +18,8 @@ options = FaceDetectorOptions(
     min_detection_confidence=0.5,
 )
 
-filepath = sys.argv[1]
-mp_image = mp.Image.create_from_file(filepath)
+filepath = ' '.join(sys.argv[1:])
+mp_image = mp.Image.create_from_file(f'{filepath}')
 
 import mediapipe as mp
 with FaceDetector.create_from_options(options) as detector:

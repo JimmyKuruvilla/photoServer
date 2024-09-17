@@ -41,7 +41,7 @@ const countFaces = async (filepath) => {
     process.argv[2] || __dirname,
     async (filepath) => {
       const trx = await db.transaction();
-
+      
       let numFaces;
 
       try {
