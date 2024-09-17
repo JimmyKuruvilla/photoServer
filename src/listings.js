@@ -52,7 +52,7 @@ async function getListings(webRoot, fullAbsDirPath) {
     if (!nodeStats.isDirectory()) {
       if (isVideo(nodeName)) {
         const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
-        duration = Number(videoInfo.streams[0].duration * 1000);
+        duration = Number(videoInfo.streams?.[0].duration * 1000);
       }
       else if (isPic(nodeName)) {
         const img = await getItemViaPath(db, path.join(fullAbsDirPath, nodeName));
@@ -127,7 +127,8 @@ async function constructItemFromDb(dbItem, webRoot) {
     id: dbItem.id,
     favorite: dbItem.favorite,
     marked: dbItem.marked,
-    tags
+    tags,
+    faceCount: dbItem.face_count
   };
 }
 

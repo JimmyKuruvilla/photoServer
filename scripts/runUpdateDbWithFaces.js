@@ -26,7 +26,7 @@ const db = localDb();
 
 const FACE_DETECTION_SCRIPT_PATH = './python/mediapipe_face.py'
 const countFaces = async (filepath) => {
-  const { stdout, stderr } = await exec(`python3 ${FACE_DETECTION_SCRIPT_PATH} ${filepath}`)
+  const { stdout, stderr } = await exec(`python3 ${FACE_DETECTION_SCRIPT_PATH} "${filepath}"`)
 
   try {
     const numFaces = parseInt(stdout, 10)

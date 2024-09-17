@@ -85,6 +85,10 @@ button:hover a {
   justify-items: center;
 }
 
+.toolbar-face-count {
+  color: white;
+}
+
 .thumbnail {
   width: 200px;
   border-radius: 5px;
