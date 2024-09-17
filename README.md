@@ -27,7 +27,6 @@ volumes:
 ./share:YOURFILES_DIR
 ```
 
-
 ## todo
 
 -- clickign random, leaves url as RANDOM instead of changing it to a bookmarkable one. 

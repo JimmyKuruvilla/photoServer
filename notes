@@ -3,3 +3,19 @@
 - use pm2 to manage the js service
 - use restart:always in the docker-compose.yml to have the pg container restart
 - relies on systemd to ensure db first, then pm2 service. No guarantee the connection will be available - fix later
+
+## face detection using mediapipe
+python 3.8 installed
+apt install python3.8-venv to create venv
+
+not enough room on / so on data drive
+@/mnt/backup/code/faces
+
+install python 3.9+ for mediapipe reqs
+python3.11 -m venv venv
+source ./venv/bin/activate
+TMPDIR=./tmp python3 -m pip install mediapipe
+
+in photoServer: 
+- source /mnt/backup/code/faces/venv/bin/activate
+

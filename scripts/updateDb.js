@@ -13,6 +13,9 @@ async function createOrUpdateFromFilePath(filepath) {
     _insertRowIfNotExists(trx, filepath);
   } else {
     _updateThumbnailIfNotExists(trx, filepath, dbResult);
+    // insert face detectionhere
+    // update code to have trx commit and rollback in top level trycatches
+    
   }
 
 }
