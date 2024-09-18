@@ -49,15 +49,15 @@ const createDir = async (path) => {
   }
   catch (e) {
     if (e.code === 'EEXIST') {
-      log('DIRECTORY_ALREADY_EXISTS', path);
+      log(`PIPELINE_CREATE_DIRECTORY_ALREADY_EXISTS ${path}`);
     } else {
-      log('CANNOT_CREATE_DIR', e.message);
+      log(`PIPELINE_CREATE_DIRECTORY_CANNOT_CREATE_DIR ${e.message}`);
     }
   }
 }
 
 const move = async (source, target) => {
-  log(`MOVING from ${source} to \n ${target}`);
+  log(`PIPELINE_MOVE_TO_DATE from ${source} to \n ${target}`);
   await renameAsync(source, target);
 }
 
@@ -77,11 +77,11 @@ const movePic = async (fullAbsSourcePath, targetDir, filename) => {
       await move(fullAbsSourcePath, fullAbsTargetPath);
       return fullAbsTargetPath;
     } else {
-      log('EXIFREADER_NO_CREATION_TIME, cannot move file', fullAbsSourcePath)
+      log(`PIPELINE_MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, cannot move file ${fullAbsSourcePath}`)
       return null;
     }
   } catch (e) {
-    log('EXIFREADER_ERROR', e.message);
+    log(`PIPELINE_MOVE_TO_DATE_EXIFREADER_ERROR ${e.message}`);
     return null;
   }
 }
@@ -100,11 +100,11 @@ const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
       await move(fullAbsSourcePath, fullAbsTargetPath);
       return fullAbsTargetPath;
     } else {
-      log('FFPROBE_NO_CREATION_TIME, cannot move file', fullAbsSourcePath);
+      log(`FFPROBE_NO_CREATION_TIME, cannot move file ${fullAbsSourcePath}`);
       return null;
     }
   } catch (e) {
-    log('FFPROBE_ERROR', e.message);
+    log(`FFPROBE_ERROR ${e.message}`);
     return null;
   }
 }
@@ -117,11 +117,11 @@ const moveFileByCreationDate = (targetDir) => async (fullAbsSourcePath) => {
     } else if (isVideo(filename)) {
       return moveVideo(fullAbsSourcePath, targetDir, filename);
     } else {
-      log('NOT_A_MEDIA_FILE, skipping')
+      log(`NOT_A_MEDIA_FILE, skipping`)
       return null;
     }
   } else {
-    log('SKIPPING_HIDDEN_FILE', fullAbsSourcePath);
+    log(`SKIPPING_HIDDEN_FILE ${fullAbsSourcePath}`);
     return null;
   }
 }

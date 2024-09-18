@@ -2,22 +2,23 @@
 const imageThumbnail = require('../src/libs/image-thumbnail/image-thumbnail');
 const { localDb } = require('../db/initDb.js');
 const { isPic } = require('../src/guards');
+const { updateFaceCount } = require('./faces.js');
+const { log } = require('./log');
 const db = localDb();
 
 async function createOrUpdateFromFilePath(filepath) {
-  console.log(`DB_UPDATE ${filepath}`);
   const trx = await db.transaction();
   const dbResult = await trx('images').where('path', filepath);
-
+  
   if (dbResult.length === 0) {
-    _insertRowIfNotExists(trx, filepath);
+    log(`PIPELINE_INSERT_IF_NOT_EXISTS ${filepath}`);
+    await _insertRowIfNotExists(trx, filepath);
   } else {
-    _updateThumbnailIfNotExists(trx, filepath, dbResult);
-    // insert face detectionhere
-    // update code to have trx commit and rollback in top level trycatches
-    
+    log(`PIPELINE_UPDATE_THUMBNAIL_IF_NOT_EXISTS ${filepath}`);
+    await _updateThumbnailIfNotExists(trx, filepath, dbResult);
   }
 
+  await updateFaceCount(db, filepath);
 }
 
 async function _insertRowIfNotExists(trx, filepath) {
@@ -29,10 +30,10 @@ async function _insertRowIfNotExists(trx, filepath) {
   try {
     await trx('images').insert({ path: filepath, thumbnail });
     await trx.commit();
-    console.log(`DB_UPDATE path inserted: ${filepath}`)
+    log(`PIPELINE_INSERT: ${filepath}`)
     _logThumbnail(filepath, thumbnail);
   } catch (e) {
-    console.log(`DB_UPDATE_ERROR no DB match: error: ${e}`);
+    log(`PIPELINE_INSERT_ERROR no DB match: error: ${e}`);
     await trx.rollback();
   }
 }
@@ -47,7 +48,7 @@ async function _updateThumbnailIfNotExists(trx, filepath, dbResult) {
       }
       await trx.commit();
     } catch (e) {
-      console.log(`DB_UPDATE_ERROR: error: ${e}`);
+      log(`PIPELINE_THUMBNAIL_ERROR: error: ${e}`);
       await trx.rollback();
     }
   }
@@ -62,13 +63,13 @@ async function _getThumbnail(fullPath, options = { percentage: 10, responseType:
     thumbnail += await imageThumbnail(fullPath, options);
     return thumbnail;
   } catch (e) {
-    console.log(`DB_UPDATE_ERROR thumbnail generation error: ${e}`);
+    log(`PIPELINE_ERROR thumbnail generation: ${e}`);
     return;
   }
 }
 
 const _logThumbnail = (filepath, thumbnail) => {
-  if (isPic(filepath)) { console.log(`DB_UPDATE thumbnail updated: ${thumbnail.slice(-50)}`); }
+  if (isPic(filepath)) { log(`PIPELINE_THUMBNAIL ${thumbnail.slice(-50)}`); }
 }
 
 module.exports = {
