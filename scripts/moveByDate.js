@@ -19,7 +19,7 @@
     b. ffprobe (2023-05-24T22:39:31.000000Z) is in UTC and needs convertime to local time
   Need to adjust to local time before sorting into folders, otherwise will have date errors across day boundaries
 
-  Possible Improvements - fall back to 1 and then 2 if 3 is not available. 
+Currently does 3 and then 2 if data not available. 1 not attempted. 
 */
 const fs = require('fs');
 const path = require('path');
@@ -27,6 +27,8 @@ const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
 const readFile = promisify(fs.readFile);
 const mkdir = promisify(fs.mkdir);
+const unlink = promisify(fs.unlink);
+const stat = promisify(fs.stat);
 const ExifReader = require('exifreader');
 const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
@@ -67,21 +69,24 @@ const movePic = async (fullAbsSourcePath, targetDir, filename) => {
     const tags = await ExifReader.load(fileBuffer);
 
     // converts from '2023:05:27 18:52:01' to 2023-05-27
-    const creationTime = tags?.DateTimeOriginal?.value?.[0];
+    const exifCreationTime = tags?.DateTimeOriginal?.value?.[0];
 
-    if (creationTime) {
-      const formattedDate = creationTime.split(' ')[0].replaceAll(':', '-');
-      const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
-
-      await createDir(path.join(targetDir, formattedDate));
-      await move(fullAbsSourcePath, fullAbsTargetPath);
-      return fullAbsTargetPath;
+    let formattedDate;
+    if (exifCreationTime) {
+      formattedDate = exifCreationTime.split(' ')[0].replaceAll(':', '-');
     } else {
-      log(`PIPELINE_MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, cannot move file ${fullAbsSourcePath}`)
-      return null;
+      // 2023-08-25T09:10:05.832Z to 2023-08-25
+      const stats = await stat(fullAbsSourcePath)
+      formattedDate = stats.birthtime.toISOString().split('T')[0]
+      log(`PIPELINE_MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
     }
+
+    await createDir(path.join(targetDir, formattedDate));
+    const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
+    await move(fullAbsSourcePath, fullAbsTargetPath);
+    return fullAbsTargetPath;
   } catch (e) {
-    log(`PIPELINE_MOVE_TO_DATE_EXIFREADER_ERROR ${e.message}`);
+    log(`PIPELINE_MOVE_TO_DATE_ERROR ${e.message}`);
     return null;
   }
 }
@@ -92,19 +97,22 @@ const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
     // converts to from '2023-05-24T22:39:31.000000Z' to 2023-05-24
     const creationTime = info?.streams?.[0]?.tags?.creation_time;
 
+    let formattedDate
     if (creationTime) {
-      const formattedDate = formatToLocalDateString(creationTime);
-      const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
-
-      await createDir(path.join(targetDir, formattedDate));
-      await move(fullAbsSourcePath, fullAbsTargetPath);
-      return fullAbsTargetPath;
+      formattedDate = formatToLocalDateString(creationTime);
     } else {
-      log(`FFPROBE_NO_CREATION_TIME, cannot move file ${fullAbsSourcePath}`);
-      return null;
+      // 2023-08-25T09:10:05.832Z to 2023-08-25
+      const stats = await stat(fullAbsSourcePath)
+      formattedDate = stats.birthtime.toISOString().split('T')[0]
+      log(`PIPELINE_MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
     }
+
+    await createDir(path.join(targetDir, formattedDate));
+    const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
+    await move(fullAbsSourcePath, fullAbsTargetPath);
+    return fullAbsTargetPath;
   } catch (e) {
-    log(`FFPROBE_ERROR ${e.message}`);
+    log(`PIPELINE_MOVE_TO_DATE_FFPROBE_ERROR ${e.message}`);
     return null;
   }
 }
@@ -121,7 +129,12 @@ const moveFileByCreationDate = (targetDir) => async (fullAbsSourcePath) => {
       return null;
     }
   } else {
-    log(`SKIPPING_HIDDEN_FILE ${fullAbsSourcePath}`);
+    if (filename.startsWith('.trashed')) {
+      log(`DELETING_TRASHED_FILE ${filename}`);
+      await unlink(fullAbsSourcePath)
+    } else {
+      log(`SKIPPING_HIDDEN_FILE ${filename}`);
+    }
     return null;
   }
 }

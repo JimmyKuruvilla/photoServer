@@ -18,7 +18,7 @@ const { log } = require('./log');
   watcher
     .on('add', async (absPath) => {
       if (!path.extname(absPath).includes('part')) {
-        log(`WATCHER_FILE_ADDED ${absPath}`);
+        log(`WATCHER_NEW_FILE_SEEN ${absPath}`);
         const newFilePath = await onAdd(absPath);
         if (newFilePath !== null) {
           await createOrUpdateFromFilePath(newFilePath);
