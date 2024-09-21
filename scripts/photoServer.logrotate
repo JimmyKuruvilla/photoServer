@@ -1,0 +1,33 @@
+/mnt/backup/media/__logs/dropProcessor.log
+/mnt/backup/media/__logs/backupToS3.log
+{
+        rotate 14
+        daily
+        dateext
+        dateformat _%Y-%m-%d
+        missingok
+        nocompress
+}
+
+/mnt/backup/backups/imagesDb/imagesDb.pg_dump
+{
+        rotate 14
+        daily
+        dateext
+        dateformat _%Y-%m-%d
+        missingok
+        nocompress
+        prerotate
+           cp /mnt/backup/backups/imagesDb/imagesDb.pg_dump /mnt/backup/backups/imagesDb/imagesDb.monthly.pg_dump
+        endscript
+}
+
+/mnt/backup/backups/imagesDb/imagesDb.monthly.pg_dump
+{
+        rotate 12
+        monthly
+        dateext
+        dateformat _%Y-%m-%d
+        missingok
+        nocompress
+}

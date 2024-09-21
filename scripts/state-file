@@ -1,0 +1,4 @@
+logrotate state -- version 2
+"/var/log/syslog" 2024-9-21-10:0:0
+"/mnt/backup/media/__logs/dropProcessor.log" 2024-9-21-10:0:0
+"/mnt/backup/media/__logs/backupToS3.log" 2024-9-21-10:0:0

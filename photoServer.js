@@ -6,6 +6,9 @@ const statAsync = promisify(fs.stat);
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan')
+const multer  = require('multer')
+const upload = multer({ dest: 'share/__print' })
+const { printPage, printFile } = require('./src/pages/print.js')
 const app = express();
 let webRoot = process.argv[2] || __dirname;
 
@@ -54,6 +57,22 @@ app.get(/.*[/]{1,1}(.*)\.js$/, (req, res, next) => {
 app.get('/favicon.ico/', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'src/assets/favicon.ico'));
 });
+
+app.get('/print', async (req, res, next) => {
+  try {
+    res.send(printPage())
+  } catch (e) {
+    next(e)
+  }
+})
+
+app.post('/print/upload', upload.single('fileToPrint'), async (req, res, next) => {
+  try {
+    await printFile(req.file.path)
+  } catch (e) {
+    next(e)
+  }
+})
 
 //called by UI when requesting new random resource as html
 app.get('/random', async (req, res, next) => {

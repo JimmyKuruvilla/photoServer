@@ -16,3 +16,4 @@ services:
       POSTGRES_PASSWORD: example
     volumes:
       - /mnt/data/photoDb:/var/lib/postgresql/data
+    user: 1000:1001
