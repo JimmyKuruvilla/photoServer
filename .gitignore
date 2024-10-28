@@ -4,6 +4,8 @@ node_modules
 .package-lock.json
 .DS_Store
 db/data
+data
+letsencrypt
 share
 *.log
 csvs/**

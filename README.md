@@ -14,6 +14,9 @@ run `docker-compose up` to bring up the db and the webserver.
 run `node updateDb.js YOURFILES_DIR` to populate the db with the file paths. YOURFILES_DIR must be an absolute path, and must *also* be passed as a volume to docker-compose. 
 The web server is made available on port `4000`.
 
+A simple reverse proxy using nginx is included that can be configured on localhost:81 using
+https://nginxproxymanager.com
+
 ## Clients
 Any browser can be used to view the media by navigating to the url. However low power devices like raspberry pis can also use the framebuffer to display slideshow images using the `slideshow.sh` script. It pulls a random file, using `fim` to show it and then kills the process on a loop. 
 
