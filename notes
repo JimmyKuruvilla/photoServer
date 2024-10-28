@@ -2,7 +2,7 @@
 
 - use pm2 to manage the js service
 - use restart:always in the docker-compose.yml to have the pg container restart
-- relies on systemd to ensure db first, then pm2 service. No guarantee the connection will be available - fix later
+- relies on systemd to ensure db first, then pm2 service. See pm2.service.manualAddon
 
 ## face detection using mediapipe
 python 3.8 installed

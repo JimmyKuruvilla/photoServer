@@ -1,0 +1,6 @@
+## This ensures that the db is started before pm2. Requires only ensures parallel start, After in combo ensures dependency.
+# copy just these 2 lines to the Unit definition in /etc/systemd/system/pm2-j.service. Do not overwrite it. 
+[Unit]
+Requires=docker.service
+After=network.target docker.service
+
