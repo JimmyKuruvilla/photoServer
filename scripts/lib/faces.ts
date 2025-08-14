@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import child_process from 'child_process'
 import { Knex } from 'knex'
-import util from 'util'
 import { log } from './log.ts'
 const spawn = child_process.spawnSync;
 
@@ -20,7 +19,7 @@ const countFaces = async (filepath: string) => {
 
   try {
     const numFaces = parseInt(stdout, 10)
-    return numFaces
+    return isNaN(numFaces) ? 0 : numFaces
   } catch (error) {
     throw new Error(`COUNT_FACES_ERROR from python: ${stderr}`, { cause: error })
   }

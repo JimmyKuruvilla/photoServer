@@ -33,12 +33,8 @@ leave original service alone and build a new one along side it.
 5. implement permadelete
 6. setup emails if no smaba connections in X
 
-
-drop processor is picking up hidden dirs
-1|dropProcessor  | 8/14/2025, 11:41:27 AM :: PIPELINE_MOVE_TO_DATE from /mnt/backup/media/__dropoff/jimmy/.thumbnails/1000012875.jpg to 
-1|dropProcessor  |  /mnt/backup/media/2025-07-24/1000012875.jpg
-
+check KEEP for things to fix
 
 fix all db faces in updateDb.ts
-
-fix all moved files as well in db. are there any wierdys?
+- check this
+maybe a query for num faces detected once react is ready

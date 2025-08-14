@@ -2,4 +2,4 @@
 set -euxo
 source ./python/venv/bin/activate
 
-env node /home/j/scripts/photoServer/scripts/runUpdateDbWithFaces.js /mnt/backup/media
+SOURCE_PATH=/mnt/backup/media env tsx /home/j/scripts/photoServer/scripts/updateFaces/runUpdateDbWithFaces.ts

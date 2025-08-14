@@ -5,7 +5,7 @@ import { updateFaceCount } from '../lib/faces.ts'
 /*
  cd ~/scripts/photoServer
  source ./python/venv/bin/activate
- node ./scripts/runUpdateDbWithFaces.js /mnt/backup/media
+ SOURCE_PATH=/mnt/backup/media node ./scripts/runUpdateDbWithFaces.js
  Updates all files with face count
 */
 
