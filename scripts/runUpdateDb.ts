@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-const { recursiveTraverseDir } = require('../src/listings');
-const { localDb } = require('../db/initDb.js');
-const { createOrUpdateFromFilePath } = require('./updateDb');
+import { recursiveTraverseDir } from '../src/listings.js'
+import { localDb } from '../src/db/initDb.js'
+import { createOrUpdateFromFilePath } from './updateDb.js'
 
-const db = localDb();
+const db = await localDb();
 
 (async () => {
   const count = await recursiveTraverseDir(

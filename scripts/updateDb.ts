@@ -1,15 +1,16 @@
 #!/usr/bin/env node
-const imageThumbnail = require('../src/libs/image-thumbnail/image-thumbnail');
-const { localDb } = require('../db/initDb.js');
-const { isPic } = require('../src/guards');
-const { updateFaceCount } = require('./faces.js');
-const { log } = require('./log');
-const db = localDb();
+import imageThumbnail from '../src/libs/image-thumbnail/image-thumbnail';
+import { localDb } from '../src/db/initDb';
+import { isPic } from '../src/guards';
+import { updateFaceCount } from './faces';
+import { log } from './log.js';
 
-async function createOrUpdateFromFilePath(filepath) {
+const db = await localDb();
+
+export async function createOrUpdateFromFilePath(filepath) {
   const trx = await db.transaction();
   const dbResult = await trx('images').where('path', filepath);
-  
+
   if (dbResult.length === 0) {
     log(`PIPELINE_INSERT_IF_NOT_EXISTS ${filepath}`);
     await _insertRowIfNotExists(trx, filepath);
@@ -59,8 +60,8 @@ async function _updateThumbnailIfNotExists(trx, filepath, dbResult) {
 
 async function _getThumbnail(fullPath, options = { percentage: 10, responseType: 'base64', jpegOptions: { force: false, quality: 20 } }) {
   try {
-    thumbnail = 'data:image/png;base64,';
-    thumbnail += await imageThumbnail(fullPath, options);
+    let thumbnail = 'data:image/png;base64,';
+    thumbnail += await imageThumbnail(fullPath, options as any);
     return thumbnail;
   } catch (e) {
     log(`PIPELINE_ERROR thumbnail generation: ${e}`);
@@ -70,8 +71,4 @@ async function _getThumbnail(fullPath, options = { percentage: 10, responseType:
 
 const _logThumbnail = (filepath, thumbnail) => {
   if (isPic(filepath)) { log(`PIPELINE_THUMBNAIL ${thumbnail.slice(-50)}`); }
-}
-
-module.exports = {
-  createOrUpdateFromFilePath
 }

@@ -1,5 +1,5 @@
-const { recursiveTraverseDir } = require('../src/listings');
-const { moveFileByCreationDate } = require('./moveByDate');
+import { recursiveTraverseDir } from '../src/listings';
+import { moveFileByCreationDate } from './moveByDate';
 
 (async () => {
   const sourceDir = process.argv[2];
@@ -11,7 +11,7 @@ const { moveFileByCreationDate } = require('./moveByDate');
 
   const count = await recursiveTraverseDir(
     sourceDir,
-    moveFileByCreationDate(targetDir)
+    moveFileByCreationDate(targetDir) as any
   );
 
   console.log(`files seen ${count}`);

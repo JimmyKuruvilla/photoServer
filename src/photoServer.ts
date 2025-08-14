@@ -31,7 +31,7 @@ import { dockerDb, localDb } from './db/initDb.ts';
 const statAsync = promisify(fs.stat);
 const upload = multer({ dest: 'share/__print' });
 const app = express();
-let webRoot = process.argv[2] || __dirname;
+let webRoot = process.env.MEDIA_PATH || __dirname;
 
 const fakeInterval = defaultInterval;
 const db = await localDb();

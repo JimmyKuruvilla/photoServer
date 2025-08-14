@@ -1,8 +1,8 @@
 'use strict';
 // modified version of https://www.npmjs.com/package/image-thumbnail
 import fs from 'fs';
-const sizeOf = require('image-size');
-const sharp = require('sharp');
+import sizeOf from 'image-size';
+import sharp from 'sharp';
 
 const PERCENTAGE = 10;
 const RESPONSE_TYPE = 'buffer';

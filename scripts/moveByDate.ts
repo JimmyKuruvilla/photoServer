@@ -21,19 +21,18 @@
 
 Currently does 3 and then 2 if data not available. 1 not attempted. 
 */
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
-const renameAsync = promisify(fs.rename);
-const readFile = promisify(fs.readFile);
-const mkdir = promisify(fs.mkdir);
-const unlink = promisify(fs.unlink);
-const stat = promisify(fs.stat);
-const ExifReader = require('exifreader');
-const ffprobe = require('ffprobe');
-const ffprobeStatic = require('ffprobe-static');
-const { isPic, isVideo } = require('../src/guards');
-const { log } = require('./log');
+import fs from 'node:fs/promises';
+import path from 'path';
+import renameAsync = fs.rename;
+import readFile = fs.readFile;
+import mkdir = fs.mkdir;
+import unlink = fs.unlink;
+import stat = fs.stat;
+import ExifReader from 'exifreader';
+import ffprobe from 'ffprobe';
+import ffprobeStatic from 'ffprobe-static';
+import { isPic, isVideo } from '../src/guards';
+import { log } from './log'
 
 // returns 2023-05-24 given UTC date
 const formatToLocalDateString = (isoDateStr) => {
@@ -117,13 +116,13 @@ const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
   }
 }
 
-const moveFileByCreationDate = (targetDir) => async (fullAbsSourcePath) => {
+export const moveFileByCreationDate = (targetPath: string) => async (fullAbsSourcePath: string) => {
   const filename = path.basename(fullAbsSourcePath);
   if (!isHidden(filename)) {
     if (isPic(filename)) {
-      return movePic(fullAbsSourcePath, targetDir, filename);
+      return movePic(fullAbsSourcePath, targetPath, filename);
     } else if (isVideo(filename)) {
-      return moveVideo(fullAbsSourcePath, targetDir, filename);
+      return moveVideo(fullAbsSourcePath, targetPath, filename);
     } else {
       log(`NOT_A_MEDIA_FILE, skipping`)
       return null;
@@ -137,8 +136,4 @@ const moveFileByCreationDate = (targetDir) => async (fullAbsSourcePath) => {
     }
     return null;
   }
-}
-
-module.exports = {
-  moveFileByCreationDate
 }

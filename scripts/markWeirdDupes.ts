@@ -9,12 +9,13 @@
   The files have been marked for deletion via the eventual purge script. 
 */
 
-const fs = require('fs');
-const path = require('path');
-const { recursiveTraverseDir } = require('../src/listings');
+import fs from 'fs';
+import path from 'path';
+import { recursiveTraverseDir } from '../src/listings.js';
+import { TABLES } from '../src/constants.js';
+import { dockerDb, localDb } from '../src/db/initDb.js';
+
 const LEADING_SIX_DIGITS_DASH_RE = /^\d{6}\-/;
-const { TABLES } = require('../src/constants');
-const { dockerDb, localDb } = require('../db/initDb.js');
 const db = localDb();
 
 const detectDupes = async (nodePath) => {

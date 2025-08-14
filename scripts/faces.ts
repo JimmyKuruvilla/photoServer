@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const child_process = require('child_process')
-const util = require('util');
+import child_process from 'child_process'
+import util from 'util'
 const exec = util.promisify(child_process.exec)
 
 const FACE_DETECTION_SCRIPT_PATH = './python/mediapipe_face.py'
@@ -16,7 +16,7 @@ const countFaces = async (filepath) => {
   }
 }
 
-const updateFaceCount = async (db, filepath) => {
+export const updateFaceCount = async (db, filepath) => {
   const trx = await db.transaction();
 
   let numFaces;
@@ -41,10 +41,4 @@ const updateFaceCount = async (db, filepath) => {
   } catch (error) {
     console.error(`PIPELINE_FACES_ERROR ${error.message}`);
   }
-}
-
-
-
-module.exports = {
-  updateFaceCount
 }

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-const { recursiveTraverseDir } = require('../src/listings.js');
-const { localDb } = require('../db/initDb.js');
-const { updateFaceCount } = require('./faces.js');
+import { recursiveTraverseDir } from '../src/listings'
+import { localDb } from '../src/db/initDb'
+import { updateFaceCount } from './faces'
 /*
  cd ~/scripts/photoServer
  source ./python/venv/bin/activate
  node ./scripts/runUpdateDbWithFaces.js /mnt/backup/media
 */
 
-const db = localDb();
+const db = await localDb();
 
 (async () => {
   const count = await recursiveTraverseDir(

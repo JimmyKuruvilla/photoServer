@@ -1,12 +1,12 @@
-const path = require('path');
-const chokidar = require('chokidar');
-const { moveFileByCreationDate } = require('./moveByDate');
-const { createOrUpdateFromFilePath } = require('./updateDb');
-const { log } = require('./log');
+import path from 'path';
+import chokidar from 'chokidar';
+import { moveFileByCreationDate } from './moveByDate';
+import { createOrUpdateFromFilePath } from './updateDb';
+import { log } from './log';
 
 (async () => {
-  const sourceDir = process.argv[2];
-  const targetDir = process.argv[3];
+  const sourceDir = process.env.SOURCE_PATH;
+  const targetDir = process.env.TARGET_PATH;
 
   if (!sourceDir || !targetDir) {
     throw new Error('Need both source and target dirs');
