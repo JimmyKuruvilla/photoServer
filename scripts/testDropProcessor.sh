@@ -1,1 +1,0 @@
-mv /mnt/backup/media/2024-09-18/PXL_20240918_122702024.jpg /mnt/backup/media/__dropoff/jimmy

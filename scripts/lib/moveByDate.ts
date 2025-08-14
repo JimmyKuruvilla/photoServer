@@ -23,49 +23,46 @@ Currently does 3 and then 2 if data not available. 1 not attempted.
 */
 import fs from 'node:fs/promises';
 import path from 'path';
-import renameAsync = fs.rename;
-import readFile = fs.readFile;
-import mkdir = fs.mkdir;
-import unlink = fs.unlink;
-import stat = fs.stat;
 import ExifReader from 'exifreader';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { isPic, isVideo } from '../src/guards';
-import { log } from './log'
+import { isPic, isVideo } from '../../src/guards.ts';
+import { log } from './log.ts'
+const renameAsync = fs.rename;
+const readFile = fs.readFile;
+const mkdir = fs.mkdir;
+const stat = fs.stat;
 
 // returns 2023-05-24 given UTC date
-const formatToLocalDateString = (isoDateStr) => {
+const formatToLocalDateString = (isoDateStr: string) => {
   const [month, date, year] = new Date(isoDateStr).toLocaleDateString().split('/');
   return `${year}-${month.padStart(2, '0')}-${date.padStart(2, '0')}`;
 }
 
-const createDatePath = (targetDir, date, filename) => `${path.join(targetDir, date, filename)}`;
+const createDatePath = (targetDir: string, date: string, filename: string) => `${path.join(targetDir, date, filename)}`;
 
-const isHidden = (filename) => filename[0] === '.'
-
-const createDir = async (path) => {
+const createDir = async (path: string) => {
   try {
     await mkdir(path)
   }
-  catch (e) {
-    if (e.code === 'EEXIST') {
-      log(`PIPELINE_CREATE_DIRECTORY_ALREADY_EXISTS ${path}`);
+  catch (error: any) {
+    if (error.code === 'EEXIST') {
+      log(`PIPELINE::CREATE_DIRECTORY_ALREADY_EXISTS ${path}`);
     } else {
-      log(`PIPELINE_CREATE_DIRECTORY_CANNOT_CREATE_DIR ${e.message}`);
+      log(`PIPELINE::CREATE_DIRECTORY_CANNOT_CREATE_DIR ${error.message}`);
     }
   }
 }
 
-const move = async (source, target) => {
-  log(`PIPELINE_MOVE_TO_DATE from ${source} to \n ${target}`);
+const move = async (source: string, target: string) => {
+  log(`PIPELINE::MOVE_TO_DATE from ${source} to \n ${target}`);
   await renameAsync(source, target);
 }
 
-const movePic = async (fullAbsSourcePath, targetDir, filename) => {
+const movePic = async (fullAbsSourcePath: string, targetDir: string, filename: string) => {
   try {
     const fileBuffer = await readFile(fullAbsSourcePath);
-    const tags = await ExifReader.load(fileBuffer);
+    const tags: any = await ExifReader.load(fileBuffer);
 
     // converts from '2023:05:27 18:52:01' to 2023-05-27
     const exifCreationTime = tags?.DateTimeOriginal?.value?.[0];
@@ -77,20 +74,20 @@ const movePic = async (fullAbsSourcePath, targetDir, filename) => {
       // 2023-08-25T09:10:05.832Z to 2023-08-25
       const stats = await stat(fullAbsSourcePath)
       formattedDate = stats.birthtime.toISOString().split('T')[0]
-      log(`PIPELINE_MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
+      log(`PIPELINE::MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
     }
 
     await createDir(path.join(targetDir, formattedDate));
     const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
     await move(fullAbsSourcePath, fullAbsTargetPath);
     return fullAbsTargetPath;
-  } catch (e) {
-    log(`PIPELINE_MOVE_TO_DATE_ERROR ${e.message}`);
+  } catch (error: any) {
+    log(`PIPELINE::MOVE_TO_DATE_ERROR ${error.message}`);
     return null;
   }
 }
 
-const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
+const moveVideo = async (fullAbsSourcePath: string, targetDir: string, filename: string) => {
   try {
     const info = await ffprobe(fullAbsSourcePath, { path: ffprobeStatic.path })
     // converts to from '2023-05-24T22:39:31.000000Z' to 2023-05-24
@@ -103,37 +100,27 @@ const moveVideo = async (fullAbsSourcePath, targetDir, filename) => {
       // 2023-08-25T09:10:05.832Z to 2023-08-25
       const stats = await stat(fullAbsSourcePath)
       formattedDate = stats.birthtime.toISOString().split('T')[0]
-      log(`PIPELINE_MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
+      log(`PIPELINE::MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
     }
 
     await createDir(path.join(targetDir, formattedDate));
     const fullAbsTargetPath = createDatePath(targetDir, formattedDate, filename);
     await move(fullAbsSourcePath, fullAbsTargetPath);
     return fullAbsTargetPath;
-  } catch (e) {
-    log(`PIPELINE_MOVE_TO_DATE_FFPROBE_ERROR ${e.message}`);
+  } catch (error: any) {
+    log(`PIPELINE::MOVE_TO_DATE_FFPROBE_ERROR ${error.message}`);
     return null;
   }
 }
 
 export const moveFileByCreationDate = (targetPath: string) => async (fullAbsSourcePath: string) => {
   const filename = path.basename(fullAbsSourcePath);
-  if (!isHidden(filename)) {
-    if (isPic(filename)) {
-      return movePic(fullAbsSourcePath, targetPath, filename);
-    } else if (isVideo(filename)) {
-      return moveVideo(fullAbsSourcePath, targetPath, filename);
-    } else {
-      log(`NOT_A_MEDIA_FILE, skipping`)
-      return null;
-    }
+  if (isPic(filename)) {
+    return movePic(fullAbsSourcePath, targetPath, filename);
+  } else if (isVideo(filename)) {
+    return moveVideo(fullAbsSourcePath, targetPath, filename);
   } else {
-    if (filename.startsWith('.trashed')) {
-      log(`DELETING_TRASHED_FILE ${filename}`);
-      await unlink(fullAbsSourcePath)
-    } else {
-      log(`SKIPPING_HIDDEN_FILE ${filename}`);
-    }
+    log(`MOVE_FILE::NOT_A_MEDIA_FILE, skipping`)
     return null;
   }
 }

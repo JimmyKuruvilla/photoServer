@@ -1,21 +1,45 @@
-- install postfix to get crontab logs, install mutt for better mail handling
+
 
 - use pm2 to manage the js service
 - use restart:always in the docker-compose.yml to have the pg container restart
 - relies on systemd to ensure db first, then pm2 service. See pm2.service.manualAddon
 
-## face detection using mediapipe
-python 3.8 installed
-apt install python3.8-venv to create venv
 
-not enough room on / so on data drive
-@/mnt/backup/code/faces
+## todo
 
-install python 3.9+ for mediapipe reqs
-python3.11 -m venv venv
-source ./venv/bin/activate
-TMPDIR=./tmp python3 -m pip install mediapipe
+-- clickign random, leaves url as RANDOM instead of changing it to a bookmarkable one. 
+-- random/slideshow does the same thing and you can't go back!
+-- auto backup db
+-- handle better scaling of images based on device orientation
+-- search!
+-- add last updated column for purging db. 
+-- make buttons bigger on touch devices
+-- convert avi to mp4
+ -- delete old
+ -- delete old from s3
 
-in photoServer: 
-- source /mnt/backup/code/faces/venv/bin/activate
+-- spacebar to be pause start and then stop. 
+-- read EXIF data and rotate photos accordingly. 
+-- remove media html `content` classes
+- install postfix to get crontab logs, install mutt for better mail handling
 
+TODO
+0. add delete button to files with conf. maybe after react. 
+leave original service alone and build a new one along side it. 
+1. use express 5
+2. simplify routing as much as possible
+3. convert to react + vite
+4. use typescript
+5. implement permadelete
+6. setup emails if no smaba connections in X
+
+
+drop processor is picking up hidden dirs
+1|dropProcessor  | 8/14/2025, 11:41:27 AM :: PIPELINE_MOVE_TO_DATE from /mnt/backup/media/__dropoff/jimmy/.thumbnails/1000012875.jpg to 
+1|dropProcessor  |  /mnt/backup/media/2025-07-24/1000012875.jpg
+
+8/14/2025, 12:01:37 PM :: PIPELINE_MOVE_TO_DATE_FFPROBE_ERROR EACCES: permission denied, rename '/mnt/backup/media/__dropoff/jimmy/WhatsApp/VID-20241221-WA0003.mp4' -> '/mnt/backup/media/2024-12-24/VID-20241221-WA0003.mp4'
+
+fix all db faces in updateDb.ts
+
+fix all moved files as well in db. are there any wierdys?

@@ -1,7 +1,6 @@
-'use strict';
 // modified version of https://www.npmjs.com/package/image-thumbnail
 import fs from 'fs';
-import sizeOf from 'image-size';
+import { imageSize } from 'image-size'
 import sharp from 'sharp';
 
 const PERCENTAGE = 10;
@@ -68,7 +67,7 @@ const getDimensions = (imageBuffer: Buffer, percentageOfImage: number, dimension
     return mergeDimensions(imageBuffer, dimensions);
   }
 
-  const originalDimensions = sizeOf(imageBuffer);
+  const originalDimensions = imageSize(imageBuffer);
 
   const width = parseInt((originalDimensions.width * (percentageOfImage / 100)).toFixed(0));
   const height = parseInt((originalDimensions.height * (percentageOfImage / 100)).toFixed(0));
@@ -77,7 +76,7 @@ const getDimensions = (imageBuffer: Buffer, percentageOfImage: number, dimension
 };
 
 const mergeDimensions = (imageBuffer: Buffer, dimensions: Dimensions): Dimensions => {
-  const originalDimensions = sizeOf(imageBuffer);
+  const originalDimensions = imageSize(imageBuffer);
   let newDimensions: Dimensions = dimensions;
 
   if (typeof dimensions.width === 'undefined') {

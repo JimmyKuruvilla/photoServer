@@ -1,19 +1,24 @@
 #!/usr/bin/env node
-import { recursiveTraverseDir } from '../src/listings'
-import { localDb } from '../src/db/initDb'
-import { updateFaceCount } from './faces'
+import { recursiveTraverseDir } from '../../src/listings.ts'
+import { localDb } from '../../src/db/initDb.ts'
+import { updateFaceCount } from '../lib/faces.ts'
 /*
  cd ~/scripts/photoServer
  source ./python/venv/bin/activate
  node ./scripts/runUpdateDbWithFaces.js /mnt/backup/media
+ Updates all files with face count
 */
 
 const db = await localDb();
+const sourceDir = process.env.SOURCE_PATH;
+if (!sourceDir) {
+  throw new Error('Need source dir');
+}
 
 (async () => {
   const count = await recursiveTraverseDir(
-    process.argv[2] || __dirname,
-    async (filepath) => updateFaceCount(db, filepath)
+    sourceDir,
+    async (filepath: string) => updateFaceCount(db, filepath)
   );
 
   const size = await db.raw(`SELECT pg_size_pretty( pg_total_relation_size('images') );`)

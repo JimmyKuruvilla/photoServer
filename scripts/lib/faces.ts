@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import child_process from 'child_process'
+import { Knex } from 'knex'
 import util from 'util'
 const exec = util.promisify(child_process.exec)
 
 const FACE_DETECTION_SCRIPT_PATH = './python/mediapipe_face.py'
 
-const countFaces = async (filepath) => {
+const countFaces = async (filepath: string) => {
   const { stdout, stderr } = await exec(`python3 ${FACE_DETECTION_SCRIPT_PATH} "${filepath}"`)
 
   try {
@@ -16,20 +17,20 @@ const countFaces = async (filepath) => {
   }
 }
 
-export const updateFaceCount = async (db, filepath) => {
+export const updateFaceCount = async (db: Knex, filepath: string) => {
   const trx = await db.transaction();
 
   let numFaces;
 
   try {
     numFaces = await countFaces(filepath)
-  } catch (error) {
+  } catch (error: any) {
     await trx.rollback();
     if (error.message.includes('Image decoding failed (unknown image type)')) {
-      console.warn(`PIPELINE_FACES_SKIPPING_FILE ${filepath}`);
+      console.warn(`PIPELINE::FACES_SKIPPING_FILE ${filepath}`);
       return
     } else {
-      console.error(`PIPELINE_FACES_PYTHON_ERROR ${error.message}`);
+      console.error(`PIPELINE::FACES_PYTHON_ERROR ${error.message}`);
       return
     }
   }
@@ -37,8 +38,8 @@ export const updateFaceCount = async (db, filepath) => {
   try {
     await trx('images').where('path', filepath).update({ face_count: numFaces });
     await trx.commit();
-    console.log(`PIPELINE_FACES ${filepath} numFaces: ${numFaces}`)
-  } catch (error) {
-    console.error(`PIPELINE_FACES_ERROR ${error.message}`);
+    console.log(`PIPELINE::FACES ${filepath} numFaces: ${numFaces}`)
+  } catch (error: any) {
+    console.error(`PIPELINE::FACES_ERROR ${error.message}`);
   }
 }

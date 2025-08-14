@@ -1,0 +1,3 @@
+#!/bin/bash
+echo $(pwd)
+logrotate -vs state-file $HOME/scripts/photoServer/scripts/rotateLogs/photoServer.logrotate
