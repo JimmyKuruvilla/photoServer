@@ -1,27 +1,63 @@
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
+
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+
+import ffprobe from 'ffprobe';
+import ffprobeStatic from 'ffprobe-static';
+import { isMedia, isVideo, isPic } from './guards.ts';
+import { getItemViaPath } from './db.js';
+
 const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
-const ffprobe = require('ffprobe');
-const ffprobeStatic = require('ffprobe-static');
 
-const { isMedia, isVideo, isPic } = require('./guards');
-const { getItemViaPath } = require('./db');
 
-const { dockerDb, localDb } = require('../db/initDb');
-// const isDockerDb = process.env.DOCKERDB;
-// const db = isDockerDb ? dockerDb() : localDb();
-const db = localDb();
+import { dockerDb, localDb } from './db/initDb.ts';
+const isDockerDb = process.env.DOCKERDB;
+const db = isDockerDb ? await dockerDb() : await localDb();
 
-const getInfoFromDbItem = (dbItem, webRoot) => {
+interface FileNode {
+  name: string;
+  webPath: string;
+  fullPath: string;
+  thumbnail?: string;
+  isDirectory: boolean;
+  duration: number | null;
+  id: number | null;
+  favorite: boolean | null;
+  marked?: boolean;
+  tags?: Array<{ id: number; value: string }>;
+  faceCount?: number | null;
+}
+
+interface DbItem {
+  id: number;
+  path: string;
+  thumbnail?: string;
+  favorite: boolean;
+  marked: boolean;
+  tags?: Array<{ id: number; value: string }>;
+  face_count?: number | null;
+}
+
+interface VideoInfo {
+  streams?: Array<{ duration: number }>;
+}
+
+interface ListingsResult {
+  dirs: FileNode[];
+  files: FileNode[];
+  media: FileNode[];
+}
+
+const getInfoFromDbItem = (dbItem: DbItem, webRoot: string): [string, string, string] => {
   const fullFilePath = dbItem.path;
   const name = fullFilePath.replace(/.*\//, '');
   const webPath = fullFilePath.replace(webRoot, '');
   return [fullFilePath, webPath, name];
 };
 
-async function getVideoInfo(absPath) {
+async function getVideoInfo(absPath: string): Promise<VideoInfo | number> {
   try {
     const info = await ffprobe(absPath, {
       path: ffprobeStatic.path
@@ -32,30 +68,32 @@ async function getVideoInfo(absPath) {
   }
 }
 
-async function getListings(webRoot, fullAbsDirPath) {
-  const dirs = [];
-  const files = [];
-  const media = [];
-  let thumbnail;
+export async function getListings(webRoot: string, fullAbsDirPath: string): Promise<ListingsResult> {
+  const dirs: FileNode[] = [];
+  const files: FileNode[] = [];
+  const media: FileNode[] = [];
+  let thumbnail: string | undefined;
 
   const nodes = await readdirAsync(fullAbsDirPath);
 
   for (let nodeName of nodes) {
     const nodeStats = await statAsync(path.join(fullAbsDirPath, nodeName));
-    let container = nodeStats.isDirectory()
+    let container: FileNode[] = nodeStats.isDirectory()
       ? dirs
       : isMedia(nodeName)
         ? media
         : files;
 
-    let duration = 0;
+    let duration: number = 0;
     if (!nodeStats.isDirectory()) {
       if (isVideo(nodeName)) {
         const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
-        duration = Number(videoInfo.streams?.[0].duration * 1000);
+        if (typeof videoInfo !== 'number' && videoInfo.streams?.[0]?.duration) {
+          duration = Number(videoInfo.streams[0].duration * 1000);
+        }
       }
       else if (isPic(nodeName)) {
-        const img = await getItemViaPath(db, path.join(fullAbsDirPath, nodeName));
+        const img = await getItemViaPath(db as any, path.join(fullAbsDirPath, nodeName));
         thumbnail = img?.thumbnail;
       }
     }
@@ -79,7 +117,7 @@ async function getListings(webRoot, fullAbsDirPath) {
   };
 }
 
-function constructMediaListingsFromDb(dbItems, webRoot) {
+export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): ListingsResult {
   return {
     dirs: [],
     files: [],
@@ -101,22 +139,25 @@ function constructMediaListingsFromDb(dbItems, webRoot) {
   };
 }
 
-async function constructItemFromDb(dbItem, webRoot) {
+export async function constructItemFromDb(dbItem: DbItem, webRoot: string): Promise<FileNode> {
   const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
-  let duration = 0;
+  let duration: number = 0;
   if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
-    duration = Number(videoInfo.streams[0].duration * 1000);
+    if (typeof videoInfo !== 'number' && videoInfo.streams?.[0]?.duration) {
+      duration = Number(videoInfo.streams[0].duration * 1000);
+    }
   }
-  
+
   /*
   db returns {id: null, tagValue: null} when none found
   random doesn't join on tags so we set to empty
   */
-  let tags =[];
-  if (dbItem.tags && dbItem.tags.length){
-    tags = dbItem.tags[0].id === null ? [] : dbItem.tags 
+  let tags: Array<{ id: number; value: string }> = [];
+  if (dbItem.tags && dbItem.tags.length) {
+    tags = dbItem.tags[0].id === null ? [] : dbItem.tags;
   }
+
   return {
     name: name,
     webPath,
@@ -132,10 +173,10 @@ async function constructItemFromDb(dbItem, webRoot) {
   };
 }
 
-async function recursiveTraverseDir(
-  fullAbsDirPath,
-  fileCallbackFn = nodePath => { }
-) {
+export async function recursiveTraverseDir(
+  fullAbsDirPath: string,
+  fileCallbackFn: (nodePath: string) => void | Promise<void> = () => { }
+): Promise<number> {
   let count = 0;
   const nodes = await readdirAsync(fullAbsDirPath);
   count += nodes.length;
@@ -152,10 +193,3 @@ async function recursiveTraverseDir(
   }
   return count;
 }
-
-module.exports = {
-  getListings,
-  recursiveTraverseDir,
-  constructItemFromDb,
-  constructMediaListingsFromDb
-};

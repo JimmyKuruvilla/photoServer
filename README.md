@@ -46,3 +46,9 @@ volumes:
 -- spacebar to be pause start and then stop. 
 -- read EXIF data and rotate photos accordingly. 
 -- remove media html `content` classes
+
+TODO
+1. use express 5
+2. simplify routing as much as possible
+3. convert to react + vite
+4. use typescript

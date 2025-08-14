@@ -1,14 +1,33 @@
-const path = require('path');
-const { isVideo } = require('./guards');
-const { generalToolbar } = require('./toolbar');
+import path from 'path';
+import { isVideo } from './guards.ts';
+import { generalToolbar } from './toolbar.ts';
+
 const NL = '\n';
 
-const cssAndJs = () => `
+// Type definitions
+interface DirectoryItem {
+  name: string;
+  webPath: string;
+  fullPath: string;
+}
+
+interface MediaItem extends DirectoryItem {
+  thumbnail?: string;
+  tags: Array<{ id: number; value: string }>;
+}
+
+interface TemplateLocals {
+  dirs: DirectoryItem[];
+  files: DirectoryItem[];
+  media: MediaItem[];
+}
+
+const cssAndJs = (): string => `
   <link rel="stylesheet" type="text/css" href="main.css">
   <script src="main.js"></script>
   `;
 
-function dirTemplate(locals) {
+export function dirTemplate(locals: TemplateLocals): string {
   return `
   <html>
     <head> 
@@ -56,34 +75,45 @@ function dirTemplate(locals) {
   </html>`;
 }
 
-function getMediaHtmlFragment(item, interval, beforeItem, afterItem) {
-  let html;
+export function getMediaHtmlFragment(
+  item: MediaItem, 
+  interval: number | null, 
+  beforeItem: MediaItem | null, 
+  afterItem: MediaItem | null
+): string {
+  let html: string;
   if (isVideo(item.webPath)) {
     html = `<video controls autoplay class="video"><source src="${interval ? path.join('..', item.webPath) : item.webPath
       }" type="video/mp4"></video>`;
   } else {
     html =
       `<img src="${interval ? path.join('..', item.webPath) : item.webPath
-      }" class="pic">`
+      }" class="pic">`;
   }
 
   return `
   <div class="content-and-controls">
     <button class="rotate-right" onclick="rotateRight()"> 🌪️ </button>
-    <a class="left arrow" href="/media?fullpath=${beforeItem?.fullPath}"> << </a>
+    <a class="left arrow" href="/media?fullpath=${beforeItem?.fullPath || ''}"> << </a>
     ${html}
-    <a class="right arrow" href="/media?fullpath=${afterItem?.fullPath}"> >> </a>
-  </div>`
+    <a class="right arrow" href="/media?fullpath=${afterItem?.fullPath || ''}"> >> </a>
+  </div>`;
 }
 
-const createTagEl = (tag) => `
+const createTagEl = (tag: { id: number; value: string }): string => `
 <div class="tag-group">
   <button class="delete-tag" data-tag-id=${tag.id} onclick="deleteTag(event)">⊖</button> 
   <button class="edit-tag" data-tag-id=${tag.id} onclick="editTag(event)">‣</button> 
   <div class="tag-text">${tag.value}</div>
 </div>`;
 
-function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
+export function imgVidTemplate(
+  item: MediaItem, 
+  type: string, 
+  interval: number | null, 
+  beforeItem: MediaItem | null, 
+  afterItem: MediaItem | null
+): string {
   const nameSection = `/${item.name}`;
   return `
     <html>
@@ -93,7 +123,7 @@ function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
 
       <body>
         <div class="toolbar">
-          ${generalToolbar(item)}
+          ${generalToolbar(item as any)}
         </div>
 
         <a href="${item.webPath.replace(nameSection, '')}"> 
@@ -130,9 +160,3 @@ function imgVidTemplate(item, type, interval, beforeItem, afterItem) {
     </html>
     `;
 }
-
-module.exports = {
-  dirTemplate,
-  imgVidTemplate,
-  getMediaHtmlFragment
-};
