@@ -1,6 +1,5 @@
 # https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector/python
 import mediapipe as mp
-# dead at import
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import sys

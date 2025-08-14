@@ -38,7 +38,6 @@ drop processor is picking up hidden dirs
 1|dropProcessor  | 8/14/2025, 11:41:27 AM :: PIPELINE_MOVE_TO_DATE from /mnt/backup/media/__dropoff/jimmy/.thumbnails/1000012875.jpg to 
 1|dropProcessor  |  /mnt/backup/media/2025-07-24/1000012875.jpg
 
-8/14/2025, 12:01:37 PM :: PIPELINE_MOVE_TO_DATE_FFPROBE_ERROR EACCES: permission denied, rename '/mnt/backup/media/__dropoff/jimmy/WhatsApp/VID-20241221-WA0003.mp4' -> '/mnt/backup/media/2024-12-24/VID-20241221-WA0003.mp4'
 
 fix all db faces in updateDb.ts
 

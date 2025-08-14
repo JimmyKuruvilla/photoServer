@@ -2,12 +2,21 @@
 import child_process from 'child_process'
 import { Knex } from 'knex'
 import util from 'util'
-const exec = util.promisify(child_process.exec)
+import { log } from './log.ts'
+const spawn = child_process.spawnSync;
 
 const FACE_DETECTION_SCRIPT_PATH = './python/mediapipe_face.py'
+const VENV_PYTHON = './python/venv/bin/python3'
 
+/**
+ * const numfaces = await countFaces('/mnt/backup/media/2006-10-22/jimm.jpg')
+ * log(numfaces)
+ * Count the number of faces by calling out to mediapipe with python
+*/
 const countFaces = async (filepath: string) => {
-  const { stdout, stderr } = await exec(`python3 ${FACE_DETECTION_SCRIPT_PATH} "${filepath}"`)
+  const child = spawn(VENV_PYTHON, [FACE_DETECTION_SCRIPT_PATH, filepath], {})
+  const stdout = child.stdout.toString()
+  const stderr = child.stderr.toString()
 
   try {
     const numFaces = parseInt(stdout, 10)
@@ -27,10 +36,10 @@ export const updateFaceCount = async (db: Knex, filepath: string) => {
   } catch (error: any) {
     await trx.rollback();
     if (error.message.includes('Image decoding failed (unknown image type)')) {
-      console.warn(`PIPELINE::FACES_SKIPPING_FILE ${filepath}`);
+      log(`PIPELINE::FACES_SKIPPING_FILE ${filepath}`);
       return
     } else {
-      console.error(`PIPELINE::FACES_PYTHON_ERROR ${error.message}`);
+      log(`PIPELINE::FACES_PYTHON_ERROR ${error.message}`);
       return
     }
   }
@@ -38,8 +47,8 @@ export const updateFaceCount = async (db: Knex, filepath: string) => {
   try {
     await trx('images').where('path', filepath).update({ face_count: numFaces });
     await trx.commit();
-    console.log(`PIPELINE::FACES ${filepath} numFaces: ${numFaces}`)
+    log(`PIPELINE::FACES ${filepath} numFaces: ${numFaces}`)
   } catch (error: any) {
-    console.error(`PIPELINE::FACES_ERROR ${error.message}`);
+    log(`PIPELINE::FACES_ERROR ${error.message}`);
   }
 }

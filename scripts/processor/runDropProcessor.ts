@@ -1,25 +1,17 @@
 import path from 'path';
 import fs from 'node:fs/promises';
-import child_process from 'child_process'
-import util from 'util'
 import chokidar from 'chokidar';
 import { moveFileByCreationDate } from '../lib/moveByDate.ts';
 import { createOrUpdateFromFilePath } from '../lib/updateDb.ts';
 import { log } from '../lib/log.ts';
 
 (async () => {
-  const exec = util.promisify(child_process.exec)
   const sourceDir = process.env.SOURCE_PATH;
   const targetDir = process.env.TARGET_PATH;
 
   if (!sourceDir || !targetDir) {
     throw new Error('Need both source and target dirs');
   }
-
-  log(`PYTHON:: ACTIVATE_VIRTUAL_ENV`)
-  const { stdout, stderr } = await exec(`. ./python/venv/bin/activate`)
-  log(stdout)
-  log(stderr)
 
   const watcher = chokidar.watch(sourceDir, { awaitWriteFinish: { pollInterval: 1000 } });
   const onAdd = moveFileByCreationDate(targetDir);
