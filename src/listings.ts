@@ -16,7 +16,7 @@ import { dockerDb, localDb } from './db/initDb.ts';
 const isDockerDb = process.env.DOCKERDB;
 const db = isDockerDb ? await dockerDb() : await localDb();
 
-interface FileNode {
+export interface FileItem {
   name: string;
   webPath: string;
   fullPath: string;
@@ -44,10 +44,10 @@ interface VideoInfo {
   streams?: Array<{ duration: number }>;
 }
 
-interface ListingsResult {
-  dirs: FileNode[];
-  files: FileNode[];
-  media: FileNode[];
+export interface Listings {
+  dirs: FileItem[];
+  files: FileItem[];
+  media: FileItem[];
 }
 
 const getInfoFromDbItem = (dbItem: DbItem, webRoot: string): [string, string, string] => {
@@ -66,17 +66,17 @@ async function getVideoInfo(absPath: string): Promise<Partial<FFProbeResult>> {
   }
 }
 
-export async function getListings(webRoot: string, fullAbsDirPath: string): Promise<ListingsResult> {
-  const dirs: FileNode[] = [];
-  const files: FileNode[] = [];
-  const media: FileNode[] = [];
+export async function getListings(webRoot: string, fullAbsDirPath: string): Promise<Listings> {
+  const dirs: FileItem[] = [];
+  const files: FileItem[] = [];
+  const media: FileItem[] = [];
   let thumbnail: string | undefined;
 
   const nodes = await readdirAsync(fullAbsDirPath);
 
   for (let nodeName of nodes) {
     const nodeStats = await statAsync(path.join(fullAbsDirPath, nodeName));
-    let container: FileNode[] = nodeStats.isDirectory()
+    let container: FileItem[] = nodeStats.isDirectory()
       ? dirs
       : isMedia(nodeName)
         ? media
@@ -115,7 +115,7 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
   };
 }
 
-export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): ListingsResult {
+export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): Listings {
   return {
     dirs: [],
     files: [],
@@ -137,7 +137,7 @@ export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string)
   };
 }
 
-export async function constructItemFromDb(dbItem: DbItem, webRoot: string): Promise<FileNode> {
+export async function constructItemFromDb(dbItem: DbItem, webRoot: string): Promise<FileItem> {
   const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
   let duration: number = 0;
   if (isVideo(fullFilePath)) {

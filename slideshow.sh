@@ -4,7 +4,7 @@
 # DELAY=15
 # while [ true ]
 # do
-#  webpath=$(curl -s http://$HOST:4000/randomUrl?type=image | jq --raw-output .webPath)
+#  webpath=$(curl -s http://$HOST:4000/random/cli?type=image | jq --raw-output .webPath)
 #  webpath=$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$webpath") 
 #  webpath=http://$HOST:4000/$webpath 
 #  curl -s -o tmp $webpath 

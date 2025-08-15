@@ -1,0 +1,28 @@
+import path from 'path';
+import { isVideo } from '../guards.ts';
+import { FileItem } from '../listings.ts';
+
+export function getMediaHtmlFragment(
+  item: FileItem,
+  interval: number | null,
+  beforeItem: FileItem | null,
+  afterItem: FileItem | null
+): string {
+  let html: string;
+  if (isVideo(item.webPath)) {
+    html = `<video controls autoplay class="video"><source src="${interval ? path.join('..', item.webPath) : item.webPath
+      }" type="video/mp4"></video>`;
+  } else {
+    html =
+      `<img src="${interval ? path.join('..', item.webPath) : item.webPath
+      }" class="pic">`;
+  }
+
+  return `
+  <div class="content-and-controls">
+    <button class="rotate-right" onclick="rotateRight()"> 🌪️ </button>
+    <a class="left arrow" href="/media?fullpath=${beforeItem?.fullPath || ''}"> << </a>
+    ${html}
+    <a class="right arrow" href="/media?fullpath=${afterItem?.fullPath || ''}"> >> </a>
+  </div>`;
+}

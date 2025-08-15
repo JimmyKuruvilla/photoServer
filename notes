@@ -24,17 +24,21 @@
 - install postfix to get crontab logs, install mutt for better mail handling
 
 TODO
-0. add delete button to files with conf. maybe after react. 
 leave original service alone and build a new one along side it. 
 1. use express 5
 2. simplify routing as much as possible
+// refactor listings
+
 3. convert to react + vite
-4. use typescript
-5. implement permadelete
-6. setup emails if no smaba connections in X
 
-check KEEP for things to fix
+1. implement permadelete
+ - add delete button to files with conf. maybe after react. 
 
-fix all db faces in updateDb.ts
-- check this
-maybe a query for num faces detected once react is ready
+2. maybe add a query for num faces detected once react is ready
+and a button to rerun face detection on the current file - !
+
+3. videos need a thumbnail as well. 
+- take first frame or 2seconds in. 
+
+fix print
+store a hash of a file on injest. So we can tell which files are the same.
