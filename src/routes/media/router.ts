@@ -1,35 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { SERVED_PATH, TABLES } from '../../constants.ts';
-import { getItemViaPath, getFavoritesFromDb, updateFieldById, searchOnTags, createTag, getById, deleteById } from '../../db.ts';
-import { constructFileViewFromDb, constructMediaListingsFromDb } from '../../listings.ts';
-import { getBeforeAndAfterItems } from '../../services/media.ts';
+import { TABLES } from '../../constants.ts';
+import { getFavoritesFromDb, updateFieldById } from '../../db.ts';
+import { constructMediaListingsFromDb } from '../../listings.ts';
 import { localDb } from '../../db/initDb.ts';
 import { tagsRouter } from './tags/router.ts';
 import { dirTemplate } from '../../pages/dirTemplate.ts';
-import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
 export const mediaRouter = express.Router();
 const db = await localDb();
-/*
-* http://192.168.2.123:4000/media?fullpath=/mnt/backup/media/Christmas.2008/IMG_2748.jpg
-*/
-mediaRouter.get('/media', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const fullpath = req.query.fullpath as string;
-    const dbItem = await getItemViaPath(db, fullpath);
-    if (!dbItem) {
-      return res.status(404).send({ error: 'Item not found' });
-    }
-    const item = await constructFileViewFromDb(dbItem);
-    const [beforeItem, afterItem] = await getBeforeAndAfterItems(fullpath)
-
-    res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
-    return;
-  }
-  catch (e: any) {
-    res.status(404).send({ error: e.message });
-    return;
-  }
-});
 
 mediaRouter.get('/media/favorites', async (req: Request, res: Response, next: NextFunction) => {
   const dbItems = await getFavoritesFromDb(db);

@@ -49,7 +49,7 @@ export function imgVidTemplate(
           }
           share.photoItem = ${JSON.stringify(item)};
 
-          window.history.replaceState({}, '', '/media?fullpath=${item.srcPath}');
+          window.history.replaceState({}, '', '${item.viewPath}');
 
         </script>
 

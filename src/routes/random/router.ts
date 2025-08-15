@@ -10,8 +10,8 @@ export const randomRouter = express.Router();
 const db = await localDb();
 type RandomType = 'image' | 'video'
 
-//called by UI when requesting new random resource as html
-randomRouter.get('/random', async (req: Request, res: Response, next: NextFunction) => {
+// returns a view for a single random item
+randomRouter.get('/randomView', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const type = req.query.type as string;
     const dbItem = await getRandomFromDb(db, type as 'image' | 'video' | undefined);
@@ -23,15 +23,7 @@ randomRouter.get('/random', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-//called by slideshow and fbi when getting json response with new json
-randomRouter.get('/random/cli', async (req: Request, res: Response, next: NextFunction) => {
-  const type = req.query.type as RandomType
-  const dbItem = await getRandomFromDb(db, type);
-  const item = await constructFileViewFromDb(dbItem);
-  res.json({ ...item, html: getMediaHtmlFragment(item, defaultInterval, null, null) });
-});
-
-//called by ui for random all
+// returns a view that starts the slideshow
 randomRouter.get('/random/slideshow', async (req: Request, res: Response, next: NextFunction) => {
   const type = req.query.type as RandomType
   const dbItem = await getRandomFromDb(db, type);
@@ -41,4 +33,12 @@ randomRouter.get('/random/slideshow', async (req: Request, res: Response, next: 
   res.send(
     imgVidTemplate(item, type, (req.query.interval ? parseInt(req.query.interval as string) : defaultInterval), beforeItem, afterItem)
   );
+});
+
+// returns json for slideshow and fbi
+randomRouter.get('/random', async (req: Request, res: Response, next: NextFunction) => {
+  const type = req.query.type as RandomType
+  const dbItem = await getRandomFromDb(db, type);
+  const item = await constructFileViewFromDb(dbItem);
+  res.json({ ...item, html: getMediaHtmlFragment(item, defaultInterval, null, null) });
 });

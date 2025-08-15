@@ -1,8 +1,7 @@
 
 // interface PhotoItem {
 //   id;
-//   webPath;
-//   fullPath;
+//   viewPath;
 //   favorite;
 //   marked;
 //   duration?;
@@ -46,11 +45,9 @@
 //   }
 // }
 
-// Utility functions
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
-// Make them globally available
 window.$ = $;
 window.$$ = $$;
 
@@ -129,7 +126,7 @@ function replaceOnInterval(contentInterval, type) {
 }
 
 async function replaceContent(type) {
-  const url = `/randomUrl?type=${type}`;
+  const url = `/random?type=${type}`;
 
   try {
     const item = await fatch(url);
@@ -139,12 +136,8 @@ async function replaceContent(type) {
       type
     );
 
-    const webpathElement = $('.webpath');
     const contentWrapper = $('.content-wrapper');
 
-    if (webpathElement) {
-      webpathElement.innerHTML = item.webPath;
-    }
     if (contentWrapper) {
       contentWrapper.innerHTML = item.html || '';
     }
@@ -153,7 +146,7 @@ async function replaceContent(type) {
     window.history.pushState(
       {},
       '',
-      `/media?fullpath=${item.fullPath}`
+      item.viewPath
     );
   } catch (error) {
     console.error('Error replacing content:', error);
@@ -261,7 +254,7 @@ function updateMarkedButton(o) {
 
 const fatch = async (
   url,
-  method,
+  method = 'get',
   body,
   headers = { 'Content-Type': 'application/json; charset=utf-8' }
 ) => {
@@ -294,7 +287,6 @@ const fatch = async (
   }
 };
 
-// Make fatch globally available
 window.fatch = fatch;
 
 const patch = (url, body, headers) => {
@@ -321,11 +313,11 @@ const del = (url, headers) => {
 };
 
 const startSlideshowAll = () => {
-  window.location.href = `/random/slideshow?type=${share.resourceMode}`;
+  window.location.href = `${window.location.origin}/random/slideshow?type=${share.resourceMode}`;
 };
 
 const getRandomResource = () => {
-  window.location.href = `/random?type=${share.resourceMode}`;
+  window.location.href = `${window.location.origin}/randomView?type=${share.resourceMode}`;
 };
 
 const animateIn = () => {

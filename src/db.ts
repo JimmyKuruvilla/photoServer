@@ -1,6 +1,6 @@
 
 import { Knex } from 'knex';
-import { isPic, isVideo } from  './guards.js';
+import { isPic, isVideo } from './guards.js';
 import { TABLES, TableName } from './constants.js';
 
 interface DbImage {
@@ -27,7 +27,7 @@ let firstId: number;
 export const setIdRange = async (db: Knex): Promise<void> => {
   const lastIdResult = await getLastId(db);
   const firstIdResult = await getFirstId(db);
-  
+
   lastId = lastIdResult.id;
   firstId = firstIdResult.id;
 
@@ -49,8 +49,12 @@ export async function getRandomFromDb(db: Knex, type: 'image' | 'video' = 'image
   while (!isMatch) {
     const result = await getById(db, TABLES.IMAGES, getRandomInt(firstId, lastId));
     dbItem = result[0];
-    if (dbItem && !dbItem.marked && filterFn(dbItem.path)) {
-      isMatch = true;
+
+    if (dbItem) {
+      const allowed = dbItem.path.indexOf('__dropoff') === -1
+      if (allowed && !dbItem.marked && filterFn(dbItem.path)) {
+        isMatch = true;
+      }
     }
   }
 
@@ -107,10 +111,10 @@ export async function getItemViaPath(db: Knex, fullFilePath: string): Promise<Im
 }
 
 export async function updateFieldById<T = any>(
-  db: Knex, 
-  tableName: TableName, 
-  id: number, 
-  field: string, 
+  db: Knex,
+  tableName: TableName,
+  id: number,
+  field: string,
   value: T
 ): Promise<T[]> {
   const updateItem: Record<string, T> = {};
