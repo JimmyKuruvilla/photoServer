@@ -55,10 +55,9 @@ app.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunc
     if (!dbItem) {
       return res.status(404).send({ error: 'Item not found' });
     }
-    const item = await constructFileViewFromDb(dbItem);
-    const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.dbPath)
+    const [item, [beforeItem, afterItem]] = await Promise.all([constructFileViewFromDb(dbItem), getBeforeAndAfterItems(dbItem.path)])
 
-    res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
+    res.send(imgVidTemplate(item, '', null, beforeItem, afterItem));
     return;
   }
   catch (e: any) {
