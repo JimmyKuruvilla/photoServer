@@ -211,6 +211,10 @@ video:hover {
   text-overflow: ellipsis;
 }
 
+.file label {
+  max-width: initial;
+}
+
 .media {
   margin: 20px 0;
 }
