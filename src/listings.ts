@@ -18,7 +18,8 @@ const db = isDockerDb ? await dockerDb() : await localDb();
 
 export interface FileItem {
   name: string;
-  viewPath?: string;
+  viewPath: string;
+  parentViewPath: string;
   srcPath: string;
   thumbnail?: string;
   isDirectory: boolean;
@@ -53,12 +54,17 @@ export interface DirList {
 const createFileViewPath = (fullAbsPath: string = '', name: string = '') => path.join('/fileView', fullAbsPath, name)
 const createFilePath = (fullAbsPath: string = '', name: string = '') => path.join('/file', fullAbsPath, name)
 const createDirViewPath = (fullAbsPath: string = '', name: string = '') => path.join('/dirView', fullAbsPath, name)
-const getInfoFromDbItem = (dbItem: DbItem, webRoot: string) => {
+const createParentDirViewPath = (fullAbsPath: string) => createDirViewPath(fullAbsPath).split(path.sep).slice(0, -1).join(path.sep)
+
+const getInfoFromDbItem = (dbItem: DbItem) => {
   const fullFilePath = dbItem.path;
   const name = fullFilePath.replace(/.*\//, '');
+
   return {
-    fullFilePath: dbItem.path,
+    fullFilePath,
     srcPath: createFilePath(fullFilePath),
+    viewPath: createFileViewPath(fullFilePath),
+    parentViewPath: createParentDirViewPath(fullFilePath),
     name
   };
 };
@@ -72,7 +78,7 @@ async function getVideoInfo(absPath: string): Promise<Partial<FFProbeResult>> {
   }
 }
 
-export async function getListings(webRoot: string, fullAbsDirPath: string): Promise<DirList> {
+export async function getListings(fullAbsDirPath: string): Promise<DirList> {
   const dirs: FileItem[] = [];
   const files: FileItem[] = [];
   const media: FileItem[] = [];
@@ -108,6 +114,7 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
       name: nodeName,
       srcPath: createFilePath(fullAbsDirPath, nodeName),
       viewPath: viewPathFn(fullAbsDirPath, nodeName),
+      parentViewPath: createParentDirViewPath(fullAbsDirPath),
       thumbnail: thumbnail,
       isDirectory: nodeStats.isDirectory(),
       duration,
@@ -115,7 +122,6 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
       favorite: null
     });
   }
-  // all these webroots should be imported not passed. 
 
   return {
     dirs,
@@ -124,17 +130,18 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
   };
 }
 
-// fix me
 export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): DirList {
   return {
     dirs: [],
     files: [],
     media: dbItems.map(dbItem => {
-      const { fullFilePath, srcPath, name } = getInfoFromDbItem(dbItem, webRoot);
+      const { fullFilePath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
 
       return {
         name: name,
         srcPath,
+        viewPath,
+        parentViewPath,
         fullPath: fullFilePath,
         thumbnail: dbItem.thumbnail,
         id: dbItem.id,
@@ -147,8 +154,8 @@ export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string)
   };
 }
 
-export async function constructFileViewFromDb(dbItem: DbItem, webRoot: string): Promise<FileItem> {
-  const { fullFilePath, srcPath, name } = getInfoFromDbItem(dbItem, webRoot);
+export async function constructFileViewFromDb(dbItem: DbItem): Promise<FileItem> {
+  const { fullFilePath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
   let duration: number = 0;
   if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
@@ -169,6 +176,8 @@ export async function constructFileViewFromDb(dbItem: DbItem, webRoot: string): 
   return {
     name: name,
     srcPath,
+    viewPath,
+    parentViewPath,
     thumbnail: dbItem.thumbnail,
     isDirectory: false,
     duration,

@@ -61,12 +61,13 @@ app.use(mediaRouter)
 app.get('/dirView/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
   const targetPath = path.join(path.sep, req.params.path);
   try {
-    const listings = await getListings(SERVED_PATH, targetPath);
+    const listings = await getListings(targetPath);
     res.send(dirTemplate(listings));
   } catch (error: any) {
     next(error)
   }
 });
+
 app.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
   const targetPath = path.join(path.sep, req.params.path);
   try {
@@ -74,7 +75,7 @@ app.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunc
     if (!dbItem) {
       return res.status(404).send({ error: 'Item not found' });
     }
-    const item = await constructFileViewFromDb(dbItem, SERVED_PATH);
+    const item = await constructFileViewFromDb(dbItem);
     const [beforeItem, afterItem] = await getBeforeAndAfterItems(targetPath)
 
     res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
@@ -101,7 +102,7 @@ app.get('/file/:path(*)', async (req: Request, res: Response, next: NextFunction
  * Directory listing at root
  */
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  const listings = await getListings(SERVED_PATH, SERVED_PATH);
+  const listings = await getListings(SERVED_PATH);
   res.send(dirTemplate(listings));
 });
 

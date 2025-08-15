@@ -12,7 +12,6 @@ export function imgVidTemplate(
   beforeItem: FileItem | null, 
   afterItem: FileItem | null
 ): string {
-  const nameSection = `/${item.name}`;
   return `
     <html>
       <head>
@@ -24,8 +23,8 @@ export function imgVidTemplate(
           ${generalToolbar(item as any)}
         </div>
 
-        <a href="${item.srcPath.replace(nameSection, '')}"> 
-          <h6 class="webpath">${item.srcPath} ↗</h6>
+        <a href="${item.parentViewPath}"> 
+          <h6 class="webpath">Parent Directory ↗</h6>
         </a>
         
         <div class="content-wrapper">
