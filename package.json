@@ -8,7 +8,7 @@
     "knex": "knex",
     "migrate:latest": "npm run knex migrate:latest -- --knexfile ./knexfile.cjs",
     "migrate:rollback": "npm run knex migrate:rollback -- --knexfile ./knexfile.cjs",
-    "build": "tsc && tsc -p tsconfig.client.json",
+    "build": "tsc",
     "dev": "tsx watch src/photoServer.ts /mnt/backup/media"
   },
   "author": "",

@@ -16,13 +16,13 @@ import { TABLES } from '../src/constants.js';
 import { dockerDb, localDb } from '../src/db/initDb.js';
 
 const LEADING_SIX_DIGITS_DASH_RE = /^\d{6}\-/;
-const db = localDb();
+const db = await localDb();
 
-const detectDupes = async (nodePath) => {
+const detectDupes = async (nodePath: string) => {
   const dirname = path.dirname(nodePath)
   const filename = path.basename(nodePath);
   const simpleFilename = filename.replace(LEADING_SIX_DIGITS_DASH_RE, '')
-  
+
   if (LEADING_SIX_DIGITS_DASH_RE.test(filename) && fs.existsSync(path.join(dirname, simpleFilename))) {
     console.log(`marking duplicate for deletion ${filename}`)
     const dbRes = await db(TABLES.IMAGES)

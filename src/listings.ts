@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 
-import ffprobe from 'ffprobe';
+import ffprobe, { FFProbeResult } from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { isMedia, isVideo, isPic } from './guards.ts';
 import { getItemViaPath } from './db.js';
@@ -57,14 +57,12 @@ const getInfoFromDbItem = (dbItem: DbItem, webRoot: string): [string, string, st
   return [fullFilePath, webPath, name];
 };
 
-async function getVideoInfo(absPath: string): Promise<VideoInfo | number> {
+async function getVideoInfo(absPath: string): Promise<Partial<FFProbeResult>> {
   try {
-    const info = await ffprobe(absPath, {
-      path: ffprobeStatic.path
-    });
+    const info = await ffprobe(absPath, { path: ffprobeStatic.path });
     return info;
   } catch (err) {
-    return 0;
+    return { streams: [{ duration: '0' }] } as Partial<FFProbeResult>;
   }
 }
 
@@ -88,8 +86,8 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
     if (!nodeStats.isDirectory()) {
       if (isVideo(nodeName)) {
         const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
-        if (typeof videoInfo !== 'number' && videoInfo.streams?.[0]?.duration) {
-          duration = Number(videoInfo.streams[0].duration * 1000);
+        if (videoInfo.streams?.[0]?.duration) {
+          duration = Number(videoInfo.streams[0].duration) * 1000;
         }
       }
       else if (isPic(nodeName)) {
@@ -144,8 +142,8 @@ export async function constructItemFromDb(dbItem: DbItem, webRoot: string): Prom
   let duration: number = 0;
   if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
-    if (typeof videoInfo !== 'number' && videoInfo.streams?.[0]?.duration) {
-      duration = Number(videoInfo.streams[0].duration * 1000);
+    if (videoInfo.streams?.[0]?.duration) {
+      duration = Number(videoInfo.streams[0].duration) * 1000;
     }
   }
 
