@@ -19,8 +19,12 @@
 
 TODO
 leave original service alone and build a new one along side it. 
+0. refactor utils + guards
+store a hash of a file on injest. So we can tell which files are the same.
+3. videos need a thumbnail as well. 
+- take first frame or 2seconds in. 
+
 1. use express 5
-2. simplify routing as much as possible
 // refactor listings
 
 3. convert to react + vite
@@ -31,8 +35,6 @@ leave original service alone and build a new one along side it.
 2. maybe add a query for num faces detected once react is ready
 and a button to rerun face detection on the current file - !
 
-3. videos need a thumbnail as well. 
-- take first frame or 2seconds in. 
+store the type of video or picture in the db so that the select random can use it to pick. 
 
-fix print
-store a hash of a file on injest. So we can tell which files are the same.
+refacotr db into "mdoels"
