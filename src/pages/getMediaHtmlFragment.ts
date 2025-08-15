@@ -9,7 +9,7 @@ export function getMediaHtmlFragment(
   afterItem: FileItem | null
 ): string {
   let html: string;
-  if (isVideo(item.webPath)) {
+  if (isVideo(item.srcPath)) {
     html = `<video controls autoplay class="video"><source src="${item.srcPath}" type="video/mp4"></video>`;
   } else {
     html =
@@ -19,8 +19,8 @@ export function getMediaHtmlFragment(
   return `
   <div class="content-and-controls">
     <button class="rotate-right" onclick="rotateRight()"> 🌪️ </button>
-    <a class="left arrow" href="/media?fullpath=${beforeItem?.fullPath || ''}"> << </a>
+    <a class="left arrow" href="${beforeItem?.viewPath || ''}"> << </a>
     ${html}
-    <a class="right arrow" href="/media?fullpath=${afterItem?.fullPath || ''}"> >> </a>
+    <a class="right arrow" href="${afterItem?.viewPath || ''}"> >> </a>
   </div>`;
 }

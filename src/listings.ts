@@ -18,6 +18,7 @@ const db = isDockerDb ? await dockerDb() : await localDb();
 
 export interface FileItem {
   name: string;
+  dbPath: string;
   viewPath: string;
   parentViewPath: string;
   srcPath: string;
@@ -57,14 +58,14 @@ const createDirViewPath = (fullAbsPath: string = '', name: string = '') => path.
 const createParentDirViewPath = (fullAbsPath: string) => createDirViewPath(fullAbsPath).split(path.sep).slice(0, -1).join(path.sep)
 
 const getInfoFromDbItem = (dbItem: DbItem) => {
-  const fullFilePath = dbItem.path;
-  const name = fullFilePath.replace(/.*\//, '');
+  const dbPath = dbItem.path;
+  const name = dbPath.replace(/.*\//, '');
 
   return {
-    fullFilePath,
-    srcPath: createFilePath(fullFilePath),
-    viewPath: createFileViewPath(fullFilePath),
-    parentViewPath: createParentDirViewPath(fullFilePath),
+    dbPath,
+    srcPath: createFilePath(dbPath),
+    viewPath: createFileViewPath(dbPath),
+    parentViewPath: createParentDirViewPath(dbPath),
     name
   };
 };
@@ -87,7 +88,8 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
   const nodes = await readdirAsync(fullAbsDirPath);
 
   for (let nodeName of nodes) {
-    const nodeStats = await statAsync(path.join(fullAbsDirPath, nodeName));
+    const fullAbsFilePath = path.join(fullAbsDirPath, nodeName)
+    const nodeStats = await statAsync(fullAbsFilePath);
     const isDir = nodeStats.isDirectory()
     let container: FileItem[] = isDir
       ? dirs
@@ -98,13 +100,13 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
     let duration: number = 0;
     if (!isDir) {
       if (isVideo(nodeName)) {
-        const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
+        const videoInfo = await getVideoInfo(fullAbsFilePath);
         if (videoInfo.streams?.[0]?.duration) {
           duration = Number(videoInfo.streams[0].duration) * 1000;
         }
       }
       else if (isPic(nodeName)) {
-        const img = await getItemViaPath(db as any, path.join(fullAbsDirPath, nodeName));
+        const img = await getItemViaPath(db as any, fullAbsFilePath);
         thumbnail = img?.thumbnail;
       }
     }
@@ -112,6 +114,7 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
 
     container.push({
       name: nodeName,
+      dbPath: fullAbsFilePath,
       srcPath: createFilePath(fullAbsDirPath, nodeName),
       viewPath: viewPathFn(fullAbsDirPath, nodeName),
       parentViewPath: createParentDirViewPath(fullAbsDirPath),
@@ -130,19 +133,19 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
   };
 }
 
-export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): DirList {
+export function constructMediaListingsFromDb(dbItems: DbItem[]): DirList {
   return {
     dirs: [],
     files: [],
     media: dbItems.map(dbItem => {
-      const { fullFilePath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
+      const { dbPath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
 
       return {
         name: name,
+        dbPath,
         srcPath,
         viewPath,
         parentViewPath,
-        fullPath: fullFilePath,
         thumbnail: dbItem.thumbnail,
         id: dbItem.id,
         favorite: dbItem.favorite,
@@ -155,10 +158,10 @@ export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string)
 }
 
 export async function constructFileViewFromDb(dbItem: DbItem): Promise<FileItem> {
-  const { fullFilePath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
+  const { dbPath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
   let duration: number = 0;
-  if (isVideo(fullFilePath)) {
-    const videoInfo = await getVideoInfo(fullFilePath);
+  if (isVideo(dbPath)) {
+    const videoInfo = await getVideoInfo(dbPath);
     if (videoInfo.streams?.[0]?.duration) {
       duration = Number(videoInfo.streams[0].duration) * 1000;
     }
@@ -175,6 +178,7 @@ export async function constructFileViewFromDb(dbItem: DbItem): Promise<FileItem>
 
   return {
     name: name,
+    dbPath,
     srcPath,
     viewPath,
     parentViewPath,

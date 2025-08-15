@@ -1,30 +1,15 @@
 #!/usr/bin/env node
-const __dirname = import.meta.dirname;
-import fs from 'fs';
-import { promisify } from 'util';
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import morgan from 'morgan';
-import { port, TABLES, SERVED_PATH } from './constants.ts';
+import { ONE_DAY_SECS, port, SERVED_PATH } from './constants.ts';
 import { dirTemplate } from './pages/dirTemplate.ts';
 import {
   getListings,
   constructFileViewFromDb,
-  constructMediaListingsFromDb
 } from './listings.ts';
-import {
-  setIdRange,
-  getRandomFromDb,
-  getFavoritesFromDb,
-  getMarkedFromDb,
-  getItemViaPath,
-  updateFieldById,
-  deleteById,
-  createTag,
-  getById,
-  searchOnTags
-} from './db.ts';
-import { dockerDb, localDb } from './db/initDb.ts';
+import { setIdRange, getItemViaPath, } from './db.ts';
+import { localDb } from './db/initDb.ts';
 import { printRouter } from './routes/print/router.ts';
 import { clientRouter } from './routes/client/router.ts';
 import { getBeforeAndAfterItems } from './services/media.ts';
@@ -33,12 +18,8 @@ import { errorMiddleware } from './middleware/error.ts';
 import { mediaRouter } from './routes/media/router.ts';
 import { imgVidTemplate } from './pages/imgVidTemplate.ts';
 
-const statAsync = promisify(fs.stat);
 const app = express();
-
-
 const db = await localDb();
-const ONE_DAY_SECS = 86400;
 
 (async () => {
   try {
@@ -51,7 +32,6 @@ const ONE_DAY_SECS = 86400;
 
 app.use(morgan('dev'))
 app.use(express.json());
-
 
 app.use(clientRouter)
 app.use(printRouter)
@@ -76,7 +56,7 @@ app.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunc
       return res.status(404).send({ error: 'Item not found' });
     }
     const item = await constructFileViewFromDb(dbItem);
-    const [beforeItem, afterItem] = await getBeforeAndAfterItems(targetPath)
+    const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.dbPath)
 
     res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
     return;

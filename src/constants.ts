@@ -5,6 +5,7 @@ export const mediaStr = 'media';
 export const port = 4000;
 export const defaultInterval = 6000;
 export const NL = '\n';
+export const ONE_DAY_SECS = 86400;
 
 export const TABLES = {
   IMAGES: 'images',
