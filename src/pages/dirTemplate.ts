@@ -23,7 +23,7 @@ export function dirTemplate(locals: {
       .reverse()
       .map(
         i =>
-          `<div class="dir"><a href="/dir/${i.webPath}"><label>📁${i.name}</label></div>`
+          `<div class="dir"><a href="${i.viewPath}"><label>📁${i.name}</label></div>`
       )
       .join('')}
         </div>
@@ -32,7 +32,7 @@ export function dirTemplate(locals: {
         ${locals.files
       .map(
         i =>
-          `<div class="file"><a href="${i.webPath}"><label>${i.name}</label></div>`
+          `<div class="file"><a href="${i.viewPath}"><label>${i.name}</label></div>`
       )
       .join('')}
         </div>
@@ -41,8 +41,7 @@ export function dirTemplate(locals: {
         ${locals.media
       .map(
         i =>
-          `<div class="media"><a href="/media?fullpath=${i.fullPath
-          }"><label>${i.name}</label>${isVideo(i.name)
+          `<div class="media"><a href="${i.viewPath}"><label>${i.name}</label>${isVideo(i.name)
             ? "🎞️"
             : i.thumbnail ? `<img src="${i.thumbnail}" class="thumbnail">` : "⚪"
           }</div>`

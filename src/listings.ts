@@ -18,8 +18,8 @@ const db = isDockerDb ? await dockerDb() : await localDb();
 
 export interface FileItem {
   name: string;
-  webPath: string;
-  fullPath: string;
+  viewPath?: string;
+  srcPath: string;
   thumbnail?: string;
   isDirectory: boolean;
   duration: number | null;
@@ -44,17 +44,23 @@ interface VideoInfo {
   streams?: Array<{ duration: number }>;
 }
 
-export interface Listings {
+export interface DirList {
   dirs: FileItem[];
   files: FileItem[];
   media: FileItem[];
 }
 
-const getInfoFromDbItem = (dbItem: DbItem, webRoot: string): [string, string, string] => {
+const createFileViewPath = (fullAbsPath: string = '', name: string = '') => path.join('/fileView', fullAbsPath, name)
+const createFilePath = (fullAbsPath: string = '', name: string = '') => path.join('/file', fullAbsPath, name)
+const createDirViewPath = (fullAbsPath: string = '', name: string = '') => path.join('/dirView', fullAbsPath, name)
+const getInfoFromDbItem = (dbItem: DbItem, webRoot: string) => {
   const fullFilePath = dbItem.path;
   const name = fullFilePath.replace(/.*\//, '');
-  const webPath = fullFilePath.replace(webRoot, '');
-  return [fullFilePath, webPath, name];
+  return {
+    fullFilePath: dbItem.path,
+    srcPath: createFilePath(fullFilePath),
+    name
+  };
 };
 
 async function getVideoInfo(absPath: string): Promise<Partial<FFProbeResult>> {
@@ -66,7 +72,7 @@ async function getVideoInfo(absPath: string): Promise<Partial<FFProbeResult>> {
   }
 }
 
-export async function getListings(webRoot: string, fullAbsDirPath: string): Promise<Listings> {
+export async function getListings(webRoot: string, fullAbsDirPath: string): Promise<DirList> {
   const dirs: FileItem[] = [];
   const files: FileItem[] = [];
   const media: FileItem[] = [];
@@ -76,14 +82,15 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
 
   for (let nodeName of nodes) {
     const nodeStats = await statAsync(path.join(fullAbsDirPath, nodeName));
-    let container: FileItem[] = nodeStats.isDirectory()
+    const isDir = nodeStats.isDirectory()
+    let container: FileItem[] = isDir
       ? dirs
       : isMedia(nodeName)
         ? media
         : files;
 
     let duration: number = 0;
-    if (!nodeStats.isDirectory()) {
+    if (!isDir) {
       if (isVideo(nodeName)) {
         const videoInfo = await getVideoInfo(path.join(fullAbsDirPath, nodeName));
         if (videoInfo.streams?.[0]?.duration) {
@@ -95,11 +102,12 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
         thumbnail = img?.thumbnail;
       }
     }
+    const viewPathFn = isDir ? createDirViewPath : createFileViewPath
 
     container.push({
       name: nodeName,
-      webPath: path.join(`${fullAbsDirPath.replace(webRoot, '')}`, nodeName),
-      fullPath: path.join(fullAbsDirPath, nodeName),
+      srcPath: createFilePath(fullAbsDirPath, nodeName),
+      viewPath: viewPathFn(fullAbsDirPath, nodeName),
       thumbnail: thumbnail,
       isDirectory: nodeStats.isDirectory(),
       duration,
@@ -107,6 +115,7 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
       favorite: null
     });
   }
+  // all these webroots should be imported not passed. 
 
   return {
     dirs,
@@ -115,16 +124,17 @@ export async function getListings(webRoot: string, fullAbsDirPath: string): Prom
   };
 }
 
-export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): Listings {
+// fix me
+export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string): DirList {
   return {
     dirs: [],
     files: [],
     media: dbItems.map(dbItem => {
-      const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
+      const { fullFilePath, srcPath, name } = getInfoFromDbItem(dbItem, webRoot);
 
       return {
         name: name,
-        webPath: webPath,
+        srcPath,
         fullPath: fullFilePath,
         thumbnail: dbItem.thumbnail,
         id: dbItem.id,
@@ -137,8 +147,8 @@ export function constructMediaListingsFromDb(dbItems: DbItem[], webRoot: string)
   };
 }
 
-export async function constructItemFromDb(dbItem: DbItem, webRoot: string): Promise<FileItem> {
-  const [fullFilePath, webPath, name] = getInfoFromDbItem(dbItem, webRoot);
+export async function constructFileViewFromDb(dbItem: DbItem, webRoot: string): Promise<FileItem> {
+  const { fullFilePath, srcPath, name } = getInfoFromDbItem(dbItem, webRoot);
   let duration: number = 0;
   if (isVideo(fullFilePath)) {
     const videoInfo = await getVideoInfo(fullFilePath);
@@ -158,8 +168,7 @@ export async function constructItemFromDb(dbItem: DbItem, webRoot: string): Prom
 
   return {
     name: name,
-    webPath,
-    fullPath: fullFilePath,
+    srcPath,
     thumbnail: dbItem.thumbnail,
     isDirectory: false,
     duration,

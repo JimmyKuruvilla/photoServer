@@ -5,11 +5,11 @@ import { promisify } from 'util';
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import morgan from 'morgan';
-import { port, TABLES, WEB_ROOT_PATH } from './constants.ts';
+import { port, TABLES, SERVED_PATH } from './constants.ts';
 import { dirTemplate } from './pages/dirTemplate.ts';
 import {
   getListings,
-  constructItemFromDb,
+  constructFileViewFromDb,
   constructMediaListingsFromDb
 } from './listings.ts';
 import {
@@ -31,6 +31,7 @@ import { getBeforeAndAfterItems } from './services/media.ts';
 import { randomRouter } from './routes/random/router.ts';
 import { errorMiddleware } from './middleware/error.ts';
 import { mediaRouter } from './routes/media/router.ts';
+import { imgVidTemplate } from './pages/imgVidTemplate.ts';
 
 const statAsync = promisify(fs.stat);
 const app = express();
@@ -57,45 +58,50 @@ app.use(printRouter)
 app.use(randomRouter)
 app.use(mediaRouter)
 
-app.use('/dir/:path', async (req: Request, res: Response, next: NextFunction) => {
-  const targetPath = path.join(WEB_ROOT_PATH, req.params.path);
+app.get('/dirView/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
+  const targetPath = path.join(path.sep, req.params.path);
   try {
-    const listings = await getListings(WEB_ROOT_PATH, targetPath);
+    const listings = await getListings(SERVED_PATH, targetPath);
     res.send(dirTemplate(listings));
   } catch (error: any) {
     next(error)
   }
 });
-app.use('/file/:path', async (req: Request, res: Response, next: NextFunction) => {
-  const targetPath = path.join(WEB_ROOT_PATH, req.params.path);
+app.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
+  const targetPath = path.join(path.sep, req.params.path);
+  try {
+    const dbItem = await getItemViaPath(db, targetPath);
+    if (!dbItem) {
+      return res.status(404).send({ error: 'Item not found' });
+    }
+    const item = await constructFileViewFromDb(dbItem, SERVED_PATH);
+    const [beforeItem, afterItem] = await getBeforeAndAfterItems(targetPath)
+
+    res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
+    return;
+  }
+  catch (e: any) {
+    res.status(404).send({ error: e.message });
+    return;
+  }
+});
+
+app.get('/file/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
+  const targetPath = path.join(path.sep, req.params.path);
   try {
     res.sendFile(targetPath);
   } catch (error: any) {
     next(error)
   }
 });
-
-// app.use('/:name', async (req: Request, res: Response, next: NextFunction) => {
-//   const dirOrFilePath = path.join(WEB_ROOT_PATH, decodeURIComponent(req.originalUrl));
-//   console.log(dirOrFilePath)
-//   try {
-//     const node = await statAsync(dirOrFilePath);
-//     if (node.isDirectory()) {
-//       const listings = await getListings(WEB_ROOT_PATH, dirOrFilePath);
-//       res.send(dirTemplate(listings));
-//     } else {
-//       res.sendFile(dirOrFilePath);
-//     }
-//   } catch (error: any) {
-//     next(error)
-//   }
-// });
+// remove interval bullshit
+// rename routes to xView
 
 /**
  * Directory listing at root
  */
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  const listings = await getListings(WEB_ROOT_PATH, WEB_ROOT_PATH);
+  const listings = await getListings(SERVED_PATH, SERVED_PATH);
   res.send(dirTemplate(listings));
 });
 

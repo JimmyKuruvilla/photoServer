@@ -24,8 +24,8 @@ export function imgVidTemplate(
           ${generalToolbar(item as any)}
         </div>
 
-        <a href="${item.webPath.replace(nameSection, '')}"> 
-          <h6 class="webpath">${item.webPath} ↗</h6>
+        <a href="${item.srcPath.replace(nameSection, '')}"> 
+          <h6 class="webpath">${item.srcPath} ↗</h6>
         </a>
         
         <div class="content-wrapper">
@@ -50,7 +50,7 @@ export function imgVidTemplate(
           }
           share.photoItem = ${JSON.stringify(item)};
 
-          window.history.replaceState({}, '', '/media?fullpath=${item.fullPath}');
+          window.history.replaceState({}, '', '/media?fullpath=${item.srcPath}');
 
         </script>
 

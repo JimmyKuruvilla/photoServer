@@ -1,3 +1,4 @@
+const __dirname = import.meta.dirname;
 export const filesStr = 'files';
 export const dirsStr = 'dirs';
 export const mediaStr = 'media';
@@ -12,4 +13,4 @@ export const TABLES = {
 
 export type TableName = typeof TABLES[keyof typeof TABLES];
 
-export const WEB_ROOT_PATH = process.env.MEDIA_PATH || __dirname;
+export const SERVED_PATH = process.env.MEDIA_PATH || __dirname;

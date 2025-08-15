@@ -1,8 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { defaultInterval, WEB_ROOT_PATH } from '../../constants.ts';
+import { defaultInterval, SERVED_PATH } from '../../constants.ts';
 import { localDb } from '../../db/initDb.ts';
 import { getRandomFromDb } from '../../db.ts';
-import { constructItemFromDb } from '../../listings.ts';
+import { constructFileViewFromDb } from '../../listings.ts';
 import { getBeforeAndAfterItems } from '../../services/media.ts';
 import { getMediaHtmlFragment } from '../../pages/getMediaHtmlFragment.ts';
 import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
@@ -15,7 +15,7 @@ randomRouter.get('/random', async (req: Request, res: Response, next: NextFuncti
   try {
     const type = req.query.type as string;
     const dbItem = await getRandomFromDb(db, type as 'image' | 'video' | undefined);
-    const item = await constructItemFromDb(dbItem, WEB_ROOT_PATH);
+    const item = await constructFileViewFromDb(dbItem, SERVED_PATH);
     const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
     res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
   } catch (e) {
@@ -27,7 +27,7 @@ randomRouter.get('/random', async (req: Request, res: Response, next: NextFuncti
 randomRouter.get('/random/cli', async (req: Request, res: Response, next: NextFunction) => {
   const type = req.query.type as RandomType
   const dbItem = await getRandomFromDb(db, type);
-  const item = await constructItemFromDb(dbItem, WEB_ROOT_PATH);
+  const item = await constructFileViewFromDb(dbItem, SERVED_PATH);
   res.json({ ...item, html: getMediaHtmlFragment(item, defaultInterval, null, null) });
 });
 
@@ -35,7 +35,7 @@ randomRouter.get('/random/cli', async (req: Request, res: Response, next: NextFu
 randomRouter.get('/random/slideshow', async (req: Request, res: Response, next: NextFunction) => {
   const type = req.query.type as RandomType
   const dbItem = await getRandomFromDb(db, type);
-  const item = await constructItemFromDb(dbItem, WEB_ROOT_PATH);
+  const item = await constructFileViewFromDb(dbItem, SERVED_PATH);
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.fullPath)
 
   res.send(

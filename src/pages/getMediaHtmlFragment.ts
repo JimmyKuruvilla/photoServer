@@ -10,12 +10,10 @@ export function getMediaHtmlFragment(
 ): string {
   let html: string;
   if (isVideo(item.webPath)) {
-    html = `<video controls autoplay class="video"><source src="${interval ? path.join('..', item.webPath) : item.webPath
-      }" type="video/mp4"></video>`;
+    html = `<video controls autoplay class="video"><source src="${item.srcPath}" type="video/mp4"></video>`;
   } else {
     html =
-      `<img src="${interval ? path.join('..', item.webPath) : item.webPath
-      }" class="pic">`;
+      `<img src="${item.srcPath}" class="pic">`;
   }
 
   return `
