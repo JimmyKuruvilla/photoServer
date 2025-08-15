@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'photoServer',
-      script: './src/photoServer.ts',
+      script: './src/server.ts',
       interpreter: 'node',
       interpreterArgs: '--import tsx',
       env: {

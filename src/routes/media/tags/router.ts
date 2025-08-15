@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { SERVED_PATH, TABLES } from '../../../constants.ts';
 import { searchOnTags, createTag, getById, updateFieldById, deleteById } from '../../../db.ts';
 import { localDb } from '../../../db/initDb.ts';
-import { constructMediaListingsFromDb } from '../../../listings.ts';
+import { constructMediaListingsFromDb } from '../../../services/listings.ts';
 import { dirTemplate } from '../../../pages/dirTemplate.ts';
 
 export const tagsRouter = express.Router();
@@ -11,7 +11,7 @@ const db = await localDb();
 tagsRouter.get('/tags', async (req: Request, res: Response, next: NextFunction) => {
   const search = req.query.search as string;
   const dbItems = await searchOnTags(db, search);
-  const listings = constructMediaListingsFromDb(dbItems, SERVED_PATH);
+  const listings = constructMediaListingsFromDb(dbItems);
   const noResults = `<html><body><div class="no-search-results"> no results for ${search}</div></body></html>`
   res.json({ html: listings.media.length ? dirTemplate(listings as any) : noResults });
 });

@@ -5,14 +5,13 @@ import { promisify } from 'util';
 
 import ffprobe, { FFProbeResult } from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { isMedia, isVideo, isPic } from './guards.ts';
-import { getItemViaPath } from './db.js';
+import { isMedia, isVideo, isPic } from '../guards.ts';
+import { getItemViaPath } from '../db.ts';
 
 const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
 
-
-import { dockerDb, localDb } from './db/initDb.ts';
+import { dockerDb, localDb } from '../db/initDb.ts';
 const isDockerDb = process.env.DOCKERDB;
 const db = isDockerDb ? await dockerDb() : await localDb();
 

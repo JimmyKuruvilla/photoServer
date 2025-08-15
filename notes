@@ -6,13 +6,7 @@
 
 
 ## todo
-
--- clickign random, leaves url as RANDOM instead of changing it to a bookmarkable one. 
--- random/slideshow does the same thing and you can't go back!
--- auto backup db
--- handle better scaling of images based on device orientation
--- search!
--- add last updated column for purging db. 
+-- convert to use vite  + react
 -- make buttons bigger on touch devices
 -- convert avi to mp4
  -- delete old

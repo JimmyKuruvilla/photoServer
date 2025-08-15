@@ -1,4 +1,4 @@
-import { FileItem } from '../listings.ts';
+import { FileItem } from '../services/listings.ts';
 import { generalToolbar } from './toolbar.ts';
 import { getMediaHtmlFragment } from './getMediaHtmlFragment.ts';
 import { cssAndJs } from './cssAndJs.ts';

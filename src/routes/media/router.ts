@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { TABLES } from '../../constants.ts';
 import { getFavoritesFromDb, updateFieldById } from '../../db.ts';
-import { constructMediaListingsFromDb } from '../../listings.ts';
+import { constructMediaListingsFromDb } from '../../services/listings.ts';
 import { localDb } from '../../db/initDb.ts';
 import { tagsRouter } from './tags/router.ts';
 import { dirTemplate } from '../../pages/dirTemplate.ts';

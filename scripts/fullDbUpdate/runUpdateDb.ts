@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { localDb } from '../../src/db/initDb.ts'
-import { recursiveTraverseDir } from '../../src/listings.ts'
+import { recursiveTraverseDir } from '../../src/services/listings.ts'
 import { createOrUpdateFromFilePath } from '../lib/updateDb.ts'
 
 /**

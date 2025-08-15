@@ -1,6 +1,6 @@
 import path from 'path';
 import { isVideo } from '../guards.ts';
-import { FileItem } from '../listings.ts';
+import { FileItem } from '../services/listings.ts';
 
 export function getMediaHtmlFragment(
   item: FileItem,

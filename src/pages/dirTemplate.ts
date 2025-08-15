@@ -1,6 +1,6 @@
 import { isVideo } from '../guards.ts';
 import { generalToolbar } from './toolbar.ts';
-import { FileItem } from '../listings.ts';
+import { FileItem } from '../services/listings.ts';
 import { cssAndJs } from './cssAndJs.ts';
 
 export function dirTemplate(locals: {

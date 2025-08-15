@@ -1,4 +1,4 @@
-import { getListings } from '../listings.ts';
+import { getListings } from './listings.ts';
 
 export async function getBeforeAndAfterItems(dbPath: string): Promise<[any, any]> {
   const fullAbsDirPath = dbPath.substring(0, dbPath.lastIndexOf('/'))

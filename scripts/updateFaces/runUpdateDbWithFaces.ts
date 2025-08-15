@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { recursiveTraverseDir } from '../../src/listings.ts'
+import { recursiveTraverseDir } from '../../src/services/listings.ts'
 import { localDb } from '../../src/db/initDb.ts'
 import { updateFaceCount } from '../lib/faces.ts'
 /*

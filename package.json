@@ -2,14 +2,14 @@
   "name": "PhotoServer",
   "version": "1.0.0",
   "description": "",
-  "main": "src/photoServer.ts",
+  "main": "src/server.ts",
   "type": "module",
   "scripts": {
     "knex": "knex",
     "migrate:latest": "npm run knex migrate:latest -- --knexfile ./knexfile.cjs",
     "migrate:rollback": "npm run knex migrate:rollback -- --knexfile ./knexfile.cjs",
     "build": "tsc",
-    "dev": "MEDIA_PATH=/mnt/backup/media tsx watch src/photoServer.ts"
+    "dev": "MEDIA_PATH=/mnt/backup/media tsx watch src/server.ts"
   },
   "author": "",
   "license": "ISC",

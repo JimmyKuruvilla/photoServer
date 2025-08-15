@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { defaultInterval } from '../../constants.ts';
 import { localDb } from '../../db/initDb.ts';
 import { getRandomFromDb } from '../../db.ts';
-import { constructFileViewFromDb } from '../../listings.ts';
+import { constructFileViewFromDb } from '../../services/listings.ts';
 import { getBeforeAndAfterItems } from '../../services/media.ts';
 import { getMediaHtmlFragment } from '../../pages/getMediaHtmlFragment.ts';
 import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';

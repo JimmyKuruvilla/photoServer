@@ -11,7 +11,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { recursiveTraverseDir } from '../src/listings.js';
+import { recursiveTraverseDir } from '../src/services/listings.ts';
 import { TABLES } from '../src/constants.js';
 import { dockerDb, localDb } from '../src/db/initDb.js';
 
