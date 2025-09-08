@@ -14,9 +14,12 @@ printRouter.get('/print', async (req: Request, res: Response, next: NextFunction
 
 printRouter.post('/print/upload', upload.single('fileToPrint'), async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log(req.file)
+    
     if (req.file) {
       await printFile(req.file.path)
     }
+    res.status(201).send(printPage())
   } catch (e) {
     next(e)
   }
