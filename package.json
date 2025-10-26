@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "knex": "knex",
+    "migrate:make": "npm run knex -- migrate:make --migrations-directory ./src/db/migrations $NAME",
     "migrate:latest": "npm run knex migrate:latest -- --knexfile ./knexfile.cjs",
     "migrate:rollback": "npm run knex migrate:rollback -- --knexfile ./knexfile.cjs",
     "build": "tsc",

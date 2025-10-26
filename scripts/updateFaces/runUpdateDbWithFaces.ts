@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { recursiveTraverseDir } from '../../src/services/listings.ts'
-import { localDb } from '../../src/db/initDb.ts'
-import { updateFaceCount } from '../lib/faces.ts'
+import { localDb } from '../../src/db/initDb.ts';
+import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
+import { updateFaceCount } from '../lib/faces.ts';
 /*
  cd ~/scripts/photoServer
  source ./python/venv/bin/activate

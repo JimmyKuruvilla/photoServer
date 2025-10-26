@@ -1,4 +1,5 @@
-import { recursiveTraverseDir } from '../../src/services/listings.ts';
+
+import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
 import { moveFileByCreationDate } from '../lib/moveByDate.ts';
 /**
  * Moves all files in SOURCE_PATH to best creation date in TARGET_PATH

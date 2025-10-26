@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { localDb } from '../../src/db/initDb.ts'
-import { recursiveTraverseDir } from '../../src/services/listings.ts'
-import { createOrUpdateFromFilePath } from '../lib/updateDb.ts'
+import { localDb } from '../../src/db/initDb.ts';
+import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
+import { createOrUpdateFromFilePath } from '../lib/updateDb.ts';
 
 /**
  * Updates all files in SOURCE_PATH with entire db update flow: insert, create thumbnail, record face count

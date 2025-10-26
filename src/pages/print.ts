@@ -16,7 +16,9 @@ export const printPage = (): string => `
 
 export const printFile = async (filepath: string): Promise<void> => {
   try {
-    const { stdout, stderr } = await execAsync(`lpr "${filepath}"`);
+    // it's just a config problem. Need to set the printer in cups. 
+    const { stdout, stderr } = await execAsync(`PRINTER="HL-2270DW" lpr "${filepath}"`);
+    // const { stdout, stderr } = await execAsync(`cat "${filepath}" > /dev/tcp/192.168.2.111/9100`);
     console.log(stdout, stderr);
   } catch (error) {
     throw new Error(`PRINT_ERROR: ${(error as any).stderr}`);
