@@ -1,6 +1,6 @@
 // modified version of https://www.npmjs.com/package/image-thumbnail
 import fs from 'fs';
-import { imageSize } from 'image-size'
+import { imageSize } from 'image-size';
 import sharp from 'sharp';
 
 const PERCENTAGE = 10;
@@ -46,7 +46,7 @@ const fromPath = async (
   return thumbnailBuffer;
 };
 
-const imageThumbnail = async (source: string, options?: ThumbnailOptions): Promise<Buffer | string> => {
+const createImageThumbnail = async (source: string, options?: ThumbnailOptions): Promise<Buffer | string> => {
   const percentage = options?.percentage ?? PERCENTAGE;
   const width = options?.width;
   const height = options?.height;
@@ -56,7 +56,7 @@ const imageThumbnail = async (source: string, options?: ThumbnailOptions): Promi
   return await fromPath(source, percentage, width, height, responseType, jpegOptions);
 };
 
-export default imageThumbnail;
+export default createImageThumbnail;
 
 const getDimensions = (imageBuffer: Buffer, percentageOfImage: number, dimensions: Dimensions): Dimensions => {
   if (typeof dimensions.width !== 'undefined' && typeof dimensions.height !== 'undefined') {

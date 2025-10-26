@@ -1,9 +1,9 @@
-import path from 'path';
-import fs from 'node:fs/promises';
 import chokidar from 'chokidar';
-import { moveFileByCreationDate } from '../lib/moveByDate.ts';
-import { createOrUpdateFromFilePath } from '../lib/updateDb.ts';
+import fs from 'node:fs/promises';
+import path from 'path';
+import { ingest } from '../lib/ingestion.ts';
 import { log } from '../lib/log.ts';
+import { moveFileByCreationDate } from '../lib/moveByDate.ts';
 
 (async () => {
   const sourceDir = process.env.SOURCE_PATH;
@@ -14,7 +14,6 @@ import { log } from '../lib/log.ts';
   }
 
   const watcher = chokidar.watch(sourceDir, { awaitWriteFinish: { pollInterval: 1000 } });
-  const onAdd = moveFileByCreationDate(targetDir);
 
   watcher
     .on('ready', () => log('WATCHER::READY'))
@@ -41,9 +40,9 @@ import { log } from '../lib/log.ts';
       }
 
       log(`WATCHER::PROCESSING_NEW_FILE ${absPath}`);
-      const newFilePath = await onAdd(absPath);
+      const newFilePath = await moveFileByCreationDate(targetDir)(absPath);
       if (newFilePath !== null) {
-        await createOrUpdateFromFilePath(newFilePath);
+        await ingest(newFilePath);
       }
     })
 

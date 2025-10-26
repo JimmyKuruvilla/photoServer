@@ -6,6 +6,7 @@ export const port = 4000;
 export const defaultInterval = 6000;
 export const NL = '\n';
 export const ONE_DAY_SECS = 86400;
+export const IGNORE_PREFIX = '__'
 
 export const TABLES = {
   IMAGES: 'images',

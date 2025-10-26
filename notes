@@ -12,10 +12,30 @@
  -- delete old
  -- delete old from s3
 
+-- display log files as type text
+-- be able to explore in a direction given a date, not just within a folder
+-- permadelete based on hashes
+
 -- spacebar to be pause start and then stop. 
 -- read EXIF data and rotate photos accordingly. 
 -- remove media html `content` classes
 - install postfix to get crontab logs, install mutt for better mail handling
+-- db cleanup
+-- script to check if db entry exists on disk, and then log it (then delete from db)
+
+-- face count is broken due to venv setup
+
+/**
+Find these
+  Thumbs.db
+  .THM
+  .AVI
+  .DS_Store
+  Picasa.ini
+- delete from disk, 
+- delete from db,
+- aws sync --delete to s3. 
+*/
 
 TODO
 leave original service alone and build a new one along side it. 

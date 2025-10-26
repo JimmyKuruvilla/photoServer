@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import child_process from 'child_process'
-import { Knex } from 'knex'
-import { log } from './log.ts'
+import child_process from 'child_process';
+import { Knex } from 'knex';
+import { log } from './log.ts';
 const spawn = child_process.spawnSync;
 
 const FACE_DETECTION_SCRIPT_PATH = './python/mediapipe_face.py'
@@ -35,10 +35,10 @@ export const updateFaceCount = async (db: Knex, filepath: string) => {
   } catch (error: any) {
     await trx.rollback();
     if (error.message.includes('Image decoding failed (unknown image type)')) {
-      log(`PIPELINE::FACES_SKIPPING_FILE ${filepath}`);
+      log(`INGEST::FACES_SKIPPING_FILE ${filepath}`);
       return
     } else {
-      log(`PIPELINE::FACES_PYTHON_ERROR ${error.message}`);
+      log(`INGEST::FACES_PYTHON_ERROR ${error.message}`);
       return
     }
   }
@@ -46,8 +46,9 @@ export const updateFaceCount = async (db: Knex, filepath: string) => {
   try {
     await trx('images').where('path', filepath).update({ face_count: numFaces });
     await trx.commit();
-    log(`PIPELINE::FACES ${filepath} numFaces: ${numFaces}`)
+    log(`INGEST::FACES ${filepath} numFaces: ${numFaces}`)
   } catch (error: any) {
-    log(`PIPELINE::FACES_ERROR ${error.message}`);
+    await trx.rollback();
+    log(`INGEST::FACES_ERROR ${error.message}`);
   }
 }

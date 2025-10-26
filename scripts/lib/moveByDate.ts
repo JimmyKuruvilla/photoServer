@@ -21,13 +21,13 @@
 
 Currently does 3 and then 2 if data not available. 1 not attempted. 
 */
-import fs from 'node:fs/promises';
-import path from 'path';
 import ExifReader from 'exifreader';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
+import fs from 'node:fs/promises';
+import path from 'path';
 import { isPic, isVideo } from '../../src/guards.ts';
-import { log } from './log.ts'
+import { log } from './log.ts';
 const renameAsync = fs.rename;
 const readFile = fs.readFile;
 const mkdir = fs.mkdir;
@@ -47,15 +47,15 @@ const createDir = async (path: string) => {
   }
   catch (error: any) {
     if (error.code === 'EEXIST') {
-      log(`PIPELINE::CREATE_DIRECTORY_ALREADY_EXISTS ${path}`);
+      log(`INGEST::CREATE_DIRECTORY_ALREADY_EXISTS ${path}`);
     } else {
-      log(`PIPELINE::CREATE_DIRECTORY_CANNOT_CREATE_DIR ${error.message}`);
+      log(`INGEST::CREATE_DIRECTORY_CANNOT_CREATE_DIR ${error.message}`);
     }
   }
 }
 
 const move = async (source: string, target: string) => {
-  log(`PIPELINE::MOVE_TO_DATE from ${source} to \n ${target}`);
+  log(`INGEST::MOVE_TO_DATE from ${source} to \n ${target}`);
   await renameAsync(source, target);
 }
 
@@ -74,7 +74,7 @@ const movePic = async (fullAbsSourcePath: string, targetDir: string, filename: s
       // 2023-08-25T09:10:05.832Z to 2023-08-25
       const stats = await stat(fullAbsSourcePath)
       formattedDate = stats.birthtime.toISOString().split('T')[0]
-      log(`PIPELINE::MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
+      log(`INGEST::MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
     }
 
     await createDir(path.join(targetDir, formattedDate));
@@ -82,7 +82,7 @@ const movePic = async (fullAbsSourcePath: string, targetDir: string, filename: s
     await move(fullAbsSourcePath, fullAbsTargetPath);
     return fullAbsTargetPath;
   } catch (error: any) {
-    log(`PIPELINE::MOVE_TO_DATE_ERROR ${error.message}`);
+    log(`INGEST::MOVE_TO_DATE_ERROR ${error.message}`);
     return null;
   }
 }
@@ -100,7 +100,7 @@ const moveVideo = async (fullAbsSourcePath: string, targetDir: string, filename:
       // 2023-08-25T09:10:05.832Z to 2023-08-25
       const stats = await stat(fullAbsSourcePath)
       formattedDate = stats.birthtime.toISOString().split('T')[0]
-      log(`PIPELINE::MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
+      log(`INGEST::MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
     }
 
     await createDir(path.join(targetDir, formattedDate));
@@ -108,7 +108,7 @@ const moveVideo = async (fullAbsSourcePath: string, targetDir: string, filename:
     await move(fullAbsSourcePath, fullAbsTargetPath);
     return fullAbsTargetPath;
   } catch (error: any) {
-    log(`PIPELINE::MOVE_TO_DATE_FFPROBE_ERROR ${error.message}`);
+    log(`INGEST::MOVE_TO_DATE_FFPROBE_ERROR ${error.message}`);
     return null;
   }
 }
