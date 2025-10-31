@@ -26,26 +26,14 @@
 -- face count is broken due to venv setup
 
 /**
-Find these
-  Thumbs.db
-  .THM
-  .AVI
-  .DS_Store
-  Picasa.ini
-- delete from disk, 
+permadelete
+- delete from disk: purgeFilesByPattern (but by tag), 
 - insert hash into deleted table
 - delete from db, (purge script)
 - aws sync --delete to s3. (has to be manual)
 */
 
 TODO
-favorites should just be a button that adds a tag for you automatically
-- script all existing favorites into tags 'favorite'
-- drop favorites column
-- update routes to auto tag with 'fav', and list 'fav's
-
-- same for marked: markedForDelete
-
 leave original service alone and build a new one along side it. 
 0. refactor utils + guards
 store a hash of a file on injest. So we can tell which files are the same.
