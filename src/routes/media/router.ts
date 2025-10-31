@@ -1,10 +1,10 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { TABLES } from '../../constants.ts';
 import { getFavoritesFromDb, updateFieldById } from '../../db.ts';
-import { constructMediaListingsFromDb } from '../../services/listings.ts';
 import { localDb } from '../../db/initDb.ts';
-import { tagsRouter } from './tags/router.ts';
 import { dirTemplate } from '../../pages/dirTemplate.ts';
+import { constructMediaListingsFromDb } from '../../services/listings.ts';
+import { tagsRouter } from './tags/router.ts';
 export const mediaRouter = express.Router();
 const db = await localDb();
 
@@ -17,7 +17,7 @@ mediaRouter.get('/media/favorites', async (req: Request, res: Response, next: Ne
 mediaRouter.patch('/media/:id/favorite', async (req: Request, res: Response, next: NextFunction) => {
   if (req.body.favorite !== undefined) {
     try {
-      const dbRes = await updateFieldById(db, TABLES.IMAGES, parseInt(req.params.id), 'favorite', req.body.favorite);
+      const dbRes = await updateFieldById(db, TABLES.MEDIA, parseInt(req.params.id), 'favorite', req.body.favorite);
       res.status(200).json(dbRes[0]);
     } catch (e: any) {
       res.send(e)
@@ -36,7 +36,7 @@ mediaRouter.get('/media/marked', async (req: Request, res: Response, next: NextF
 mediaRouter.patch('/media/:id/marked', async (req: Request, res: Response, next: NextFunction) => {
   if (req.body.marked !== undefined) {
     try {
-      const dbRes = await updateFieldById(db, TABLES.IMAGES, parseInt(req.params.id), 'marked', req.body.marked);
+      const dbRes = await updateFieldById(db, TABLES.MEDIA, parseInt(req.params.id), 'marked', req.body.marked);
       res.status(200).json(dbRes[0]);
     } catch (e: any) {
       res.send(e)

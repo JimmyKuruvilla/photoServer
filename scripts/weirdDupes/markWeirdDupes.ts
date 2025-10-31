@@ -26,7 +26,7 @@ const detectDupes = async (nodePath: string) => {
 
   if (LEADING_SIX_DIGITS_DASH_RE.test(filename) && fs.existsSync(path.join(dirname, simpleFilename))) {
     console.log(`marking duplicate for deletion ${filename}`)
-    const dbRes = await db(TABLES.IMAGES)
+    const dbRes = await db(TABLES.MEDIA)
       .select('*')
       .where({ path: nodePath })
       .update({ marked: true });

@@ -1,9 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express';
-import { SERVED_PATH, TABLES } from '../../../constants.ts';
-import { searchOnTags, createTag, getById, updateFieldById, deleteById } from '../../../db.ts';
+import express, { NextFunction, Request, Response } from 'express';
+import { TABLES } from '../../../constants.ts';
+import { createTag, deleteById, getById, searchOnTags, updateFieldById } from '../../../db.ts';
 import { localDb } from '../../../db/initDb.ts';
-import { constructMediaListingsFromDb } from '../../../services/listings.ts';
 import { dirTemplate } from '../../../pages/dirTemplate.ts';
+import { constructMediaListingsFromDb } from '../../../services/listings.ts';
 
 export const tagsRouter = express.Router();
 const db = await localDb();
@@ -36,7 +36,7 @@ tagsRouter.post('/tags', async (req: Request, res: Response, next: NextFunction)
 
 tagsRouter.get('/tags/:tagId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dbRes = await getById(db, TABLES.TAGS, parseInt(req.params.tagId));
+    const dbRes = await getById(db, TABLES.MEDIA_TAGS, parseInt(req.params.tagId));
     dbRes.length === 0 ? res.sendStatus(404) : res.status(200).json(dbRes[0]);
   } catch (e: any) {
     res.send(e)
@@ -45,7 +45,7 @@ tagsRouter.get('/tags/:tagId', async (req: Request, res: Response, next: NextFun
 
 tagsRouter.patch('/tags/:tagId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dbRes = await updateFieldById(db, TABLES.TAGS, parseInt(req.params.tagId), 'value', req.body.tagValue);
+    const dbRes = await updateFieldById(db, TABLES.MEDIA_TAGS, parseInt(req.params.tagId), 'value', req.body.tagValue);
     res.status(200).json(dbRes[0]);
   } catch (e: any) {
     res.send(e)
@@ -54,7 +54,7 @@ tagsRouter.patch('/tags/:tagId', async (req: Request, res: Response, next: NextF
 
 tagsRouter.delete('/tags/:tagId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dbRes = await deleteById(db, TABLES.TAGS, parseInt(req.params.tagId));
+    const dbRes = await deleteById(db, TABLES.MEDIA_TAGS, parseInt(req.params.tagId));
     res.status(200).json({});
   } catch (e: any) {
     res.send(e)

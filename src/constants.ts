@@ -9,8 +9,9 @@ export const ONE_DAY_SECS = 86400;
 export const IGNORE_PREFIX = '__'
 
 export const TABLES = {
-  IMAGES: 'images',
-  TAGS: 'image_tags'
+  MEDIA: 'media',
+  MEDIA_TAGS: 'media_tags',
+  DELETED: 'deleted'
 } as const;
 
 export type TableName = typeof TABLES[keyof typeof TABLES];

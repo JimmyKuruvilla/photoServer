@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Knex } from 'knex';
+import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { isPic } from '../../src/guards.ts';
 import { updateFaceCount } from './faces.ts';
@@ -12,7 +13,7 @@ const db = await localDb();
 // TODO: change to an upsert, gather all data first, then upsert once
 export async function ingest(filepath: string) {
   const trx = await db.transaction();
-  const dbResult = await trx('images').where('path', filepath);
+  const dbResult = await trx(TABLES.MEDIA).where('path', filepath);
 
   if (dbResult.length === 0) {
     log(`INGEST::INSERT_IF_NOT_EXISTS ${filepath}`);
@@ -33,7 +34,7 @@ async function insertRowIfNotExists(trx: Knex.Transaction, filepath: string) {
   }
 
   try {
-    await trx('images').insert({ path: filepath, thumbnail });
+    await trx(TABLES.MEDIA).insert({ path: filepath, thumbnail });
     await trx.commit();
     log(`INGEST::INSERT: ${filepath}`)
     logThumbnail(filepath, thumbnail!);
@@ -48,7 +49,7 @@ async function updateThumbnailIfNotExists(trx: Knex.Transaction, filepath: strin
     const thumbnail = await genB64Thumbnail(filepath);
     try {
       if (thumbnail) {
-        await trx('images').where('path', filepath).update({ thumbnail });
+        await trx(TABLES.MEDIA).where('path', filepath).update({ thumbnail });
         logThumbnail(filepath, thumbnail);
       }
       await trx.commit();

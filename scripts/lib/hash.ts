@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Knex } from 'knex';
 import fs from 'node:fs';
 import path from 'node:path';
+import { TABLES } from '../../src/constants.ts';
 import { isPic } from '../../src/guards.ts';
 import { getExifData } from './exif.ts';
 import { log } from './log.ts';
@@ -42,7 +43,7 @@ export const updateHashOrientationModel = async (db: Knex, filepath: string) => 
   const trx = await db.transaction();
 
   try {
-    await trx('images').where('path', filepath).update({ hash, orientation, model });
+    await trx(TABLES.MEDIA).where('path', filepath).update({ hash, orientation, model });
     log(`INGEST::HASH_ORIENTATION_MODEL ${filepath} ${hash}, ${orientation}, ${model}`);
     await trx.commit();
   } catch (error: any) {

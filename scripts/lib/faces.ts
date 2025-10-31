@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import child_process from 'child_process';
 import { Knex } from 'knex';
+import { TABLES } from '../../src/constants.ts';
 import { log } from './log.ts';
 const spawn = child_process.spawnSync;
 
@@ -44,7 +45,7 @@ export const updateFaceCount = async (db: Knex, filepath: string) => {
   }
 
   try {
-    await trx('images').where('path', filepath).update({ face_count: numFaces });
+    await trx(TABLES.MEDIA).where('path', filepath).update({ face_count: numFaces });
     await trx.commit();
     log(`INGEST::FACES ${filepath} numFaces: ${numFaces}`)
   } catch (error: any) {

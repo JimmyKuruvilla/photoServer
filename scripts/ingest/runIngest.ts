@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import path from 'node:path';
-import { IGNORE_PREFIX } from '../../src/constants.ts';
+import { IGNORE_PREFIX, TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
 import { ingest } from '../lib/ingestion.ts';
@@ -37,7 +37,7 @@ const isIgnored = (filepath: string) => {
     ingestFileToDb
   );
 
-  const size = await db.raw(`SELECT pg_size_pretty( pg_total_relation_size('images') );`)
+  const size = await db.raw(`SELECT pg_size_pretty( pg_total_relation_size(${TABLES.MEDIA}) );`)
   console.log(count, size);
   process.exit();
 })();
