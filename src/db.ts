@@ -1,24 +1,29 @@
 
 import { Knex } from 'knex';
-import { TABLES, TableName } from './constants.js';
+import { COLS, TABLES, TAGS, TableName } from './constants.js';
 import { isPic, isVideo } from './guards.js';
+import { isIgnored } from './utils.ts';
 
-interface DbImage {
+export interface DbMedia {
   id: number;
   path: string;
-  favorite: boolean;
-  marked: boolean;
   thumbnail?: string;
+  face_count: number | null;
+  created_at: Date,
+  hash: string;
+  orientation?: string;
+  model?: string;
 }
 
-interface DbTag {
+export interface DbTag {
   id: number;
   value: string;
   media_id: number;
+  created_at: Date,
 }
 
-interface ImageWithTags extends DbImage {
-  tags: Array<{ id: number; value: string }>;
+export interface DbMediaWithTags extends DbMedia {
+  tags: DbTag[]
 }
 
 let lastId: number;
@@ -41,18 +46,17 @@ export function getRandomInt(min: number, max: number): number {
 }
 
 // dumb but fast
-export async function getRandomFromDb(db: Knex, type: 'image' | 'video' = 'image'): Promise<DbImage> {
+export async function getRandomFromDb(db: Knex, type: 'image' | 'video' = 'image'): Promise<DbMediaWithTags> {
   const filterFn = type === 'image' ? isPic : isVideo;
   let isMatch = false;
-  let dbItem: DbImage;
+  let dbItem: DbMediaWithTags | undefined;
 
   while (!isMatch) {
-    const result = await getById(db, TABLES.MEDIA, getRandomInt(firstId, lastId));
-    dbItem = result[0];
+    const result = await getItemById(db, getRandomInt(firstId, lastId));
+    dbItem = result;
 
     if (dbItem) {
-      const allowed = dbItem.path.indexOf('__dropoff') === -1
-      if (allowed && !dbItem.marked && filterFn(dbItem.path)) {
+      if (!isIgnored(dbItem.path) && filterFn(dbItem.path)) {
         isMatch = true;
       }
     }
@@ -61,53 +65,52 @@ export async function getRandomFromDb(db: Knex, type: 'image' | 'video' = 'image
   return dbItem!;
 }
 
-export async function getById(db: Knex, tableName: TableName, id: number): Promise<DbImage[]> {
+export async function getById(db: Knex, tableName: TableName, id: number): Promise<DbMedia[]> {
   const result = await db(tableName).select('*').where({ id: parseInt(id.toString(), 10) });
   return result;
 }
 
 export async function getFirstId(db: Knex): Promise<{ id: number }> {
-  const result = await db.raw(`SELECT id FROM ${TABLES.MEDIA} ORDER BY id ASC LIMIT 1;`);
-  return result.rows[0];
+  const result = await db<DbMedia, DbMedia>(TABLES.MEDIA).select('id').from(TABLES.MEDIA).orderBy('id', 'asc').limit(1)
+  return result[0];
 }
 
 export async function getLastId(db: Knex): Promise<{ id: number }> {
-  const result = await db.raw(`SELECT id FROM ${TABLES.MEDIA} ORDER BY id DESC LIMIT 1;`);
-  return result.rows[0];
+  const result = await db<DbMedia, DbMedia>(TABLES.MEDIA).select('id').from(TABLES.MEDIA).orderBy('id', 'desc').limit(1)
+  return result[0];
 }
 
-export async function getFavoritesFromDb(db: Knex): Promise<DbImage[]> {
-  // currently doesn't support tags
-  const result = await db(TABLES.MEDIA).where({ favorite: true });
-  return result;
+const MediaWithTagsQuery = (db: Knex) => db<DbMedia, DbMediaWithTags>(TABLES.MEDIA)
+  .select([
+    'media.id',
+    'path',
+    'thumbnail',
+    'face_count',
+    'media.created_at',
+    'hash',
+    'orientation',
+    'model',
+    db.raw<DbTag>(`json_agg(json_build_object('id', media_tags.id, 'value', media_tags.value)) as tags`)
+  ])
+  .from(TABLES.MEDIA)
+  .leftJoin(TABLES.MEDIA_TAGS, 'media.id', 'media_tags.media_id')
+
+export async function getItemById(db: Knex, id: number): Promise<DbMediaWithTags | undefined> {
+  const result = await MediaWithTagsQuery(db)
+    .where('media.id', id)
+    .groupBy('media.id')
+
+  return result[0];
 }
 
-export async function getMarkedFromDb(db: Knex): Promise<DbImage[]> {
-  // currently doesn't support tags
-  const result = await db(TABLES.MEDIA).where({ marked: true });
-  return result;
-}
-
-export async function getItemViaPath(db: Knex, fullFilePath: string): Promise<ImageWithTags | undefined> {
+export async function getItemByPath(db: Knex, fullFilePath: string): Promise<DbMediaWithTags | undefined> {
   const path = fullFilePath.replace(/'/g, "''");
 
-  const result = await db.raw(`SELECT
-    media.id,
-    path,
-    favorite,
-    marked,
-    thumbnail,
-    json_agg(json_build_object('id', mt.id, 'value', mt.value)) as tags
-  FROM
-    ${TABLES.MEDIA}
-    left join ${TABLES.MEDIA_TAGS} as mt on mt.media_id = media.id
-  WHERE 
-    media.path = '${path}'
-  GROUP BY
-    media.id;
-`);
+  const result = await MediaWithTagsQuery(db)
+    .where('media.path', path)
+    .groupBy('media.id')
 
-  return result.rows[0];
+  return result[0];
 }
 
 export async function updateFieldById<T = any>(
@@ -152,10 +155,11 @@ export async function createTag(db: Knex, mediaId: number, tagValue: string): Pr
   }
 }
 
-export async function searchOnTags(db: Knex, searchParam: string): Promise<DbImage[]> {
+// TODO: add index for media_tags.value
+export async function searchOnTags(db: Knex, searchParam: string): Promise<DbMediaWithTags[]> {
   try {
     const dbRes = await db(TABLES.MEDIA_TAGS)
-      .whereILike('value', `%${searchParam}%`)
+      .where(COLS.MEDIA_TAGS.VALUE, searchParam)
       .innerJoin(TABLES.MEDIA, 'media.id', `${TABLES.MEDIA_TAGS}.media_id`)
       .distinctOn('media.id');
 
@@ -163,4 +167,12 @@ export async function searchOnTags(db: Knex, searchParam: string): Promise<DbIma
   } catch (e) {
     throw e;
   }
+}
+
+export async function getFavoritesFromDb(db: Knex) {
+  return searchOnTags(db, TAGS.FAVORITE)
+}
+
+export async function getMarkedFromDb(db: Knex) {
+  return searchOnTags(db, TAGS.MARKED)
 }

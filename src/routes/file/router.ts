@@ -1,10 +1,10 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
-import { getItemViaPath } from '../../db.ts';
-import { constructFileViewFromDb } from '../../services/listings.ts';
-import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
-import { getBeforeAndAfterItems } from '../../services/media.ts';
+import { getItemByPath } from '../../db.ts';
 import { localDb } from '../../db/initDb.ts';
+import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
+import { constructFileViewFromDb } from '../../services/listings.ts';
+import { getBeforeAndAfterItems } from '../../services/media.ts';
 const db = await localDb();
 export const fileRouter = express.Router();
 
@@ -14,7 +14,7 @@ export const fileRouter = express.Router();
 fileRouter.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
   const targetPath = path.join(path.sep, req.params.path);
   try {
-    const dbItem = await getItemViaPath(db, targetPath);
+    const dbItem = await getItemByPath(db, targetPath);
     if (!dbItem) {
       return res.status(404).send({ error: 'Item not found' });
     }

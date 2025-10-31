@@ -130,7 +130,7 @@ async function replaceContent(type) {
 
   try {
     const item = await fatch(url);
-    share.photoItem = item;
+    share.mediaItem = item;
     replaceOnInterval(
       item.duration ? item.duration + 1000 : (share.contentInterval || 6000),
       type
@@ -153,44 +153,41 @@ async function replaceContent(type) {
   }
 }
 
-function toggleFavorite() {
-  pauseSlideShow();
-  if (!share.photoItem) return;
+const FAVORITE = 'favorite'
+const MARKED = 'marked'
 
-  fatch(`/media/${share.photoItem.id}/favorite`, 'patch', {
-    favorite: !share.photoItem.favorite
-  }).then((resp) => {
-    if (share.photoItem) {
-      share.photoItem.favorite = resp.favorite;
-      updateFavoriteButton(resp);
-    }
-  });
+function toggleTag(name) {
+  if (!share.mediaItem) return;
+  pauseSlideShow();
+
+  const tag = share.mediaItem?.tags.find(tag => tag.value === name)
+  const action = tag ? deleteTagById(tag.id) : createTagOnItem(name, share.mediaItem.id)
+  action.then(() => {
+    location.reload();
+  })
 }
 
-function toggleMarked() {
-  pauseSlideShow();
-  if (!share.photoItem) return;
+const toggleFavorite = () => toggleTag(FAVORITE)
+const toggleMarked = () => toggleTag(MARKED)
 
-  fatch(`/media/${share.photoItem.id}/marked`, 'patch', {
-    marked: !share.photoItem.marked
-  }).then((resp) => {
-    if (share.photoItem) {
-      share.photoItem.marked = resp.marked;
-      updateMarkedButton(resp);
-    }
-  });
+function createTagOnItem(tagValue, itemId) {
+  return fatch(`/media/tags`, 'post', {
+    tagValue,
+    mediaId: itemId
+  })
+}
+
+function deleteTagById(tagId) {
+  return fatch(`/media/tags/${tagId}`, 'delete')
 }
 
 function addTag() {
-  if (!share.photoItem) return;
+  if (!share.mediaItem) return;
 
   const input = $('.add-tag-input')
   if (!input) return;
 
-  fatch(`/media/tags`, 'post', {
-    tagValue: input.value,
-    mediaId: share.photoItem.id
-  }).then(() => {
+  createTagOnItem(input.value, share.mediaItem.id).then(() => {
     location.reload();
   });
 }
@@ -203,7 +200,7 @@ function editTag(evt) {
   if (!tagId || !input) return;
 
   fatch(`/media/tags/${tagId}`, 'patch', {
-    "tagValue": input.value
+    tagValue: input.value
   }).then(() => {
     location.reload();
   });
@@ -215,7 +212,7 @@ function deleteTag(evt) {
 
   if (!tagId) return;
 
-  fatch(`/media/tags/${tagId}`, 'delete').then(() => {
+  deleteTagById(tagId).then(() => {
     location.reload();
   });
 }
@@ -235,20 +232,6 @@ function searchByTag(inputLocator) {
   const input = $(inputLocator);
   if (input) {
     search(input.value);
-  }
-}
-
-function updateFavoriteButton(o) {
-  const favoriteButton = $('.toolbar button.favorite');
-  if (favoriteButton) {
-    favoriteButton.textContent = o.favorite ? "❤️" : "🖤";
-  }
-}
-
-function updateMarkedButton(o) {
-  const markedButton = $('.toolbar button.marked');
-  if (markedButton) {
-    markedButton.textContent = o.marked ? "💣" : "👍";
   }
 }
 
@@ -356,12 +339,15 @@ const rotateRight = () => {
   }
 };
 
+const hasTag = (o, name) => !!o.tags.find(tag => tag.value === name)
+
 // Make functions globally available
 window.pauseSlideShow = pauseSlideShow;
 window.goFullScreen = goFullScreen;
 window.replaceOnInterval = replaceOnInterval;
 window.toggleFavorite = toggleFavorite;
 window.toggleMarked = toggleMarked;
+window.hasTag = hasTag;
 window.addTag = addTag;
 window.editTag = editTag;
 window.deleteTag = deleteTag;

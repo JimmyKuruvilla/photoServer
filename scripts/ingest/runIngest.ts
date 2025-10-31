@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import path from 'node:path';
-import { IGNORE_PREFIX, TABLES } from '../../src/constants.ts';
+import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
+import { isIgnored } from '../../src/utils.ts';
 import { ingest } from '../lib/ingestion.ts';
 import { log } from '../lib/log.ts';
 import { purgeDeadDbLinks } from '../purgeDeadDbLinks/purgeDeadDbLinks.ts';
@@ -22,11 +22,7 @@ const ingestFileToDb = async (filepath: string) => {
   }
 }
 
-const isIgnored = (filepath: string) => {
-  const directoryPath = path.dirname(filepath);
-  const lastDirectoryName = path.basename(directoryPath);
-  return lastDirectoryName.startsWith(IGNORE_PREFIX)
-}
+
 
 (async () => {
   log(`PURGING_ANY_DEAD_DB_LINKS_TO_FILESYSTEM`)

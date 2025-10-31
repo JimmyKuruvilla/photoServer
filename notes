@@ -44,6 +44,8 @@ favorites should just be a button that adds a tag for you automatically
 - drop favorites column
 - update routes to auto tag with 'fav', and list 'fav's
 
+- same for marked: markedForDelete
+
 leave original service alone and build a new one along side it. 
 0. refactor utils + guards
 store a hash of a file on injest. So we can tell which files are the same.

@@ -5,7 +5,7 @@ import { promisify } from 'util';
 
 import ffprobe, { FFProbeResult } from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { getItemViaPath } from '../db.ts';
+import { DbMedia, DbMediaWithTags, DbTag, getItemByPath } from '../db.ts';
 import { isMedia, isPic, isVideo } from '../guards.ts';
 
 const statAsync = promisify(fs.stat);
@@ -25,20 +25,8 @@ export interface FileItem {
   isDirectory: boolean;
   duration: number | null;
   id: number | null;
-  favorite: boolean | null;
-  marked?: boolean;
   tags?: Array<{ id: number; value: string }>;
   faceCount?: number | null;
-}
-
-interface DbItem {
-  id: number;
-  path: string;
-  thumbnail?: string;
-  favorite: boolean;
-  marked: boolean;
-  tags?: Array<{ id: number; value: string }>;
-  face_count?: number | null;
 }
 
 interface VideoInfo {
@@ -56,7 +44,7 @@ const createFilePath = (fullAbsPath: string = '', name: string = '') => path.joi
 const createDirViewPath = (fullAbsPath: string = '', name: string = '') => path.join('/dirView', fullAbsPath, name)
 const createParentDirViewPath = (fullAbsPath: string) => createDirViewPath(fullAbsPath).split(path.sep).slice(0, -1).join(path.sep)
 
-const getInfoFromDbItem = (dbItem: DbItem) => {
+const getInfoFromDbItem = (dbItem: DbMedia) => {
   const dbPath = dbItem.path;
   const name = dbPath.replace(/.*\//, '');
 
@@ -105,7 +93,7 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
         }
       }
       else if (isPic(nodeName)) {
-        const img = await getItemViaPath(db as any, fullAbsFilePath);
+        const img = await getItemByPath(db as any, fullAbsFilePath);
         thumbnail = img?.thumbnail;
       }
     }
@@ -121,7 +109,6 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
       isDirectory: nodeStats.isDirectory(),
       duration,
       id: null,
-      favorite: null
     });
   }
 
@@ -132,7 +119,7 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
   };
 }
 
-export function constructMediaListingsFromDb(dbItems: DbItem[]): DirList {
+export function constructMediaListingsFromDb(dbItems: DbMediaWithTags[]): DirList {
   return {
     dirs: [],
     files: [],
@@ -147,8 +134,6 @@ export function constructMediaListingsFromDb(dbItems: DbItem[]): DirList {
         parentViewPath,
         thumbnail: dbItem.thumbnail,
         id: dbItem.id,
-        favorite: dbItem.favorite,
-        marked: dbItem.marked,
         isDirectory: false,
         duration: null
       };
@@ -156,7 +141,7 @@ export function constructMediaListingsFromDb(dbItems: DbItem[]): DirList {
   };
 }
 
-export async function constructFileViewFromDb(dbItem: DbItem): Promise<FileItem> {
+export async function constructFileViewFromDb(dbItem: DbMediaWithTags): Promise<FileItem> {
   const { dbPath, srcPath, name, viewPath, parentViewPath } = getInfoFromDbItem(dbItem);
   let duration: number = 0;
   if (isVideo(dbPath)) {
@@ -168,12 +153,8 @@ export async function constructFileViewFromDb(dbItem: DbItem): Promise<FileItem>
 
   /*
   db returns {id: null, tagValue: null} when none found
-  random doesn't join on tags so we set to empty
   */
-  let tags: Array<{ id: number; value: string }> = [];
-  if (dbItem.tags && dbItem.tags.length) {
-    tags = dbItem.tags[0].id === null ? [] : dbItem.tags;
-  }
+  const tags: DbTag[] = dbItem.tags[0].id === null ? [] : dbItem.tags;
 
   return {
     name: name,
@@ -185,8 +166,6 @@ export async function constructFileViewFromDb(dbItem: DbItem): Promise<FileItem>
     isDirectory: false,
     duration,
     id: dbItem.id,
-    favorite: dbItem.favorite,
-    marked: dbItem.marked,
     tags,
     faceCount: dbItem.face_count
   };

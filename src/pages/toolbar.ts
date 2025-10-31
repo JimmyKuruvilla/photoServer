@@ -1,7 +1,6 @@
 // Type definitions
 interface MediaItem {
-  favorite?: boolean;
-  marked?: boolean;
+  tags: Array<{ id: number, value: string }>
   faceCount?: number | null;
 }
 
@@ -11,13 +10,15 @@ const slideshowAll = `<button onclick="startSlideshowAll()">📽️</button>`;
 const fullscreen = `<button onclick="goFullScreen()" title="go fullscreen">⛰️</button>`;
 const pause = `<button class="pause" onclick="pauseSlideShow()" title="pause slideshow">⏸️</button>`;
 
+const hasTag = (o: MediaItem, name: string) => o.tags.find(tag => tag.value === name)
+
 const favorite = (o: MediaItem): string =>
-  `<button class="favorite" onclick="toggleFavorite()" title="toggle favorite">${o.favorite ? "❤️" : "🖤"}</button>`;
+  `<button class="favorite" onclick="toggleFavorite()" title="toggle favorite">${hasTag(o, 'favorite') ? "❤️" : "🖤"}</button>`;
 
 const favorites = `<a href="/media/favorites" title="go to favorites"><button>❤️↗</button></a>`;
 
 const mark = (o: MediaItem): string =>
-  `<button class="marked" onclick="toggleMarked()" title="toggle marked">${o.marked ? "💣" : "👍"}</button>`;
+  `<button class="marked" onclick="toggleMarked()" title="toggle marked">${hasTag(o, 'marked') ? "💣" : "👍"}</button>`;
 
 const marked = `<a href="/media/marked" title="go to marked"><button>💣↗</button></a>`;
 
@@ -28,7 +29,7 @@ const searchByTag = `<button class="toolbar-search-by-tag" onclick="searchByTag(
 
 const faceCount = (o: MediaItem): string => {
   let faceValue: string | number;
-  
+
   if (o.faceCount === null) {
     faceValue = 'In Progress';
   } else if (o.faceCount === undefined) {
@@ -36,7 +37,7 @@ const faceCount = (o: MediaItem): string => {
   } else {
     faceValue = o.faceCount;
   }
-  
+
   return `<div class="toolbar-face-count">😅s: ${faceValue}</div>`;
 };
 
@@ -52,5 +53,5 @@ export const generalToolbar = (o?: MediaItem): string => `
   ${o ? mark(o) : ''}
   ${fullscreen}
   ${searchByTag}
-  ${o ? faceCount(o): ''}
+  ${o ? faceCount(o) : ''}
   `;

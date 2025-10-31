@@ -1,9 +1,9 @@
-import { FileItem } from '../services/listings.ts';
-import { generalToolbar } from './toolbar.ts';
-import { getMediaHtmlFragment } from './getMediaHtmlFragment.ts';
-import { cssAndJs } from './cssAndJs.ts';
 import { NL } from '../constants.ts';
+import { FileItem } from '../services/listings.ts';
 import { createTagEl } from './createTagEl.ts';
+import { cssAndJs } from './cssAndJs.ts';
+import { getMediaHtmlFragment } from './getMediaHtmlFragment.ts';
+import { generalToolbar } from './toolbar.ts';
 
 export function imgVidTemplate(
   item: FileItem, 
@@ -47,7 +47,7 @@ export function imgVidTemplate(
             share.contentInterval = ${interval};
             replaceOnInterval(${interval}, "${type}");
           }
-          share.photoItem = ${JSON.stringify(item)};
+          share.mediaItem = ${JSON.stringify(item)};
 
           window.history.replaceState({}, '', '${item.viewPath}');
 
