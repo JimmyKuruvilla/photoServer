@@ -161,6 +161,10 @@ button:hover a {
   transition: opacity 0.7s ease;
 }
 
+.content-wrapper.log {
+  color: white;
+}
+
 .pic,
 video {
   opacity: 0;

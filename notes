@@ -8,9 +8,6 @@
 ## todo
 -- convert to use vite  + react
 -- make buttons bigger on touch devices
--- convert avi to mp4
- -- delete old
- -- delete old from s3
 
 -- display log files as type text
 -- be able to explore in a direction given a date, not just within a folder
@@ -25,13 +22,20 @@
 
 -- face count is broken due to venv setup
 
-/**
-permadelete
-- delete from disk: purgeFilesByPattern (but by tag), 
-- insert hash into deleted table
-- delete from db, (purge script)
+TODO
+permadelete 
+phase 1
+- modify ingestion to calc hashes of new files, check if !inDeleted table before accepting
+- still to do next
+
+phase 2 permadelete script : done
+- get all media with marked tag
+- insert hashes into deleted table
+- delete from disk
+- delete from db
+- delete from s3 (use aws sdk)
+
 - aws sync --delete to s3. (has to be manual)
-*/
 
 TODO
 leave original service alone and build a new one along side it. 

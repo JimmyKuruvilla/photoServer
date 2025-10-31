@@ -14,13 +14,14 @@ const db = await localDb();
   const recordsStream = await db(TABLES.MEDIA).where(COLS.MEDIA.MARKED, true).stream()
   let count = 0;
   for await (const record of recordsStream) {
+    const trx = await db.transaction();
     try {
-      const trx = await db.transaction();
-      await trx(TABLES.MEDIA_TAGS).insert({[COLS.MEDIA_TAGS.VALUE]: TAGS.MARKED, [COLS.MEDIA_TAGS.MEDIA_ID]: record.id})
+      await trx(TABLES.MEDIA_TAGS).insert({ [COLS.MEDIA_TAGS.VALUE]: TAGS.MARKED, [COLS.MEDIA_TAGS.MEDIA_ID]: record.id })
       await trx.commit()
       count += 1;
       console.log(record.path, count)
     } catch (error: any) {
+      await trx.rollback()
       log(`ERROR: ${error.message}`)
     }
   }

@@ -80,7 +80,7 @@ export async function getLastId(db: Knex): Promise<{ id: number }> {
   return result[0];
 }
 
-const MediaWithTagsQuery = (db: Knex) => db<DbMedia, DbMediaWithTags>(TABLES.MEDIA)
+export const MediaWithTagsQuery = (db: Knex) => db<DbMedia, DbMediaWithTags>(TABLES.MEDIA)
   .select([
     'media.id',
     'path',
@@ -156,7 +156,7 @@ export async function createTag(db: Knex, mediaId: number, tagValue: string): Pr
 }
 
 // TODO: add index for media_tags.value
-export async function searchOnTags(db: Knex, searchParam: string): Promise<DbMediaWithTags[]> {
+export async function searchOnTags(db: Knex, searchParam: string): Promise<Array<DbMedia & DbTag>> {
   try {
     const dbRes = await db(TABLES.MEDIA_TAGS)
       .where(COLS.MEDIA_TAGS.VALUE, searchParam)
