@@ -47,15 +47,15 @@ const createDir = async (path: string) => {
   }
   catch (error: any) {
     if (error.code === 'EEXIST') {
-      log(`INGEST::CREATE_DIRECTORY_ALREADY_EXISTS ${path}`);
+      log(`CREATE_DIR::DIRECTORY_ALREADY_EXISTS ${path}`);
     } else {
-      log(`INGEST::CREATE_DIRECTORY_CANNOT_CREATE_DIR ${error.message}`);
+      log(`CREATE_DIR::CANNOT_CREATE_DIR ${error.message}`);
     }
   }
 }
 
 const move = async (source: string, target: string) => {
-  log(`INGEST::MOVE_TO_DATE from ${source} to \n ${target}`);
+  log(`MOVE_FILE::MOVE_TO_DATE from ${source} to \n ${target}`);
   await renameAsync(source, target);
 }
 
@@ -74,7 +74,7 @@ const movePic = async (fullAbsSourcePath: string, targetDir: string, filename: s
       // 2023-08-25T09:10:05.832Z to 2023-08-25
       const stats = await stat(fullAbsSourcePath)
       formattedDate = stats.birthtime.toISOString().split('T')[0]
-      log(`INGEST::MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
+      log(`MOVE_PIC::MOVE_TO_DATE_EXIFREADER_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`)
     }
 
     await createDir(path.join(targetDir, formattedDate));
@@ -82,7 +82,7 @@ const movePic = async (fullAbsSourcePath: string, targetDir: string, filename: s
     await move(fullAbsSourcePath, fullAbsTargetPath);
     return fullAbsTargetPath;
   } catch (error: any) {
-    log(`INGEST::MOVE_TO_DATE_ERROR ${error.message}`);
+    log(`MOVE_PIC::MOVE_TO_DATE_ERROR ${error.message}`);
     return null;
   }
 }
@@ -100,7 +100,7 @@ const moveVideo = async (fullAbsSourcePath: string, targetDir: string, filename:
       // 2023-08-25T09:10:05.832Z to 2023-08-25
       const stats = await stat(fullAbsSourcePath)
       formattedDate = stats.birthtime.toISOString().split('T')[0]
-      log(`INGEST::MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
+      log(`MOVE_VID::MOVE_TO_DATE_FFPROBE_NO_CREATION_TIME, USING_FILE_CREATION_TIME ${formattedDate} ${fullAbsSourcePath}`);
     }
 
     await createDir(path.join(targetDir, formattedDate));
@@ -108,7 +108,7 @@ const moveVideo = async (fullAbsSourcePath: string, targetDir: string, filename:
     await move(fullAbsSourcePath, fullAbsTargetPath);
     return fullAbsTargetPath;
   } catch (error: any) {
-    log(`INGEST::MOVE_TO_DATE_FFPROBE_ERROR ${error.message}`);
+    log(`MOVE_VID::MOVE_TO_DATE_FFPROBE_ERROR ${error.message}`);
     return null;
   }
 }
@@ -120,7 +120,6 @@ export const moveFileByCreationDate = (targetPath: string) => async (fullAbsSour
   } else if (isVideo(filename)) {
     return moveVideo(fullAbsSourcePath, targetPath, filename);
   } else {
-    log(`MOVE_FILE::NOT_A_MEDIA_FILE, skipping`)
     return null;
   }
 }

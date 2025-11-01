@@ -1,9 +1,9 @@
 import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'path';
-import { ingest } from '../lib/ingestion.ts';
-import { log } from '../lib/log.ts';
-import { moveFileByCreationDate } from '../lib/moveByDate.ts';
+import { log } from '../../../scripts/lib/log.ts';
+import { moveFileByCreationDate } from '../../../scripts/lib/moveByDate.ts';
+import { ingest } from '../ingestion.ts';
 
 (async () => {
   const sourceDir = process.env.SOURCE_PATH;
@@ -42,7 +42,10 @@ import { moveFileByCreationDate } from '../lib/moveByDate.ts';
       log(`WATCHER::PROCESSING_NEW_FILE ${absPath}`);
       const newFilePath = await moveFileByCreationDate(targetDir)(absPath);
       if (newFilePath !== null) {
+        log(`INGEST::MOVED_FILE_PATH ${newFilePath}`)
         await ingest(newFilePath);
+      } else {
+        log(`WATCHER::SKIPPING_NON_MEDIA_FILE`)
       }
     })
 

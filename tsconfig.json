@@ -29,7 +29,7 @@
   },
   "include": [
     "src/**/*",
-    "scripts/**/*"
+    "scripts/**/*",
   ],
   "exclude": [
     "node_modules",

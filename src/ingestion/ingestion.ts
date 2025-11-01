@@ -1,18 +1,28 @@
 #!/usr/bin/env node
 import { Knex } from 'knex';
-import { TABLES } from '../../src/constants.ts';
+import { log } from 'node:console';
+import { updateFaceCount } from '../../scripts/lib/faces.ts';
+import { genFileHash, updateHashOrientationModel } from '../../scripts/lib/hash.ts';
+import { genB64Thumbnail, logThumbnail } from '../../scripts/lib/thumbnail.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { isPic } from '../../src/guards.ts';
-import { updateFaceCount } from './faces.ts';
-import { updateHashOrientationModel } from './hash.ts';
-import { log } from './log.ts';
-import { genB64Thumbnail, logThumbnail } from './thumbnail.ts';
+import { COLS, TABLES } from '../constants.ts';
+import { isPic } from '../guards.ts';
+
 
 const db = await localDb();
 
 // TODO: change to an upsert, gather all data first, then upsert once
+// extract fns to get the data
+// then get all teh data in one go, then do an 
 export async function ingest(filepath: string) {
   const trx = await db.transaction();
+  const hash = await genFileHash(filepath)
+  const isDenyListed = (await trx(TABLES.DELETED).where(COLS.DELETED.HASH, hash).limit(1)).length > 0;
+  if (isDenyListed) {
+    log(`INGEST::SKIPPING_PERMA_DELETED_HASH ${filepath}`)
+    return
+  }
+
   const dbResult = await trx(TABLES.MEDIA).where('path', filepath);
 
   if (dbResult.length === 0) {

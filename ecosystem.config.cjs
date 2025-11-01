@@ -12,7 +12,7 @@ module.exports = {
     {
       // SOURCE_PATH='/mnt/backup/media/__dropoff' TARGET_PATH='/mnt/backup/media' tsx scripts/runDropProcessor.ts
       name: 'dropProcessor',
-      script: './scripts/processor/runDropProcessor.ts',
+      script: './src/ingestion/dropProcessor/runDropProcessor.ts',
       interpreter: 'node',
       interpreterArgs: '--import tsx',
       log_file: '/mnt/backup/media/__logs/dropProcessor.log',
