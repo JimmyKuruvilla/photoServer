@@ -1,75 +1,78 @@
 #!/usr/bin/env node
-import { Knex } from 'knex';
 import { log } from 'node:console';
-import { updateFaceCount } from '../../scripts/lib/faces.ts';
-import { genFileHash, updateHashOrientationModel } from '../../scripts/lib/hash.ts';
-import { genB64Thumbnail, logThumbnail } from '../../scripts/lib/thumbnail.ts';
+import { getExifData } from '../../scripts/lib/exif.ts';
+import { countFaces, } from '../../scripts/lib/faces.ts';
+import { genFileHash, } from '../../scripts/lib/hash.ts';
+import { genB64Thumbnail } from '../../scripts/lib/thumbnail.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { COLS, TABLES } from '../constants.ts';
-import { isPic } from '../guards.ts';
+import { isMedia, isPic } from '../guards.ts';
 
+/*
+Sample Data 
+[[{
+  "id":55004,
+  "created_at":"2025-08-14 21:52:00.563431+00",
 
+  // all nullable
+  "path":"/mnt/backup/media/01-02-2012/IMG_5461.JPG",
+  "thumbnail":"data:image/png;base64,1234567",
+  "face_count":1,
+  "hash":"bfb6b3189ccfda580aa63216a9d051925d3d39fe7b0d1ce6a72be501df042a98",
+  "orientation":6,
+  "model":"Canon PowerShot SD1000"
+}] 
+*/
 const db = await localDb();
 
-// TODO: change to an upsert, gather all data first, then upsert once
-// extract fns to get the data
-// then get all teh data in one go, then do an 
 export async function ingest(filepath: string) {
-  const trx = await db.transaction();
-  const hash = await genFileHash(filepath)
-  const isDenyListed = (await trx(TABLES.DELETED).where(COLS.DELETED.HASH, hash).limit(1)).length > 0;
+  const record: Record<string, string | null | number> = {
+    path: null,
+    hash: null,
+    orientation: null,
+    model: null,
+    thumbnail: null,
+    face_count: 0,
+  }
+
+  const isDenyListed = (await db(TABLES.DELETED).where(COLS.DELETED.HASH, record.hash).limit(1)).length > 0;
+
   if (isDenyListed) {
     log(`INGEST::SKIPPING_PERMA_DELETED_HASH ${filepath}`)
     return
-  }
-
-  const dbResult = await trx(TABLES.MEDIA).where('path', filepath);
-
-  if (dbResult.length === 0) {
-    log(`INGEST::INSERT_IF_NOT_EXISTS ${filepath}`);
-    await insertRowIfNotExists(trx, filepath);
   } else {
-    log(`INGEST::UPDATE_THUMBNAIL_IF_NOT_EXISTS ${filepath}`);
-    await updateThumbnailIfNotExists(trx, filepath, dbResult);
-  }
+    if (isMedia(filepath)) {
+      record.path = filepath
+      record.hash = await genFileHash(filepath)
 
-  await updateFaceCount(db, filepath);
-  await updateHashOrientationModel(db, filepath);
-}
-
-async function insertRowIfNotExists(trx: Knex.Transaction, filepath: string) {
-  let thumbnail;
-  if (isPic(filepath)) {
-    thumbnail = await genB64Thumbnail(filepath);
-  }
-
-  try {
-    await trx(TABLES.MEDIA).insert({ path: filepath, thumbnail });
-    await trx.commit();
-    log(`INGEST::INSERT: ${filepath}`)
-    logThumbnail(filepath, thumbnail!);
-  } catch (e) {
-    log(`INGEST::INSERT_ERROR no DB match: error: ${e}`);
-    await trx.rollback();
-  }
-}
-
-async function updateThumbnailIfNotExists(trx: Knex.Transaction, filepath: string, dbResult: any) {
-  if (isPic(filepath) && dbResult[0] && !dbResult[0].thumbnail) {
-    const thumbnail = await genB64Thumbnail(filepath);
-    try {
-      if (thumbnail) {
-        await trx(TABLES.MEDIA).where('path', filepath).update({ thumbnail });
-        logThumbnail(filepath, thumbnail);
+      if (isPic(filepath)) {
+        const exif = await getExifData(filepath)
+        record.orientation = exif.orientation
+        record.model = exif.model
+        record.thumbnail = await genB64Thumbnail(filepath)
+        record.face_count = await countFaces(filepath)
       }
-      await trx.commit();
-    } catch (e) {
-      log(`INGEST::THUMBNAIL_ERROR: error: ${e}`);
-      await trx.rollback();
+    }
+
+    /**
+     * Knex/PG requires a unique index on the columns to use an upsert with onConflict
+     * https://knexjs.org/guide/query-builder.html#onconflict
+     */
+    const isNotInDb = (await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, filepath)).length === 0;
+    if (isNotInDb) {
+      try {
+        log(`INGEST::INSERT_RECORD ${filepath}`);
+        await db(TABLES.MEDIA).insert(record);
+      } catch (error) {
+        log(`INGEST::INSERT_ERROR ${error}`);
+      }
+    } else {
+      try {
+        log(`INGEST::UPDATE_RECORD ${filepath}`);
+        await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, filepath).update(record);
+      } catch (error) {
+        log(`INGEST::UPDATE_ERROR ${error}`);
+      }
     }
   }
-  else {
-    await trx.commit();
-  }
 }
-

@@ -23,7 +23,7 @@ export const purgeDeadDbLinks = async () => {
         const trx = await db.transaction();
         await trx(TABLES.MEDIA).where('path', record.path).del()
         await trx.commit()
-        log(`PURGE ${record.path} from DB`)
+        log(`PURGE: ${record.path} from DB`)
       }
 
     } catch (error: any) {

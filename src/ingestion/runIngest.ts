@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+import { log } from '../../scripts/lib/log.ts';
+import { purgeDeadDbLinks } from '../../scripts/purgeDeadDbLinks/purgeDeadDbLinks.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
 import { isIgnored } from '../../src/utils.ts';
-import { log } from '../lib/log.ts';
 import { ingest } from './ingestion.ts';
 
 /**
@@ -20,11 +21,9 @@ const ingestFileToDb = async (filepath: string) => {
   }
 }
 
-
-
 (async () => {
   log(`PURGING_ANY_DEAD_DB_LINKS_TO_FILESYSTEM`)
-  // await purgeDeadDbLinks()
+  await purgeDeadDbLinks()
 
   const count = await recursiveTraverseDir(
     sourceDir,

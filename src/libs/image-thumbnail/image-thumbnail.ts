@@ -53,7 +53,7 @@ const createImageThumbnail = async (source: string, options?: ThumbnailOptions):
   const responseType = options?.responseType ?? RESPONSE_TYPE;
   const jpegOptions = options?.jpegOptions;
 
-  return await fromPath(source, percentage, width, height, responseType, jpegOptions);
+  return fromPath(source, percentage, width, height, responseType, jpegOptions);
 };
 
 export default createImageThumbnail;

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import { Knex } from 'knex';
 import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
-import { updateFaceCount } from '../lib/faces.ts';
+import { countFaces } from '../lib/faces.ts';
+import { log } from '../lib/log.ts';
 /*
  cd ~/scripts/photoServer
  source ./python/venv/bin/activate
@@ -12,6 +14,35 @@ import { updateFaceCount } from '../lib/faces.ts';
 
 const db = await localDb();
 const sourceDir = process.env.SOURCE_PATH;
+
+export const updateFaceCount = async (db: Knex, filepath: string) => {
+  const trx = await db.transaction();
+
+  let numFaces;
+
+  try {
+    numFaces = await countFaces(filepath)
+  } catch (error: any) {
+    await trx.rollback();
+    if (error.message.includes('Image decoding failed (unknown image type)')) {
+      log(`FACES::SKIPPING_FILE ${filepath}`);
+      return
+    } else {
+      log(`FACES::PYTHON_ERROR ${error.message}`);
+      return
+    }
+  }
+
+  try {
+    await trx(TABLES.MEDIA).where('path', filepath).update({ face_count: numFaces });
+    await trx.commit();
+    log(`FACES::${filepath} numFaces: ${numFaces}`)
+  } catch (error: any) {
+    await trx.rollback();
+    log(`FACES::ERROR ${error.message}`);
+  }
+}
+
 if (!sourceDir) {
   throw new Error('Need source dir');
 }
