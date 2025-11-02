@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import ffprobe, { FFProbeResult } from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { DbMedia, DbMediaWithTags, DbTag, getItemByPath } from '../db.ts';
-import { isMedia, isPic, isVideo } from '../guards.ts';
+import { isImage, isMedia, isVideo } from '../guards.ts';
 
 const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
@@ -92,7 +92,7 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
           duration = Number(videoInfo.streams[0].duration) * 1000;
         }
       }
-      else if (isPic(nodeName)) {
+      else if (isImage(nodeName)) {
         const img = await getItemByPath(db as any, fullAbsFilePath);
         thumbnail = img?.thumbnail;
       }

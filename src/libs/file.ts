@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { log } from './log.ts';
 
 export const doesFileExist = async (filePath: string) => {
   try {
@@ -6,9 +7,9 @@ export const doesFileExist = async (filePath: string) => {
     return true;
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      // console.log(`File "${filePath}" does not exist.`);
+      log(`File "${filePath}" does not exist.`);
     } else {
-      // console.error(`Error checking file "${filePath}":`, error);
+      log(`Error checking file "${filePath}": ${error}`);
     }
     return false;
   }

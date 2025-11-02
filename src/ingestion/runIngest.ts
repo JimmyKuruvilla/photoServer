@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { purgeDeadDbLinks } from '../../scripts/purgeDeadDbLinks/purgeDeadDbLinks.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { isIgnored } from '../../src/utils.ts';
 import { log } from '../libs/log.ts';
 import { recursiveTraverseDir } from '../libs/recursiveTraverseDir.ts';
 import { ingest } from './ingestion.ts';
@@ -11,14 +10,11 @@ import { ingest } from './ingestion.ts';
 */
 
 const db = await localDb();
-const sourceDir = process.env.SOURCE_PATH!;
+const sourcePath = process.env.SOURCE_PATH;
+const targetPath = process.env.TARGET_PATH;
 
-const ingestFileToDb = async (filepath: string) => {
-  if (isIgnored(filepath)) {
-    log(`IGNORE ${filepath}`)
-  } else {
-    return ingest(filepath)
-  }
+if (!sourcePath || !targetPath) {
+  throw new Error('Need both source and target dirs');
 }
 
 (async () => {
@@ -26,8 +22,8 @@ const ingestFileToDb = async (filepath: string) => {
   await purgeDeadDbLinks()
 
   const count = await recursiveTraverseDir(
-    sourceDir,
-    ingestFileToDb
+    sourcePath,
+    (filepath:string) => ingest(filepath, targetPath, { shouldMove: false })
   );
 
   const { rows } = await db.raw(`
@@ -38,7 +34,7 @@ const ingestFileToDb = async (filepath: string) => {
   from information_schema.tables
   where table_schema = 'public'
   order by 3 desc;`
-)
+  )
   console.log(count, rows);
   process.exit();
 })();

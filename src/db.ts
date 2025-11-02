@@ -1,8 +1,8 @@
 
 import { Knex } from 'knex';
 import { COLS, TABLES, TAGS, TableName } from './constants.js';
-import { isPic, isVideo } from './guards.js';
-import { isIgnored } from './utils.ts';
+import { isImage, isVideo } from './guards.js';
+import { isIgnorePath } from './utils.ts';
 
 export interface DbMedia {
   id: number;
@@ -47,7 +47,7 @@ export function getRandomInt(min: number, max: number): number {
 
 // dumb but fast
 export async function getRandomFromDb(db: Knex, type: 'image' | 'video' = 'image'): Promise<DbMediaWithTags> {
-  const filterFn = type === 'image' ? isPic : isVideo;
+  const filterFn = type === 'image' ? isImage : isVideo;
   let isMatch = false;
   let dbItem: DbMediaWithTags | undefined;
 
@@ -56,7 +56,7 @@ export async function getRandomFromDb(db: Knex, type: 'image' | 'video' = 'image
     dbItem = result;
 
     if (dbItem) {
-      if (!isIgnored(dbItem.path) && filterFn(dbItem.path)) {
+      if (!isIgnorePath(dbItem.path) && filterFn(dbItem.path)) {
         isMatch = true;
       }
     }

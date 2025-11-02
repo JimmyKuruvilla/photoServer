@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 import { log } from 'node:console';
+import fs from 'node:fs/promises';
+import path from 'path';
 import { localDb } from '../../src/db/initDb.ts';
 import { COLS, TABLES } from '../constants.ts';
-import { isMedia, isPic } from '../guards.ts';
+import { isImage, isMedia, isVideo } from '../guards.ts';
 import { getExifData } from '../libs/exif.ts';
 import { countFaces, } from '../libs/faces.ts';
 import { genFileHash, } from '../libs/hash.ts';
+import { moveToTarget } from '../libs/move.ts';
+import { generateTargetPathForImage, generateTargetPathForVideo } from '../libs/path.ts';
 import { genB64Thumbnail } from '../libs/thumbnail.ts';
+import { isIgnorePath } from '../utils.ts';
 
 /*
 Sample Data 
@@ -25,7 +30,11 @@ Sample Data
 */
 const db = await localDb();
 
-export async function ingest(filepath: string) {
+/**
+ * Used from full ingestion where paths can be from media folder (vetted media files)
+ * Used from dropProcessor where paths can be from drop folder (include *any* file)
+ */
+export async function ingest(sourceFilePath: string, targetPath: string, opts = { shouldMove: false }) {
   const record: Record<string, string | null | number> = {
     path: null,
     hash: null,
@@ -35,44 +44,104 @@ export async function ingest(filepath: string) {
     face_count: 0,
   }
 
+  const filename = path.basename(sourceFilePath);
+  const ext = path.extname(sourceFilePath)
+  const somePathsAreHidden = sourceFilePath.split(path.sep).some(f => f[0] === '.')
+
+  if (isIgnorePath(sourceFilePath)) {
+    log(`INGEST::SKIPPING_IGNORE_PREFIX_PATH ${sourceFilePath}`)
+    return
+  }
+
+  if (!isMedia(filename)) {
+    log(`INGEST::SKIPPING_NON_MEDIA_FILE ${sourceFilePath}`)
+    return
+  }
+
+  if (ext.includes('part')) {
+    log(`INGEST::SKIPPING_PARTIAL_UPLOAD (part) ${filename}`);
+    return
+  }
+
+  if (filename.startsWith('.trashed')) {
+    log(`INGEST::DELETING_TRASHED_FILE (.trashed) ${filename}`);
+    await fs.unlink(sourceFilePath)
+    return
+  }
+
+  if (somePathsAreHidden) {
+    log(`INGEST::SKIPPING_HIDDEN_FOLDER_OR_FILE ${sourceFilePath}`);
+    return
+  }
+
+  try {
+    record.hash = await genFileHash(sourceFilePath)
+  } catch (error) {
+    log(`INGEST: GEN_HASH_ERROR: ${error}`)
+    return
+  }
+
   const isDenyListed = (await db(TABLES.DELETED).where(COLS.DELETED.HASH, record.hash).limit(1)).length > 0;
 
   if (isDenyListed) {
-    log(`INGEST::SKIPPING_PERMA_DELETED_HASH ${filepath}`)
+    log(`INGEST::SKIPPING_DENY_LISTED_HASH ${sourceFilePath}`)
     return
   } else {
-    if (isMedia(filepath)) {
-      record.path = filepath
-      record.hash = await genFileHash(filepath)
+    let targetFolderName
+    let targetFilePath
 
-      if (isPic(filepath)) {
-        const exif = await getExifData(filepath)
-        record.orientation = exif.orientation
-        record.model = exif.model
-        record.thumbnail = await genB64Thumbnail(filepath)
-        record.face_count = await countFaces(filepath)
-      }
+    if (isImage(sourceFilePath)) {
+      const pathData = await generateTargetPathForImage(sourceFilePath, targetPath)
+      targetFolderName = pathData.targetFolderName
+      targetFilePath = pathData.targetFilePath
+    } else if (isVideo(sourceFilePath)) {
+      const pathData = await generateTargetPathForVideo(sourceFilePath, targetPath)
+      targetFolderName = pathData.targetFolderName
+      targetFilePath = pathData.targetFilePath
     }
 
-    /**
-     * Knex/PG requires a unique index on the columns to use an upsert with onConflict
-     * https://knexjs.org/guide/query-builder.html#onconflict
-     */
-    const isNotInDb = (await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, filepath)).length === 0;
-    if (isNotInDb) {
-      try {
-        log(`INGEST::INSERT_RECORD ${filepath}`);
-        await db(TABLES.MEDIA).insert(record);
-      } catch (error) {
-        log(`INGEST::INSERT_ERROR ${error}`);
+    if (opts.shouldMove && targetFolderName && targetFilePath) {
+      const movedFilePath = await moveToTarget(sourceFilePath, targetPath, targetFolderName, targetFilePath)
+      record.path = movedFilePath
+    } else {
+      record.path = sourceFilePath
+    }
+
+    if (record.path) {
+      if (isImage(record.path)) {
+        record.face_count = await countFaces(record.path)
+        record.thumbnail = await genB64Thumbnail(record.path)
+
+        const exif = await getExifData(record.path)
+        if (exif) {
+          record.orientation = exif.orientation
+          record.model = exif.model
+        }
+      }
+
+      /**
+       * Knex/PG requires a unique index on the columns to use an upsert with onConflict
+       * https://knexjs.org/guide/query-builder.html#onconflict
+       */
+      const isNotInDb = (await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, record.path)).length === 0;
+
+      if (isNotInDb) {
+        try {
+          log(`INGEST::INSERT_RECORD ${record.path}`);
+          await db(TABLES.MEDIA).insert(record);
+        } catch (error) {
+          log(`INGEST::INSERT_ERROR ${error}`);
+        }
+      } else {
+        try {
+          log(`INGEST::UPDATE_RECORD ${record.path}`);
+          await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, record.path).update(record);
+        } catch (error) {
+          log(`INGEST::UPDATE_ERROR ${error}`);
+        }
       }
     } else {
-      try {
-        log(`INGEST::UPDATE_RECORD ${filepath}`);
-        await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, filepath).update(record);
-      } catch (error) {
-        log(`INGEST::UPDATE_ERROR ${error}`);
-      }
+      return
     }
   }
 }

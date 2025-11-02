@@ -4,7 +4,7 @@ import { Knex } from 'knex';
 import path from 'path';
 import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { isPic } from '../../src/guards.ts';
+import { isImage } from '../../src/guards.ts';
 import { getExifData } from '../../src/libs/exif.ts';
 import { genFileHash } from '../../src/libs/hash.ts';
 import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
@@ -26,7 +26,7 @@ export const updateHashOrientationModel = async (db: Knex, filepath: string) => 
 
   const filename = path.basename(filepath);
 
-  if (isPic(filename)) {
+  if (isImage(filename)) {
     const exif = await getExifData(filepath)
     orientation = exif.orientation
     model = exif.orientation

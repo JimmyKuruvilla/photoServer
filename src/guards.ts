@@ -1,8 +1,8 @@
 export function isMedia(name: string): boolean {
-  return isPic(name) || isVideo(name);
+  return isImage(name) || isVideo(name);
 }
 
-export function isPic(name: string): boolean {
+export function isImage(name: string): boolean {
   return /.+\.jpg$|jpeg$|png$/i.test(name);
 }
 
