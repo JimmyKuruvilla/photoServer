@@ -12,7 +12,7 @@ const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
 
 import { getDb } from '../db/initDb.ts';
-const db = getDb();
+const db = await getDb();
 
 export interface FileItem {
   name: string;

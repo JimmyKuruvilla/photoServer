@@ -2,7 +2,7 @@
 import { unlink } from 'fs/promises';
 import { TABLES } from '../../src/constants.ts';
 import { getMarkedFromDb } from '../../src/db.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb } from '../../src/db/initDb.ts';
 import { log } from '../../src/libs/log.ts';
 
 /*
@@ -13,7 +13,7 @@ import { log } from '../../src/libs/log.ts';
   - [OPTIONAL, MANUAL] delete from s3 by running ~/scripts/deleteSyncToS3 script
 */
 
-const db = await localDb();
+const db = await getDb();
 
 (async () => {
   const records = await getMarkedFromDb(db) // id and media_id are both the media.id

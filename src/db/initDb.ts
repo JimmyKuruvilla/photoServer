@@ -3,6 +3,8 @@ import { Knex } from 'knex';
 
 import knex from 'knex';
 import { dbConfig } from '../../knexfile.js';
+import { createLogger } from '../libs/log.ts';
+const log = createLogger('INITDB')
 let initializedClient: Knex | null = null;
 
 export const getDb = async (): Promise<Knex> => {
@@ -24,9 +26,9 @@ export const getDb = async (): Promise<Knex> => {
 const testConnection = async (db: Knex) => {
   try {
     await db.raw('SELECT 1')
-    console.log('Database connection successful')
+    log('Database connection successful')
   } catch (error) {
-    console.error('Failed to create database connection:', error);
+    log(`Failed to create database connection: ${error}`);
     throw error;
   }
 }

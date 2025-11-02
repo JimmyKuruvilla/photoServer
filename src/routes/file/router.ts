@@ -16,7 +16,6 @@ export const fileRouter = express.Router();
 fileRouter.get('/fileView/:path(.*__logs.*)', async (req: Request, res: Response, next: NextFunction) => {
   const targetPath = path.join(path.sep, req.params.path);
   try {
-    // res.sendFile(targetPath);
     const fileContents = await readFileSync(targetPath, { encoding: 'utf-8' })
     res.send(logTemplate(fileContents));
   }
@@ -31,7 +30,6 @@ fileRouter.get('/fileView/:path(.*__logs.*)', async (req: Request, res: Response
  */
 fileRouter.get('/fileView/:path(*)', async (req: Request, res: Response, next: NextFunction) => {
   const targetPath = path.join(path.sep, req.params.path);
-  console.log('normal', req.params)
   try {
     const dbItem = await getItemByPath(db, targetPath);
     if (!dbItem) {

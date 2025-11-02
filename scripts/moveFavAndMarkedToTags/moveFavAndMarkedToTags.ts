@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { COLS, TABLES, TAGS } from '../../src/constants.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb } from '../../src/db/initDb.ts';
 import { log } from '../../src/libs/log.ts';
 
 /*
@@ -8,7 +8,7 @@ import { log } from '../../src/libs/log.ts';
  - set to handle marked
 */
 
-const db = await localDb();
+const db = await getDb();
 
 (async () => {
   const recordsStream = await db(TABLES.MEDIA).where(COLS.MEDIA.MARKED, true).stream()

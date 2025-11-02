@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Knex } from 'knex';
 import { TABLES } from '../../src/constants.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb } from '../../src/db/initDb.ts';
 import { countFaces } from '../../src/libs/faces.ts';
 import { log } from '../../src/libs/log.ts';
 import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
@@ -12,7 +12,7 @@ import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
  Updates all files with face count
 */
 
-const db = await localDb();
+const db = await getDb();
 const sourceDir = process.env.SOURCE_PATH;
 
 export const updateFaceCount = async (db: Knex, filepath: string) => {

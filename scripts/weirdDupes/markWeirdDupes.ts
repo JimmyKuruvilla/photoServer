@@ -12,12 +12,12 @@
 import fs from 'fs';
 import path from 'path';
 import { TABLES } from '../../src/constants.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb } from '../../src/db/initDb.ts';
 import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
 
 
 const LEADING_SIX_DIGITS_DASH_RE = /^\d{6}\-/;
-const db = await localDb();
+const db = await getDb();
 
 const detectDupes = async (nodePath: string) => {
   const dirname = path.dirname(nodePath)

@@ -2,7 +2,9 @@
 import { Knex } from 'knex';
 import { COLS, TABLES, TAGS, TableName } from './constants.js';
 import { isImage, isVideo } from './guards.js';
+import { createLogger } from './libs/log.ts';
 import { isIgnorePath } from './utils.ts';
+const log = createLogger('DB')
 
 export interface DbMedia {
   id: number;
@@ -36,7 +38,7 @@ export const setIdRange = async (db: Knex): Promise<void> => {
   lastId = lastIdResult.id;
   firstId = firstIdResult.id;
 
-  console.log(`first ${firstId}, last ${lastId}`);
+  log(`first ${firstId}, last ${lastId}`);
 };
 
 export function getRandomInt(min: number, max: number): number {
