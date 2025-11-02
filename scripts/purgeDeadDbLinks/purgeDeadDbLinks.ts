@@ -6,8 +6,8 @@
 
 import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { doesFileExist } from '../lib/file.ts';
-import { log } from '../lib/log.ts';
+import { doesFileExist } from '../../src/libs/file.ts';
+import { log } from '../../src/libs/log.ts';
 
 const db = await localDb();
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { log } from '../../scripts/lib/log.ts';
 import { purgeDeadDbLinks } from '../../scripts/purgeDeadDbLinks/purgeDeadDbLinks.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
 import { isIgnored } from '../../src/utils.ts';
+import { log } from '../libs/log.ts';
+import { recursiveTraverseDir } from '../libs/recursiveTraverseDir.ts';
 import { ingest } from './ingestion.ts';
 
 /**

@@ -1,4 +1,4 @@
-import createImageThumbnail from '../../src/libs/image-thumbnail/image-thumbnail.ts';
+import createImageThumbnail from './image-thumbnail.ts';
 import { log } from './log.ts';
 
 export const genB64Thumbnail = async (fullPath: string, options = { percentage: 10, responseType: 'base64', jpegOptions: { force: false, quality: 20 } }) => {

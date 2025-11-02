@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { COLS, TABLES, TAGS } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { log } from '../lib/log.ts';
+import { log } from '../../src/libs/log.ts';
 
 /*
  Moving marked and favorites into tag table

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { log } from 'node:console';
-import { getExifData } from '../../scripts/lib/exif.ts';
-import { countFaces, } from '../../scripts/lib/faces.ts';
-import { genFileHash, } from '../../scripts/lib/hash.ts';
-import { genB64Thumbnail } from '../../scripts/lib/thumbnail.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { COLS, TABLES } from '../constants.ts';
 import { isMedia, isPic } from '../guards.ts';
+import { getExifData } from '../libs/exif.ts';
+import { countFaces, } from '../libs/faces.ts';
+import { genFileHash, } from '../libs/hash.ts';
+import { genB64Thumbnail } from '../libs/thumbnail.ts';
 
 /*
 Sample Data 

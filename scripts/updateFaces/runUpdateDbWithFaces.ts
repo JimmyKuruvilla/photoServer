@@ -2,9 +2,9 @@
 import { Knex } from 'knex';
 import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
-import { countFaces } from '../lib/faces.ts';
-import { log } from '../lib/log.ts';
+import { countFaces } from '../../src/libs/faces.ts';
+import { log } from '../../src/libs/log.ts';
+import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
 /*
  cd ~/scripts/photoServer
  source ./python/venv/bin/activate

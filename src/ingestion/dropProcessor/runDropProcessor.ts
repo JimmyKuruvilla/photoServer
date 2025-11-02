@@ -1,9 +1,9 @@
 import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'path';
-import { log } from '../../../scripts/lib/log.ts';
-import { moveFileByCreationDate } from '../../../scripts/lib/moveByDate.ts';
+import { log } from '../../libs/log.ts';
 import { ingest } from '../ingestion.ts';
+import { moveFileByCreationDate } from './moveByDate.ts';
 
 (async () => {
   const sourceDir = process.env.SOURCE_PATH;

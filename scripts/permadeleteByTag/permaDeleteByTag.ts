@@ -3,7 +3,7 @@ import { unlink } from 'fs/promises';
 import { TABLES } from '../../src/constants.ts';
 import { getMarkedFromDb } from '../../src/db.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { log } from '../lib/log.ts';
+import { log } from '../../src/libs/log.ts';
 
 /*
   - get all media with marked tag

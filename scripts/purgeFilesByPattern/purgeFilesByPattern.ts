@@ -2,7 +2,7 @@
 import { unlink } from 'fs/promises';
 import { COLS, TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { log } from '../lib/log.ts';
+import { log } from '../../src/libs/log.ts';
 
 /*
  Search db for a file path pattern, and delete those files from disk, and from db

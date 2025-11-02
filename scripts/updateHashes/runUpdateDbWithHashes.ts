@@ -5,9 +5,9 @@ import path from 'path';
 import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
 import { isPic } from '../../src/guards.ts';
-import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
-import { getExifData } from '../lib/exif.ts';
-import { genFileHash } from '../lib/hash.ts';
+import { getExifData } from '../../src/libs/exif.ts';
+import { genFileHash } from '../../src/libs/hash.ts';
+import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
 /*
  Read all files and update the images table with a sha 256 hash of the file
  - also adds orientation and camera model

@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { TABLES } from '../../src/constants.ts';
 import { localDb } from '../../src/db/initDb.ts';
-import { recursiveTraverseDir } from '../../src/libs/file/recursiveTraverseDir.ts';
+import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
 
 
 const LEADING_SIX_DIGITS_DASH_RE = /^\d{6}\-/;
