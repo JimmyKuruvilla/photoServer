@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+export const up = function (knex) {
   return knex.schema.table('images', function(t) {
     t.boolean('favorite')
       .notNull()
@@ -6,7 +6,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+export const down = function (knex) {
   return knex.schema.table('images', function(t) {
     t.dropColumn('favorite');
   });

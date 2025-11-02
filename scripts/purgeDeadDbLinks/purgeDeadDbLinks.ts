@@ -5,11 +5,11 @@
 */
 
 import { TABLES } from '../../src/constants.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb } from '../../src/db/initDb.ts';
 import { doesFileExist } from '../../src/libs/file.ts';
 import { log } from '../../src/libs/log.ts';
 
-const db = await localDb();
+const db = await getDb();
 
 export const purgeDeadDbLinks = async () => {
   const recordsStream = await db(TABLES.MEDIA).select('*').stream()

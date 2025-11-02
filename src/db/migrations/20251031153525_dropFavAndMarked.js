@@ -1,7 +1,3 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 export const up = function (knex) {
   return knex.raw(`
     ALTER TABLE media DROP COLUMN favorite;
@@ -10,10 +6,6 @@ export const up = function (knex) {
   );
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 export const down = function (knex) {
   return knex.schema.table('media', function (t) {
     t.boolean('favorite')

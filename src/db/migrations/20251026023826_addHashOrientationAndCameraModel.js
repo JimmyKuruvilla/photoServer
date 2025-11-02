@@ -1,8 +1,4 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-export const up = function(knex) {
+export const up = function (knex) {
     return knex.raw(`
     alter table images add column hash TEXT NULL;
     alter table images add column orientation INT NULL;
@@ -11,10 +7,6 @@ export const up = function(knex) {
   );
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 export const down = function(knex) {
     return knex.raw(`
     alter table images drop column hash;

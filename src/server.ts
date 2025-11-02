@@ -1,10 +1,10 @@
 #!/usr/bin/env node
+import { app } from './app.ts';
 import { ONE_DAY_SECS, port } from './constants.ts';
 import { setIdRange, } from './db.ts';
-import { localDb } from './db/initDb.ts';
-import { app } from './app.ts';
+import { getDb } from './db/initDb.ts';
 
-const db = await localDb();
+const db = await getDb();
 
 try {
   await setIdRange(db);

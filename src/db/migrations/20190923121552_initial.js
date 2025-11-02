@@ -1,15 +1,17 @@
 
-exports.up = function(knex) {
-return knex.raw(
-`
+
+export const up = function (knex) {
+  return knex.raw(
+    `
 CREATE TABLE IF NOT EXISTS images
   (
     id SERIAL PRIMARY KEY,
     path text UNIQUE
   );
 `
-)};
+  )
+};
 
-exports.down = function(knex) {
-  
+export const down = function (knex) {
+
 };

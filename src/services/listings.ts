@@ -11,9 +11,8 @@ import { isImage, isMedia, isVideo } from '../guards.ts';
 const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
 
-import { dockerDb, localDb } from '../db/initDb.ts';
-const isDockerDb = process.env.DOCKERDB;
-const db = isDockerDb ? await dockerDb() : await localDb();
+import { getDb } from '../db/initDb.ts';
+const db = getDb();
 
 export interface FileItem {
   name: string;
@@ -119,7 +118,7 @@ export async function getListings(fullAbsDirPath: string): Promise<DirList> {
   };
 }
 
-export function constructMediaListingsFromDb(dbItems: DbMediaWithTags[]): DirList {
+export function constructMediaListingsFromDb(dbItems: DbMedia[]): DirList {
   return {
     dirs: [],
     files: [],

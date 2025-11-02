@@ -1,7 +1,3 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 export const up = function (knex) {
   return knex.raw(`
    CREATE TABLE IF NOT EXISTS deleted
@@ -17,10 +13,6 @@ export const up = function (knex) {
   );
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 export const down = function (knex) {
   return knex.raw(`
      DROP TABLE IF EXISTS deleted;

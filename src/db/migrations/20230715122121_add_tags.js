@@ -1,8 +1,4 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.up = function(knex) {
+export const up = function (knex) {
   return knex.raw(`
     create table if not exists image_tags(
       id serial PRIMARY KEY,
@@ -17,10 +13,6 @@ exports.up = function(knex) {
   `);
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.down = function(knex) {
+export const down = function (knex) {
   
 };

@@ -2,12 +2,12 @@ import express, { NextFunction, Request, Response } from 'express';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { getItemByPath } from '../../db.ts';
-import { localDb } from '../../db/initDb.ts';
+import { getDb } from '../../db/initDb.ts';
 import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
 import { logTemplate } from '../../pages/logTemplate.ts';
 import { constructFileViewFromDb } from '../../services/listings.ts';
 import { getBeforeAndAfterItems } from '../../services/media.ts';
-const db = await localDb();
+const db = await getDb();
 export const fileRouter = express.Router();
 
 /**

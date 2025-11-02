@@ -2,40 +2,18 @@
 import { Knex } from 'knex';
 
 import knex from 'knex';
+import { dbConfig } from '../../knexfile.js';
 let initializedClient: Knex | null = null;
 
-export const dockerDb = async (): Promise<Knex> => {
+export const getDb = async (): Promise<Knex> => {
   if (initializedClient) { return initializedClient; }
 
-  const db = knex({
-    client: 'pg',
-    connection: {
-      host: 'db',
-      port: 5432,
-      user: 'postgres',
-      password: 'example',
-      database: 'postgres'
-    }
-  });
-
-  await testConnection(db);
-  initializedClient = db;
-  return db
-};
-
-export const localDb = async (): Promise<Knex> => {
-  if (initializedClient) { return initializedClient; }
+  const env = process.env.IS_TEST === true.toString() ? 'test' : 'prod'
 
   const db = knex({
-    client: 'pg',
-    pool: { min: 0, max: 7 },
-    connection: {
-      host: '127.0.0.1',
-      port: 54320,
-      user: 'postgres',
-      password: 'example',
-      database: 'postgres'
-    }
+    client: dbConfig[env].client,
+    pool: dbConfig[env].pool,
+    connection: dbConfig[env].connection
   });
 
   await testConnection(db);
@@ -51,4 +29,17 @@ const testConnection = async (db: Knex) => {
     console.error('Failed to create database connection:', error);
     throw error;
   }
+}
+
+export const getTableSizes = async (db: Knex) => {
+  const { rows } = await db.raw(`
+  select
+    table_name,
+    pg_size_pretty(pg_total_relation_size(quote_ident(table_name))),
+    pg_total_relation_size(quote_ident(table_name))
+  from information_schema.tables
+  where table_schema = 'public'
+  order by 3 desc;`
+  )
+  return rows
 }

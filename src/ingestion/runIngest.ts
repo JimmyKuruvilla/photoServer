@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { purgeDeadDbLinks } from '../../scripts/purgeDeadDbLinks/purgeDeadDbLinks.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb, getTableSizes } from '../../src/db/initDb.ts';
 import { log } from '../libs/log.ts';
 import { recursiveTraverseDir } from '../libs/recursiveTraverseDir.ts';
 import { ingest } from './ingestion.ts';
@@ -9,7 +9,7 @@ import { ingest } from './ingestion.ts';
  * Updates all files in SOURCE_PATH with entire db update flow: insert, create thumbnail, record face count, generate hash
 */
 
-const db = await localDb();
+const db = await getDb();
 const sourcePath = process.env.SOURCE_PATH;
 const targetPath = process.env.TARGET_PATH;
 
@@ -23,18 +23,10 @@ if (!sourcePath || !targetPath) {
 
   const count = await recursiveTraverseDir(
     sourcePath,
-    (filepath:string) => ingest(filepath, targetPath, { shouldMove: false })
+    (filepath: string) => ingest(filepath, targetPath, { shouldMove: false })
   );
 
-  const { rows } = await db.raw(`
-  select
-    table_name,
-    pg_size_pretty(pg_total_relation_size(quote_ident(table_name))),
-    pg_total_relation_size(quote_ident(table_name))
-  from information_schema.tables
-  where table_schema = 'public'
-  order by 3 desc;`
-  )
-  console.log(count, rows);
+  const sizes = await getTableSizes(db)
+  console.log(count, sizes);
   process.exit();
 })();

@@ -1,17 +1,19 @@
 #!/usr/bin/env node
-import { log } from 'node:console';
+
 import fs from 'node:fs/promises';
 import path from 'path';
-import { localDb } from '../../src/db/initDb.ts';
 import { COLS, TABLES } from '../constants.ts';
+import { getDb } from '../db/initDb.ts';
 import { isImage, isMedia, isVideo } from '../guards.ts';
 import { getExifData } from '../libs/exif.ts';
 import { countFaces, } from '../libs/faces.ts';
 import { genFileHash, } from '../libs/hash.ts';
+import { createLogger } from '../libs/log.ts';
 import { moveToTarget } from '../libs/move.ts';
 import { generateTargetPathForImage, generateTargetPathForVideo } from '../libs/path.ts';
 import { genB64Thumbnail } from '../libs/thumbnail.ts';
 import { isIgnorePath } from '../utils.ts';
+const log = createLogger('INGEST');
 
 /*
 Sample Data 
@@ -28,7 +30,7 @@ Sample Data
   "model":"Canon PowerShot SD1000"
 }] 
 */
-const db = await localDb();
+const db = await getDb();
 
 /**
  * Used from full ingestion where paths can be from media folder (vetted media files)
@@ -46,62 +48,62 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
 
   const filename = path.basename(sourceFilePath);
   const ext = path.extname(sourceFilePath)
-  const somePathsAreHidden = sourceFilePath.split(path.sep).some(f => f[0] === '.')
+  const containsHiddenPath = sourceFilePath.split(path.sep).some(f => f[0] === '.')
 
   if (isIgnorePath(sourceFilePath)) {
-    log(`INGEST::SKIPPING_IGNORE_PREFIX_PATH ${sourceFilePath}`)
+    log(`SKIPPING_IGNORE_PREFIX_PATH ${sourceFilePath}`)
     return
   }
 
-  if (!isMedia(filename)) {
-    log(`INGEST::SKIPPING_NON_MEDIA_FILE ${sourceFilePath}`)
+  if (containsHiddenPath) {
+    log(`SKIPPING_HIDDEN_FOLDER_OR_FILE ${sourceFilePath}`);
     return
   }
 
   if (ext.includes('part')) {
-    log(`INGEST::SKIPPING_PARTIAL_UPLOAD (part) ${filename}`);
+    log(`SKIPPING_PARTIAL_UPLOAD (part) ${filename}`);
     return
   }
 
   if (filename.startsWith('.trashed')) {
-    log(`INGEST::DELETING_TRASHED_FILE (.trashed) ${filename}`);
+    log(`DELETING_TRASHED_FILE (.trashed) ${filename}`);
     await fs.unlink(sourceFilePath)
     return
   }
 
-  if (somePathsAreHidden) {
-    log(`INGEST::SKIPPING_HIDDEN_FOLDER_OR_FILE ${sourceFilePath}`);
+  if (!isMedia(filename)) {
+    log(`SKIPPING_NON_MEDIA_FILE ${sourceFilePath}`)
     return
   }
 
   try {
     record.hash = await genFileHash(sourceFilePath)
   } catch (error) {
-    log(`INGEST: GEN_HASH_ERROR: ${error}`)
+    log(`GEN_HASH_ERROR: ${error}`)
     return
   }
 
   const isDenyListed = (await db(TABLES.DELETED).where(COLS.DELETED.HASH, record.hash).limit(1)).length > 0;
 
   if (isDenyListed) {
-    log(`INGEST::SKIPPING_DENY_LISTED_HASH ${sourceFilePath}`)
+    log(`SKIPPING_DENY_LISTED_HASH ${sourceFilePath}`)
     return
   } else {
     let targetFolderName
     let targetFilePath
 
-    if (isImage(sourceFilePath)) {
-      const pathData = await generateTargetPathForImage(sourceFilePath, targetPath)
-      targetFolderName = pathData.targetFolderName
-      targetFilePath = pathData.targetFilePath
-    } else if (isVideo(sourceFilePath)) {
-      const pathData = await generateTargetPathForVideo(sourceFilePath, targetPath)
-      targetFolderName = pathData.targetFolderName
-      targetFilePath = pathData.targetFilePath
-    }
+    if (opts.shouldMove) {
+      if (isImage(sourceFilePath)) {
+        const pathData = await generateTargetPathForImage(sourceFilePath, targetPath)
+        targetFolderName = pathData.targetFolderName
+        targetFilePath = pathData.targetFilePath
+      } else if (isVideo(sourceFilePath)) {
+        const pathData = await generateTargetPathForVideo(sourceFilePath, targetPath)
+        targetFolderName = pathData.targetFolderName
+        targetFilePath = pathData.targetFilePath
+      }
 
-    if (opts.shouldMove && targetFolderName && targetFilePath) {
-      const movedFilePath = await moveToTarget(sourceFilePath, targetPath, targetFolderName, targetFilePath)
+      const movedFilePath = await moveToTarget(sourceFilePath, targetPath, targetFolderName!, targetFilePath!)
       record.path = movedFilePath
     } else {
       record.path = sourceFilePath
@@ -127,17 +129,17 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
 
       if (isNotInDb) {
         try {
-          log(`INGEST::INSERT_RECORD ${record.path}`);
+          log(`INSERT_RECORD ${record.path}`);
           await db(TABLES.MEDIA).insert(record);
         } catch (error) {
-          log(`INGEST::INSERT_ERROR ${error}`);
+          log(`INSERT_ERROR ${error}`);
         }
       } else {
         try {
-          log(`INGEST::UPDATE_RECORD ${record.path}`);
+          log(`UPDATE_RECORD ${record.path}`);
           await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, record.path).update(record);
         } catch (error) {
-          log(`INGEST::UPDATE_ERROR ${error}`);
+          log(`UPDATE_ERROR ${error}`);
         }
       }
     } else {

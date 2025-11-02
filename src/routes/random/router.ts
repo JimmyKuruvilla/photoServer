@@ -1,13 +1,13 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { defaultInterval } from '../../constants.ts';
-import { localDb } from '../../db/initDb.ts';
 import { getRandomFromDb } from '../../db.ts';
-import { constructFileViewFromDb } from '../../services/listings.ts';
-import { getBeforeAndAfterItems } from '../../services/media.ts';
+import { getDb } from '../../db/initDb.ts';
 import { getMediaHtmlFragment } from '../../pages/getMediaHtmlFragment.ts';
 import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
+import { constructFileViewFromDb } from '../../services/listings.ts';
+import { getBeforeAndAfterItems } from '../../services/media.ts';
 export const randomRouter = express.Router();
-const db = await localDb();
+const db = await getDb();
 type RandomType = 'image' | 'video'
 
 // returns a view for a single random item

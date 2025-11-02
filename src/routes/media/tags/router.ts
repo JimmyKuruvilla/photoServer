@@ -1,12 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { TABLES } from '../../../constants.ts';
 import { createTag, deleteById, getById, searchOnTags, updateFieldById } from '../../../db.ts';
-import { localDb } from '../../../db/initDb.ts';
+import { getDb } from '../../../db/initDb.ts';
 import { dirTemplate } from '../../../pages/dirTemplate.ts';
 import { constructMediaListingsFromDb } from '../../../services/listings.ts';
 
 export const tagsRouter = express.Router();
-const db = await localDb();
+const db = await getDb();
 
 tagsRouter.get('/tags', async (req: Request, res: Response, next: NextFunction) => {
   const search = req.query.search as string;
