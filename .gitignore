@@ -1,11 +1,7 @@
 node_modules
-*.mp4
-*.jpg
-.package-lock.json
 .DS_Store
-db/data
-data
 letsencrypt
+data
 share
 dist
 *.log
