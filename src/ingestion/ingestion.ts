@@ -111,8 +111,9 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
 
     if (record.path) {
       if (isImage(record.path)) {
-        record.face_count = await countFaces(record.path)
         record.thumbnail = await genB64Thumbnail(record.path)
+        record.face_count = record.thumbnail ? await countFaces({ b64: record.thumbnail }) : 0
+        //DEBUG log(`FACE_COUNT: ${record.path} ${record.face_count}`)
 
         const exif = await getExifData(record.path)
         if (exif) {

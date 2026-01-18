@@ -14,3 +14,11 @@ export const doesFileExist = async (filePath: string) => {
     return false;
   }
 }
+
+// note: always uses jpg mime type
+export const createDataUriFromFilePath = async (filepath: string): Promise<string> => {
+  const buffer = await fs.readFile(filepath)
+  const base64 = buffer.toString('base64');
+  const mime = 'image/jpeg'
+  return `data:${mime};base64,${base64}`;
+};

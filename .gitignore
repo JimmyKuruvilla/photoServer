@@ -6,4 +6,4 @@ share
 dist
 *.log
 csvs/**
-python/venv
+**/venv
