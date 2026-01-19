@@ -165,15 +165,14 @@ button:hover a {
 
 .pic,
 video {
-  /* TEMP Disable opacity transition. Set opacity back to 0 to restore */
-  opacity: 1; 
+  opacity: 0; 
   max-width: 100vw;
   max-height: calc(100vh - 100px);
   margin: 0 auto;
 }
 
 .transition-opacity {
-  transition: opacity 0.75s ease-in;
+  transition: opacity 0.2s linear;
   opacity: 1;
 }
 
