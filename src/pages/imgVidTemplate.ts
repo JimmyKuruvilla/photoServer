@@ -16,6 +16,8 @@ export function imgVidTemplate(
     <html>
       <head>
         ${cssAndJs()}
+        <link rel="prefetch" href="${beforeItem?.srcPath}" as="image">
+        <link rel="prefetch" href="${afterItem?.srcPath}" as="image">
       </head>
 
       <body>
