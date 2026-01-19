@@ -5,42 +5,20 @@
 - relies on systemd to ensure db first, then pm2 service. See pm2.service.manualAddon
 
 
-## todo
--- convert to use vite  + react
--- make buttons bigger on touch devices
-
--- display log files as type text
--- be able to explore in a direction given a date, not just within a folder
--- permadelete based on hashes
-
--- spacebar to be pause start and then stop. 
--- read EXIF data and rotate photos accordingly. 
--- remove media html `content` classes
-- install postfix to get crontab logs, install mutt for better mail handling
--- db cleanup
--- script to check if db entry exists on disk, and then log it (then delete from db)
-
--- face count is broken due to venv setup
-
-TODO
-permadelete 
-phase 1
-- modify ingestion to calc hashes of new files, check if !inDeleted table before accepting
-- still to do next
-
-phase 2 permadelete script : done
-- get all media with marked tag
-- insert hashes into deleted table
-- delete from disk
-- delete from db
-- delete from s3 (use aws sdk)
-
-- aws sync --delete to s3. (has to be manual)
+DONE
+permadelete : deletions stored in deleted table, rejected from ingestion, manual delete by tag. 
 
 TODO
 leave original service alone and build a new one along side it. 
+- on image load, prefetch left and right. load left and right from cache first if available, if not fetch. cache ttl of 30s. 
+- or prefetch on hover.
+
+1. add search by any db param and return as listing to UI
+2. add additional queries to llm ingest and migrate db schema. include each as a column. people_count, animal_count etc. 
+3. add prompt to ui to ask about a particular image. 
+4. give llm abilitiy to connect to db and make queries across media. How many brown dogs are there?
+
 0. refactor utils + guards
-store a hash of a file on injest. So we can tell which files are the same.
 3. videos need a thumbnail as well. 
 - take first frame or 2seconds in. 
 
@@ -48,6 +26,18 @@ store a hash of a file on injest. So we can tell which files are the same.
 // refactor listings
 
 3. convert to react + vite
+-- convert to use vite  + react
+-- make buttons bigger on touch devices
+
+-- display log files as type text
+
+-- be able to explore in a direction given a date, not just within a folder
+-- permadelete based on hashes
+
+-- spacebar to be pause start and then stop. 
+-- read EXIF data and rotate photos accordingly. 
+-- remove media html `content` classes
+- install postfix to get crontab logs, install mutt for better mail handling
 
 1. implement permadelete
  - add delete button to files with conf. maybe after react. 

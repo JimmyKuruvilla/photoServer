@@ -3,7 +3,7 @@ import { log } from 'console';
 import { Knex } from 'knex';
 import path from 'path';
 import { TABLES } from '../../src/constants.ts';
-import { localDb } from '../../src/db/initDb.ts';
+import { getDb } from '../../src/db/initDb.ts';
 import { isImage } from '../../src/guards.ts';
 import { getExifData } from '../../src/libs/exif.ts';
 import { genFileHash } from '../../src/libs/hash.ts';
@@ -13,7 +13,7 @@ import { recursiveTraverseDir } from '../../src/libs/recursiveTraverseDir.ts';
  - also adds orientation and camera model
 */
 
-const db = await localDb();
+const db = await getDb();
 const sourceDir = process.env.SOURCE_PATH;
 if (!sourceDir) {
   throw new Error('Need source dir');
@@ -28,8 +28,8 @@ export const updateHashOrientationModel = async (db: Knex, filepath: string) => 
 
   if (isImage(filename)) {
     const exif = await getExifData(filepath)
-    orientation = exif.orientation
-    model = exif.orientation
+    orientation = exif?.orientation
+    model = exif?.orientation
   }
 
   // no guard for videos - just generate hashes for all other files
