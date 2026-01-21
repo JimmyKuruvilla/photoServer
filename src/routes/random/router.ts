@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { defaultInterval } from '../../constants.ts';
-import { getRandomFromDb } from '../../db.ts';
+import { getRandomFromDbWithCaching } from '../../db.ts';
 import { getDb } from '../../db/initDb.ts';
 import { getMediaHtmlFragment } from '../../pages/getMediaHtmlFragment.ts';
 import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
@@ -14,9 +14,14 @@ type RandomType = 'image' | 'video'
 randomRouter.get('/randomView', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const type = req.query.type as string;
-    const dbItem = await getRandomFromDb(db, type as 'image' | 'video' | undefined);
+    const dbItem = await getRandomFromDbWithCaching(db, type as 'image' | 'video' | undefined, 10);
+
+    // the db part is fstat, but the file part is slow
     const item = await constructFileViewFromDb(dbItem);
-    const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.dbPath)
+    const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.dbPath) // SLOW.
+    // extract the dirListingCache to its own file
+    // then when background the prefetch of the randoms. so the randoms get prefetched, then their associated directories get cached. 
+
     res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
   } catch (e) {
     next(e);
@@ -26,7 +31,7 @@ randomRouter.get('/randomView', async (req: Request, res: Response, next: NextFu
 // returns a view that starts the slideshow
 randomRouter.get('/random/slideshow', async (req: Request, res: Response, next: NextFunction) => {
   const type = req.query.type as RandomType
-  const dbItem = await getRandomFromDb(db, type);
+  const dbItem = await getRandomFromDbWithCaching(db, type, 10);
   const item = await constructFileViewFromDb(dbItem);
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.dbPath)
 
@@ -38,7 +43,7 @@ randomRouter.get('/random/slideshow', async (req: Request, res: Response, next: 
 // returns json for slideshow and fbi
 randomRouter.get('/random', async (req: Request, res: Response, next: NextFunction) => {
   const type = req.query.type as RandomType
-  const dbItem = await getRandomFromDb(db, type);
+  const dbItem = await getRandomFromDbWithCaching(db, type, 10);
   const item = await constructFileViewFromDb(dbItem);
   res.json({ ...item, html: getMediaHtmlFragment(item, defaultInterval, null, null) });
 });

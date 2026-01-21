@@ -2,13 +2,13 @@
 import express from 'express';
 import morgan from 'morgan';
 
-import { printRouter } from './routes/print/router.ts';
-import { clientRouter } from './routes/client/router.ts';
-import { randomRouter } from './routes/random/router.ts';
 import { errorMiddleware } from './middleware/error.ts';
-import { mediaRouter } from './routes/media/router.ts';
-import { fileRouter } from './routes/file/router.ts';
+import { clientRouter } from './routes/client/router.ts';
 import { dirRouter } from './routes/dir/router.ts';
+import { fileRouter } from './routes/file/router.ts';
+import { mediaRouter } from './routes/media/router.ts';
+import { printRouter } from './routes/print/router.ts';
+import { randomRouter } from './routes/random/router.ts';
 
 export const app = express();
 
