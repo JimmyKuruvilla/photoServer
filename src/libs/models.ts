@@ -68,6 +68,7 @@ export const callModelWithImageInput = async (options: ModelCallOptions): Promis
     method: 'POST',
     headers: { 'Content-Type': 'application/json', },
     body: JSON.stringify(body),
+    // signal: AbortSignal.timeout(1000) // TODO verify this works
   });
 
   if (!response.ok) {

@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'path';
-import { COLS, TABLES } from '../constants.ts';
+import { COLS, IMAGE, TABLES, VIDEO } from '../constants.ts';
 import { getDb } from '../db/initDb.ts';
 import { isImage, isMedia, isVideo } from '../guards.ts';
 import { getExifData } from '../libs/exif.ts';
@@ -44,6 +44,7 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
     model: null,
     thumbnail: null,
     face_count: 0,
+    media_type: null
   }
 
   const filename = path.basename(sourceFilePath);
@@ -83,6 +84,7 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
     return
   }
 
+  record.media_type = isImage(filename) ? IMAGE : isVideo(filename) ? VIDEO : null
   const isDenyListed = (await db(TABLES.DELETED).where(COLS.DELETED.HASH, record.hash).limit(1)).length > 0;
 
   if (isDenyListed) {

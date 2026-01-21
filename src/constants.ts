@@ -8,6 +8,8 @@ export const NL = '\n';
 export const ONE_DAY_SECS = 86400;
 export const ONE_HOUR_SECS = 3600;
 export const IGNORE_PREFIX = '__'
+export const IMAGE = 'image'
+export const VIDEO = 'video'
 
 export const TABLES = {
   MEDIA: 'media',
@@ -28,7 +30,9 @@ export const COLS = {
     ...COMMON_COLS,
     ...PATH,
     ...HASH,
+    UPDATED_AT: 'updated_at',
     FAVORITE: 'favorite',
+    MEDIA_TYPE: 'media_type',
     THUMBNAIL: 'thumbnail',
     MARKED: 'marked',
     FACE_COUNT: 'face_count',

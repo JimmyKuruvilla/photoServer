@@ -6,21 +6,29 @@
 
 
 DONE
+
+store the type of video or picture in the db so that the select random can use it to pick. 
+
+add last updated at with default now() so that upserts can change time. can be used to query script changes
+
+- on image load, prefetch left and right. load left and right from cache first if available, if not fetch. cache ttl of 30s. 
+
 permadelete : deletions stored in deleted table, rejected from ingestion, manual delete by tag. 
 
 TODO
+make random work with media_type
+
+if random could generate a set of 10 randoms, and go and fetch and load those into cache, then random would be faster as well. 
+
+videos need a thumbnail as well. 
+- take first frame or 2seconds in. 
+
 leave original service alone and build a new one along side it. 
-- on image load, prefetch left and right. load left and right from cache first if available, if not fetch. cache ttl of 30s. 
-- or prefetch on hover.
 
 1. add search by any db param and return as listing to UI
-2. add additional queries to llm ingest and migrate db schema. include each as a column. people_count, animal_count etc. 
-3. add prompt to ui to ask about a particular image. 
-4. give llm abilitiy to connect to db and make queries across media. How many brown dogs are there?
+2. face recognition is the key
 
 0. refactor utils + guards
-3. videos need a thumbnail as well. 
-- take first frame or 2seconds in. 
 
 1. use express 5
 // refactor listings
@@ -29,22 +37,10 @@ leave original service alone and build a new one along side it.
 -- convert to use vite  + react
 -- make buttons bigger on touch devices
 
--- display log files as type text
-
 -- be able to explore in a direction given a date, not just within a folder
--- permadelete based on hashes
 
 -- spacebar to be pause start and then stop. 
--- read EXIF data and rotate photos accordingly. 
 -- remove media html `content` classes
 - install postfix to get crontab logs, install mutt for better mail handling
 
-1. implement permadelete
- - add delete button to files with conf. maybe after react. 
-
-2. maybe add a query for num faces detected once react is ready
-and a button to rerun face detection on the current file - !
-
-store the type of video or picture in the db so that the select random can use it to pick. 
-
-refacotr db into "mdoels"
+refacotr db into "models"
