@@ -7,3 +7,4 @@ dist
 *.log
 csvs/**
 **/venv
+src/mcp/others

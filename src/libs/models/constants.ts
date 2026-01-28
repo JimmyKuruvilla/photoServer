@@ -1,0 +1,1 @@
+export const JWIND_ORIGIN = 'http://192.168.2.156:1234'

@@ -2,7 +2,8 @@
 import child_process from 'child_process';
 import { log } from 'console';
 import { createDataUriFromFilePath } from './file.ts';
-import { callModelWithImageInput, Prompts } from './models.ts';
+import { callModel, } from './models/models.ts';
+import { Prompts } from './models/prompts.ts';
 const spawn = child_process.spawnSync;
 
 const FACE_DETECTION_SCRIPT_PATH = './python/mediapipe_face.py'
@@ -39,11 +40,9 @@ export const countFaces = async (options: CountFacesOptions) => {
     }
 
     const dataUrl = options.filepath ? await createDataUriFromFilePath(options.filepath!) : options.b64!
-    const modelRespData = await callModelWithImageInput({
+    const modelRespData = await callModel({
       dataUrl,
       prompt: Prompts.NumFacesPrompt,
-      modelName: undefined,
-      modelOrigin: 'http://192.168.2.156:1234', //jwind
     })
 
     try {

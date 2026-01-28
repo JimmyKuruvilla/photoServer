@@ -1,0 +1,106 @@
+       {
+      type: "function",
+      name: "getHoroscope",
+      description: "Get today's horoscope for an astrological sign.",
+      parameters: {
+        type: "object",
+        properties: {
+          sign: {
+            type: "string",
+            description: "An astrological sign like Taurus or Aquarius",
+          },
+        },
+        required: ["sign"],
+      },
+    }
+    
+      {
+  name: "list-events",
+  description: "List events from one or more calendars. Supports both calendar IDs and calendar names.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      account: {
+        anyOf: [
+          {
+            type: "string",
+            pattern: "^[a-z0-9_-]{1,64}$",
+          },
+          {
+            type: "array",
+            items: {
+              type: "string",
+              pattern: "^[a-z0-9_-]{1,64}$",
+            },
+            minItems: 1,
+            maxItems: 10,
+          },
+        ],
+        description: "Account nickname(s) to query (e.g., 'work' or ['work', 'personal']). Omit to query all accounts.",
+      },
+      calendarId: {
+        anyOf: [
+          {
+            type: "string",
+            description: "Calendar identifier(s) to query. Accepts calendar IDs (e.g., 'primary', 'user@gmail.com') OR calendar names (e.g., 'Work', 'Personal'). Single calendar: 'primary'. Multiple calendars: array ['Work', 'Personal'] or JSON string '[\"Work\", \"Personal\"]'",
+          },
+          {
+            type: "array",
+            items: {
+              type: "string",
+              minLength: 1,
+            },
+            minItems: 1,
+            maxItems: 50,
+            description: "Array of calendar IDs to query events from (max 50, no duplicates)",
+          },
+        ],
+      },
+      timeMin: {
+        type: "string",
+        description: "Start of time range (ISO 8601, e.g., '2024-01-01T00:00:00').",
+      },
+      timeMax: {
+        type: "string",
+        description: "End of time range (ISO 8601, e.g., '2024-01-31T23:59:59').",
+      },
+      timeZone: {
+        type: "string",
+        description: "IANA timezone (e.g., 'America/Los_Angeles'). Defaults to calendar's timezone.",
+      },
+      fields: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: [
+            "id",
+          ],
+        },
+        description: "Additional fields to include beyond defaults (id, summary, start, end, status, htmlLink, location, attendees).",
+      },
+      privateExtendedProperty: {
+        type: "array",
+        items: {
+          type: "string",
+          pattern: "^[^=]+=[^=]+$",
+        },
+        description: "Filter by private extended properties (key=value). Matches events that have all specified properties.",
+      },
+      sharedExtendedProperty: {
+        type: "array",
+        items: {
+          type: "string",
+          pattern: "^[^=]+=[^=]+$",
+        },
+        description: "Filter by shared extended properties (key=value). Matches events that have all specified properties.",
+      },
+    },
+    required: [
+      "calendarId",
+    ],
+    additionalProperties: false,
+    $schema: "http://json-schema.org/draft-07/schema#",
+  },
+  execution: {
+    taskSupport: "forbidden",
+  },
