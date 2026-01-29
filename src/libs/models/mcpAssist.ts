@@ -8,6 +8,7 @@ import { applyMCPToolsAsFns, isFunctionCall, isRequestingFnUse, LMStudioTypes, l
 
 const log = createLogger('[MCP_ASSIST]')
 export const GOOGLE_CAL_MCP_STDIO_SCRIPT_PATH = '/home/j/scripts/photoServer/src/mcp/others/google-calendar-mcp/build/index.js'
+let mcpToolList;
 
 /**
  * 01/24/2026 LM Studio supports mcp server usage in chat locally but not over the responses API
@@ -56,6 +57,28 @@ const connectToMCPServer = async (mcp: Client, serverScriptPath: string, env: Re
   }
 }
 
+export const initMcpAssist = async () => {
+  const mcpClient = new Client({ name: 'jubuntus-mcp-client-stdio', version: '1.0.0' })
+  try {
+    console.time('connect')
+    mcpToolList = await connectToMCPServer(
+      mcpClient,
+      GOOGLE_CAL_MCP_STDIO_SCRIPT_PATH,
+      {
+        GOOGLE_OAUTH_CREDENTIALS: process.env.GOOGLE_OAUTH_CREDENTIALS!,
+        GOOGLE_CALENDAR_MCP_TOKEN_PATH: process.env.GOOGLE_CALENDAR_MCP_TOKEN_PATH!
+      })
+    const tools = transformMCPToolsToFns(mcpToolList)
+    console.timeEnd('connect')
+
+    return { mcpClient, tools }
+  } catch (error) {
+    log.error(error)
+    await mcpClient.close();
+    throw error
+  }
+}
+
 const test = async () => {
   const mcpClient = new Client({ name: 'jubuntus-mcp-client-stdio', version: '1.0.0' })
   try {
@@ -95,7 +118,7 @@ const test = async () => {
       log.info('TOOL_OUTPUTS')
       log.info(toolOutputs)
 
-      input = input.concat(toolOutputs)
+      input = input.concat(response.output, toolOutputs)
       response = await callModel({ tools, input })
 
       log.info('AFTER_TOOL_RESPONSE')
@@ -115,7 +138,7 @@ const test = async () => {
   }
 }
 
-await test()
+// await test()
 
 // /setup mcp for keep
 // handle email to note

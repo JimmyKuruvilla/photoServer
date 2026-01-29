@@ -28,6 +28,7 @@ const outputProps = (o: any) => ({
   type: o?.type,
   args: o?.arguments,
 })
+
 export const logModelResponse = async (response: ModelResponse, log: Logger) => {
   if (response?.output?.length) {
     log.info(response?.output?.map(

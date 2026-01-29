@@ -1,54 +1,84 @@
 import { ParsedMail } from 'mailparser';
-import fs from 'node:fs/promises';
+import fs from 'node:fs';
 import { createLogger } from '../libs/pinologger.ts';
-import { fetchAllParsed, initMailClient, isFrom, MAIL_STATE_FILE_PATH, NewMail } from './mail.ts';
-import { callModel, Prompts } from '../libs/models/models.ts';
-import calendarMCPTools from '../emailbot/calendar-mcp-tools.json' with { type: 'json' };
+import { fetchAllParsed, fetchAndEmit, getMailData, initMailClient, isFrom, MAIL_STATE_FILE_PATH, NewMail, writeMailData } from './inbox.ts';
+import { callModel, callModelWithMcp } from '../libs/models/models.ts';
+import { Prompts } from '../libs/models/prompts.ts';
+import { sendMail } from './outbox.ts';
+import { ModelResponse } from '../libs/models/types.ts';
+import { initMcpAssist } from '../libs/models/mcpAssist.ts';
 
-const log = createLogger('[EMAILBOT] ')
-const eliImsa = 'ekuruvilla@imsa.edu'
-const eliHome = 'elihomephone@gmail.com'
+const log = createLogger('[EMAILBOT]')
+const EMAILS = {
+  jchomephone: 'jchomephone@gmail.com',
+  jimmyjk: 'jimmyjk@gmail.com',
+  eliImsa: 'ekuruvilla@imsa.edu',
+  eliHome: 'elihomephone@gmail.com'
+}
 
-let lastMailDate;
+const isLLMSubject = (subject: string | undefined) => {
+  return subject?.toLowerCase().includes('llm')
+}
+const isChat = (subject: string | undefined) => {
+  return isLLMSubject(subject) && subject?.toLowerCase().includes('chat')
+}
+
+const isHomeworkCalendar = (subject: string | undefined) => {
+  return isLLMSubject(subject) && subject?.toLowerCase().includes('hwcal')
+}
+
+const getModelRespText = (response: ModelResponse) => {
+  return response?.output?.flatMap(o =>
+    o?.content?.flatMap(
+      c => c?.text
+    )
+  ).join(',')
+}
+
 const main = async () => {
-  const { emitter, stateFilePath, events } = await initMailClient(1_000)
-  // stateFilePath update with string at path {lastSeenModSeq} from mail.modseq.toString()
+  const { mcpClient, tools } = await initMcpAssist()
+  const { emitter, events } = await initMailClient(30_000)
 
-  // const mails = await fetchAllParsed('0')
-  // for (const mail of mails) {
-  //   if (isFrom(mail, ['jimmyjk@gmail.com'])) {
-  //     console.log('got a jimmy', mail.subject)
-  //   }
-  // }
-  emitter.once(events.NEW_MAIL, async (mail: NewMail) => { // TODO change to polling
-    //   // log.info(mail)
-    //   // log.info(mail.date)
-    //   // log.info(mail.subject)
-    //   // log.info(mail?.to?.text)
-    //   // log.info(mail?.from?.text)
-    //   // log.info(mail.text)
+  emitter.on(events.NEW_MAIL, async (mail: NewMail) => {
+    log.info(`NEW_MAIL ${mail.subject} from ${mail?.from?.text}`)
+    await writeMailData({
+      lastSeenModSeq: mail.modSeq,
+      lastSeenDate: mail.date!.toString(),
+      from: mail.from!.text,
+      subject: mail.subject!
+    })
 
+    if (mail?.from?.text && mail?.subject && !isFrom(mail, [EMAILS.jchomephone])) {
+      if (isChat(mail.subject)) {
+        try {
+          const resp = await callModel({ prompt: Prompts.LLMChat(mail.text!) })
+          const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: `${getModelRespText(resp)}\n You asked: ${mail.text}` })
+        } catch (error: any) {
+          log.error(error)
+          const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: error.message })
+        }
+      }
 
-    //   log.info({ msg: 'got some mail', date: mail.date, modSeq: mail?.modseq?.toString() })
-
-    //   // if already seen, don't send again
-    if (isFrom(mail, ['jimmyjk@gmail.com'])) {
-      const mailData = JSON.parse(await fs.readFile(MAIL_STATE_FILE_PATH, 'utf8'))
-      console.log('got a jimmy', mail.subject)
-
-      console.time('callModel')
-      const resp = await callModel({ prompt: Prompts.CreateHWCalendarInvites(mail.text!)})
-      // const resp = await callModel({ prompt: Prompts.CreateHWCalendarInvites(mail.text!), tools: calendarMCPTools })
-      console.log(resp)
-      console.timeEnd('callModel')
-      // establish success from model and then update the file record
-      // mailData.lastSeenModSeq = mail?.modseq?.toString()
-      // await fs.writeFile(MAIL_STATE_FILE_PATH, JSON.stringify(mailData))
+      if (isHomeworkCalendar(mail.subject)) {
+        try {
+          const resp = await callModelWithMcp(
+            mcpClient,
+            {
+              tools,
+              prompt: Prompts.CreateHWCalendarInvites(mail.text!),
+            })
+          const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: `${getModelRespText(resp)}\n You asked: ${mail.text}` })
+        } catch (error: any) {
+          log.error(error)
+          const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: error.message })
+        }
+      }
     }
   })
+
+  await fetchAndEmit();
+
 }
 main()
 
-// TODO 
-// // establish success from model and then update the file record
 // renew credentials so that they last longer and ensure they last past 1 week from jan 22

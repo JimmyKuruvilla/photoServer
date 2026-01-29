@@ -25,13 +25,18 @@ export const Prompts = {
     Return the number of faces detected in this image. Return in a structured format as parseable json that looks like {faces: countOfFacesDetected}
     `,
   CreateHWCalendarInvites: (email: string) => `
-  1. Check the current time.
-  2. Take this email of homework items that are due and create calendar invites on the 'normal' account for each item. 
-  3. Set an event the day each item is due called 'Turn in X' where X is the assignment name.
-  4. Add jimmyjk@gmail.com as an invitee for each item.
-  If the invite exists already, do not recreate it.
-  If the email is not about homework and due dates, do nothing.
-  Return the text: TASK_COMPLETED if successful or TASK_FAILED if not.
+  All times should be in CST - central standard time timezone. 
+  Take this email of items that are due and create calendar events on the 'primary' account for each item. 
+  If a time is given use that as the start time for the event. If no time is given start them at 0700am and last 30 minutes.
+  Determine what date each event is due, then set a calendar event on that date for each item called 'Turn in X' where X is the assignment name. 
+  If a due time is Friday, ensure the date you are setting the event for is also a Friday.
+  Add jimmyjk@gmail.com as an invitee for each item.
+  Do not create an event if it already exists. 
+  Overlapping events are acceptable. 
+  if successful return the list of event names and their date + times, if failed return the reason why it failed.
   email: ${email}
-  `
+  `,
+  LLMChat: (query: string) => `Answer the question below as best as you can with the info you have. 
+  Don't ask any follow up questions. This is a one question to one response type conversation.
+  query: ${query}`
 }

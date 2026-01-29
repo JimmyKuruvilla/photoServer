@@ -21,5 +21,14 @@ module.exports = {
         TARGET_PATH: '/mnt/backup/media'
       }
     },
+    {
+      name: 'emailbot',
+      script: './src/emailbot/emailbot.ts',
+      interpreter: 'node',
+      interpreterArgs: '--import tsx',
+      env: {
+        MAIL_STATE_FILE_PATH: '/home/j/scripts/photoServer/src/emailbot/mail.state.json'
+      }
+    },
   ],
 };

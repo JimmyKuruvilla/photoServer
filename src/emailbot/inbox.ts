@@ -3,15 +3,16 @@ import { ParsedMail, simpleParser } from 'mailparser';
 import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
 import { createLogger } from '../libs/pinologger.ts';
-const log = createLogger('[MAIL] ')
+import { string } from 'zod/v4';
+const log = createLogger('[INBOX]')
 
-const MailEmitter = new EventEmitter();
-export const MAIL_STATE_FILE_PATH = './mail.state.json'
+const InboxEmitter = new EventEmitter();
+export const MAIL_STATE_FILE_PATH = process.env.MAIL_STATE_FILE_PATH ?? './mail.state.json'
 export const MAIL_EVENTS = {
   NEW_MAIL: 'NEW_MAIL'
 }
 export type NewMail = ParsedMail & {
-  modseq: bigint | undefined
+  modSeq: string
 }
 
 const client: ImapFlow = new ImapFlow({
@@ -51,7 +52,6 @@ export const initMailClient = async (interval: number = 15_000) => {
     log.info(`Flags changed for message ${data.seq}`);
   });
 
-  // Mailbox open/close events
   client.on('mailboxOpen', (mailbox) => {
     log.info(`Opened ${mailbox.path}`);
   });
@@ -60,18 +60,21 @@ export const initMailClient = async (interval: number = 15_000) => {
     log.info(`Closed ${mailbox.path}`);
   });
 
-  setInterval(async () => {
-    const mailData = JSON.parse(await fs.readFile(MAIL_STATE_FILE_PATH, 'utf8'))
-    const messages = await fetchAll(mailData.lastSeenModSeq)
+  setInterval(fetchAndEmit, interval)
 
-    for (const message of messages) {
-      const mail = await simpleParser(message.source!);
-      MailEmitter.emit(MAIL_EVENTS.NEW_MAIL, { modseq: message.modseq, ...mail })
-    }
+  return { emitter: InboxEmitter, events: MAIL_EVENTS }
+}
 
-  }, interval)
+export const fetchAndEmit = async () => {
+  const mailData = JSON.parse(await fs.readFile(MAIL_STATE_FILE_PATH, 'utf8'))
+  log.debug(`Fetching from lastSeenModSeq: ${mailData.lastSeenModSeq}`)
+  const messages = await fetchAll(mailData.lastSeenModSeq)
 
-  return { emitter: MailEmitter, stateFilePath: MAIL_STATE_FILE_PATH, events: MAIL_EVENTS }
+
+  for (const message of messages) {
+    const mail = await simpleParser(message.source!);
+    InboxEmitter.emit(MAIL_EVENTS.NEW_MAIL, { modSeq: message.modseq?.toString(), ...mail })
+  }
 }
 
 /*
@@ -99,6 +102,18 @@ export const fetchAllParsed = async (modSeq: string) => {
     mails.push(mail)
   }
   return mails;
+}
+
+export const getMailData = async () => JSON.parse(await fs.readFile(MAIL_STATE_FILE_PATH, 'utf8'))
+
+type WriteMailDataParams = {
+  lastSeenModSeq: string;
+  lastSeenDate: string;
+  from: string;
+  subject: string;
+}
+export const writeMailData = async (data: WriteMailDataParams) => {
+  await fs.writeFile(MAIL_STATE_FILE_PATH, JSON.stringify(data))
 }
 
 export const isFrom = (mail: NewMail | ParsedMail, addressesToCheck: string[]) => {
