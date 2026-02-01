@@ -1,5 +1,5 @@
 import { ModelResponse } from '../types.ts';
-import { isFunctionCall, LMStudioTypes } from '../utils.ts';
+import { isFunctionCall, LMStudioTypes } from '../mcpAssistUtils.ts';
 
 export const getHoroscope = (args: { sign: string }) => {
   return args.sign + " Next Tuesday you will befriend a baby otter.";

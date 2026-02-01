@@ -1,11 +1,11 @@
 import { createLogger } from '../pinologger.ts';
-import { ModelCallOptions, ModelResponse } from './types.ts';
-import { JWIND_ORIGIN } from './constants.ts';
-import { applyMCPToolsAsFns, isRequestingFnUse, logModelResponse, ModelRoles } from './utils.ts';
+import { ChatModelResponse, ModelCallOptions, ModelResponse } from './types.ts';
+import { DEFAULT_MODEL, JWIND_ORIGIN } from './constants.ts';
+import { applyMCPToolsAsFns, isRequestingFnUse, logModelResponse, ModelRoles } from './mcpAssistUtils.ts';
 import { Client } from '@modelcontextprotocol/sdk/client';
 const log = createLogger('[MODELS]')
 
-export const constructInput = (options: ModelCallOptions) => {
+export const constructInputForV1Responses = (options: ModelCallOptions) => {
   return options.input ?? [
     {
       role: ModelRoles.USER,
@@ -18,27 +18,31 @@ export const constructInput = (options: ModelCallOptions) => {
 }
 
 /**
- * Used to call local network model and returns a single response
+ * Used to call local network model and returns a single response using the v1/responses API
+ * Does support custom tool use but needs MCPAssist to handle mcp usage
  */
-export const callModel = async (options: ModelCallOptions): Promise<ModelResponse> => {
+export const v1Responses = async (options: ModelCallOptions): Promise<ModelResponse> => {
   const path = 'v1/responses'
-  const modelName = options.modelName ?? 'qwen/qwen3-vl-8b'
-  // 'qwen/qwen3-vl-4b' is ok for photos, dumb for calendar. 
+  const modelName = options.modelName ?? DEFAULT_MODEL
   const modelOrigin = options.modelOrigin ?? JWIND_ORIGIN
 
-  const input = constructInput(options)
+  const input = constructInputForV1Responses(options)
+  log.info(input)
 
   const body = {
-    model: `${modelName}`,
-    ...(options.tools ? { tools: options.tools } : null),
+    model: modelName,
     input,
+    ...(options.integrations ? { integrations: options.integrations } : null),
+    ...(options.tools ? { tools: options.tools } : null),
     ...(options.instructions ? { instructions: options.instructions } : null)
   }
 
+  console.log(process.env.LM_STUDIO_API_KEY)
   const response = await fetch(`${modelOrigin}/${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.LM_STUDIO_API_KEY}`,
     },
     body: JSON.stringify(body)
   });
@@ -51,18 +55,62 @@ export const callModel = async (options: ModelCallOptions): Promise<ModelRespons
   return json;
 }
 
-export const callModelWithMcp = async (mcpClient: Client, options: ModelCallOptions): Promise<ModelResponse> => {
-  let response = await callModel(options)
+export const v1ResponsesWithMcpAssist = async (mcpClient: Client, options: ModelCallOptions): Promise<ModelResponse> => {
+  let response = await v1Responses(options)
   // await logModelResponse(response, log)
 
-  let input = constructInput(options)
+  let input = constructInputForV1Responses(options)
   while (isRequestingFnUse(response)) {
     const toolOutputs = await applyMCPToolsAsFns(mcpClient, response, createLogger('[MCP_TOOL_USE]'))
     input = input.concat(response.output, toolOutputs)
-    response = await callModel({ tools: options.tools, input })
+    response = await v1Responses({ tools: options.tools, input })
 
     // await logModelResponse(response, log)
   }
 
   return response;
+}
+
+/*
+* LM Studio specific api that allows remote mcp integrations
+* Does not support custom tool usage
+* LMS api can also be used to load and unload models
+*/
+export const constructInputForV1Chat = (options: ModelCallOptions) => {
+  return options.input ?? [
+    { type: 'text', content: options.prompt },
+    ...(options.dataUrl ? [{ type: 'image', data_url: options.dataUrl }] : [])
+  ]
+}
+
+export const v1Chat = async (options: ModelCallOptions): Promise<ChatModelResponse> => {
+  const path = 'api/v1/chat'
+  const modelName = options.modelName ?? DEFAULT_MODEL
+  const modelOrigin = options.modelOrigin ?? JWIND_ORIGIN
+
+  const input = constructInputForV1Chat(options)
+  log.info(input)
+
+  const body = {
+    model: modelName,
+    input,
+    ...(options.integrations ? { integrations: options.integrations } : null),
+    ...(options.instructions ? { system_prompt: options.instructions } : null)
+  }
+
+  const response = await fetch(`${modelOrigin}/${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.LM_STUDIO_API_KEY}`,
+    },
+    body: JSON.stringify(body)
+  });
+
+  const json = await response.json()
+  if (!response.ok) {
+    throw new Error(`MODEL__HTTP_ERROR__${modelName}: ${response.status}, ${json.error.message}`);
+  }
+
+  return json;
 }

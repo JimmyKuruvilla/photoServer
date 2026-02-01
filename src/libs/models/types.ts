@@ -6,6 +6,7 @@ export type ModelCallOptions = {
   tools?: any[];
   input?: any[];
   instructions?: string
+  integrations?: any[] // {type:plugin, id: string}
 }
 
 export type ModelResponseOutputContent = {
@@ -33,4 +34,25 @@ export type ModelResponse = {
   status: string
   model: string
   output: ModelResponseOutput[]
+}
+
+/* v1Chat types */
+export type ChatResponseToolCallOutput = {
+  type: 'tool_call'
+  tool: string;
+  arguments: any
+  output: any
+  provider_info: any
+}
+
+export type ChatResponseTextOutput = {
+  type: 'message'
+  content: string;
+}
+
+export type ChatModelResponse = {
+  model_instance_id: string;
+  output: (ChatResponseTextOutput | ChatResponseToolCallOutput)[]
+  response_id: string
+  stats: any
 }

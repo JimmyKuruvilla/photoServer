@@ -2,10 +2,10 @@ import { argv, exit } from 'process';
 import { createDataUriFromFilePath } from '../../file.ts';
 import { createDataUriFromImageUrl } from '../../image.ts';
 import { JWIND_ORIGIN } from '../constants.ts';
-import { callModel } from '../models.ts';
+import { v1Responses } from '../models.ts';
 import { Prompts } from '../prompts.ts';
 import { createLogger } from '../../pinologger.ts';
-import { logModelResponse } from '../utils.ts';
+import { logModelResponse } from '../mcpAssistUtils.ts';
 const log = createLogger('image')
 
 /**
@@ -21,7 +21,7 @@ const image = async () => {
     console.timeEnd('datauri')
 
     console.time('callmodel')
-    const modelRespData = await callModel({
+    const modelRespData = await v1Responses({
       modelName: undefined,
       modelOrigin: JWIND_ORIGIN,
       prompt: Prompts.GeneralStructuredImagePrompt,

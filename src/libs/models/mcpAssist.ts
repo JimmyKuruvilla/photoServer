@@ -2,9 +2,9 @@ import { argv, exit } from 'process';
 import { createLogger } from '../pinologger.ts';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { callModel } from './models.ts';
+import { v1Responses } from './models.ts';
 import { ModelResponse } from './types.ts';
-import { applyMCPToolsAsFns, isFunctionCall, isRequestingFnUse, LMStudioTypes, logModelResponse, ModelRoles, transformMCPToolsToFns } from './utils.ts';
+import { applyMCPToolsAsFns, isFunctionCall, isRequestingFnUse, LMStudioTypes, logModelResponse, ModelRoles, transformMCPToolsToFns } from './mcpAssistUtils.ts';
 
 const log = createLogger('[MCP_ASSIST]')
 export const GOOGLE_CAL_MCP_STDIO_SCRIPT_PATH = '/home/j/scripts/photoServer/src/mcp/others/google-calendar-mcp/build/index.js'
@@ -19,6 +19,9 @@ let mcpToolList;
 /**
  * Connects to STDIO mcp server and returns available tools
  * built from https://modelcontextprotocol.io/docs/develop/build-client
+ * MCPs
+ * https://github.com/nspady/google-calendar-mcp#
+ * https://github.com/feuerdev/keep-mcp
  */
 const connectToMCPServer = async (mcp: Client, serverScriptPath: string, env: Record<string, string> = {}) => {
   try {
@@ -100,11 +103,13 @@ const test = async () => {
         role: ModelRoles.USER,
         // content: `What events do I have for today? `
         // content: `Add an event for today at 3pm called 'testing' and invite jimmyjk@gmail.com`
-        content: `If there is an event called 'Testing' uppercase or lowercase for today, delete it.`
+        content: `When is it time to throw out eggs?`
+        // content: `If there is an event called 'Testing' uppercase or lowercase for today, delete it.`
         // content: `What calendars are available and what are their ids? Only return the ids nothing else`
       },
     ];
-    let response = await callModel({ tools, input, instructions: `todays date is: ${new Date().toLocaleString()}. Don't fetch the date or time, use this as a value.` })
+    let response = await v1Responses({ tools, prompt: 'when do eggs go bad?', instructions: `todays date is: ${new Date().toLocaleString()}. Don't fetch the date or time, use this as a value.` })
+    // let response = await v1Responses({ tools, input, instructions: `todays date is: ${new Date().toLocaleString()}. Don't fetch the date or time, use this as a value.` })
     log.info('INITIAL_MODEL_RESPONSE')
     await logModelResponse(response, log)
     console.timeEnd('INITIAL_MODEL_RESPONSE')
@@ -119,7 +124,7 @@ const test = async () => {
       log.info(toolOutputs)
 
       input = input.concat(response.output, toolOutputs)
-      response = await callModel({ tools, input })
+      response = await v1Responses({ tools, input })
 
       log.info('AFTER_TOOL_RESPONSE')
       await logModelResponse(response, log)
@@ -139,9 +144,3 @@ const test = async () => {
 }
 
 // await test()
-
-// /setup mcp for keep
-// handle email to note
-// email > sbj:llm > respond in email
-// email > fetch recipes > update shopping list
-// email sort keep list by alpha, then by meijer.

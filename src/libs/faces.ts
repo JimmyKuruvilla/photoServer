@@ -2,7 +2,7 @@
 import child_process from 'child_process';
 import { log } from 'console';
 import { createDataUriFromFilePath } from './file.ts';
-import { callModel, } from './models/models.ts';
+import { v1Responses, } from './models/models.ts';
 import { Prompts } from './models/prompts.ts';
 const spawn = child_process.spawnSync;
 
@@ -40,7 +40,7 @@ export const countFaces = async (options: CountFacesOptions) => {
     }
 
     const dataUrl = options.filepath ? await createDataUriFromFilePath(options.filepath!) : options.b64!
-    const modelRespData = await callModel({
+    const modelRespData = await v1Responses({
       dataUrl,
       prompt: Prompts.NumFacesPrompt,
     })

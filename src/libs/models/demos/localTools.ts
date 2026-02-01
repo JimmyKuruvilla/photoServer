@@ -1,7 +1,7 @@
 import { createLogger } from '../../pinologger.ts';
 import { applyLocalTools } from './utils.ts';
-import { callModel } from '../models.ts';
-import { isRequestingFnUse } from '../utils.ts';
+import { v1Responses } from '../models.ts';
+import { isRequestingFnUse } from '../mcpAssistUtils.ts';
 
 const log = createLogger('[LocalTools]')
 
@@ -44,11 +44,11 @@ const testLocalTools = async () => {
     { role: "user", content: "What is my lucky number? I am an Aquarius." },
   ];
 
-  let response = await callModel({ tools, input })
+  let response = await v1Responses({ tools, input })
 
   while (isRequestingFnUse(response)) {
     input = input.concat(await applyLocalTools(response))
-    response = await callModel({ tools, input })
+    response = await v1Responses({ tools, input })
   }
 
   log.info('ModelInput');

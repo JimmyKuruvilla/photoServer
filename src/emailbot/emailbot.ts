@@ -2,12 +2,17 @@ import { ParsedMail } from 'mailparser';
 import fs from 'node:fs';
 import { createLogger } from '../libs/pinologger.ts';
 import { fetchAllParsed, fetchAndEmit, getMailData, initMailClient, isFrom, MAIL_STATE_FILE_PATH, NewMail, writeMailData } from './inbox.ts';
-import { callModel, callModelWithMcp } from '../libs/models/models.ts';
+import { v1Responses, v1ResponsesWithMcpAssist } from '../libs/models/models.ts';
 import { Prompts } from '../libs/models/prompts.ts';
 import { sendMail } from './outbox.ts';
 import { ModelResponse } from '../libs/models/types.ts';
 import { initMcpAssist } from '../libs/models/mcpAssist.ts';
 
+/*
+TODO
+1. recover from disconnection
+
+*/
 const log = createLogger('[EMAILBOT]')
 const EMAILS = {
   jchomephone: 'jchomephone@gmail.com',
@@ -51,7 +56,7 @@ const main = async () => {
     if (mail?.from?.text && mail?.subject && !isFrom(mail, [EMAILS.jchomephone])) {
       if (isChat(mail.subject)) {
         try {
-          const resp = await callModel({ prompt: Prompts.LLMChat(mail.text!) })
+          const resp = await v1Responses({ prompt: Prompts.LLMChat(mail.text!) })
           const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: `${getModelRespText(resp)}\n You asked: ${mail.text}` })
         } catch (error: any) {
           log.error(error)
@@ -61,7 +66,7 @@ const main = async () => {
 
       if (isHomeworkCalendar(mail.subject)) {
         try {
-          const resp = await callModelWithMcp(
+          const resp = await v1ResponsesWithMcpAssist(
             mcpClient,
             {
               tools,
@@ -80,5 +85,3 @@ const main = async () => {
 
 }
 main()
-
-// renew credentials so that they last longer and ensure they last past 1 week from jan 22
