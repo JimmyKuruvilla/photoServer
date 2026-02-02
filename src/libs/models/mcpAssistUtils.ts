@@ -1,5 +1,5 @@
 import { Logger } from 'pino'
-import { ModelResponse } from './types.ts'
+import { ChatModelResponse, ModelResponse } from './types.ts'
 import { Client } from '@modelcontextprotocol/sdk/client'
 
 export const LMStudioTypes = {
@@ -44,6 +44,14 @@ export const logModelResponse = async (response: ModelResponse, log: Logger) => 
   } else {
     log.info(response)
   }
+}
+
+export const getModelRespText = (response: ModelResponse) => {
+  return response?.output?.flatMap(o =>
+    o?.content?.flatMap(
+      c => c?.text
+    )
+  ).join(',')
 }
 
 /**

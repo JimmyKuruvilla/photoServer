@@ -7,7 +7,7 @@ export const integrations = [
   { type: 'plugin', id: 'mcp/filesystem' }
 ]
 
-export const logModelResponse = async (response: ChatModelResponse, log: Logger, isDebug = false) => {
+export const logModelChatResponse = async (response: ChatModelResponse, log: Logger, isDebug = false) => {
   if (response?.output?.length) {
     log.info(response?.output?.map(
       o => o?.type === 'message'
@@ -19,4 +19,12 @@ export const logModelResponse = async (response: ChatModelResponse, log: Logger,
   } else {
     log.info(response)
   }
+}
+
+export const getModelChatRespText = (response: ChatModelResponse) => {
+  return response?.output?.flatMap(o =>
+    o?.type === 'message'
+      ? o.content
+      : 'not message'
+  ).join('\n')
 }

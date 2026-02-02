@@ -1,7 +1,6 @@
-import GPSOAuth from "gpsoauth-js";
 import { createLogger } from "../pinologger.ts";
 import { v1Responses, v1Chat } from "./models.ts";
-import { integrations, logModelResponse } from "./utils.ts";
+import { integrations, logModelChatResponse } from "./utils.ts";
 
 
 const log = createLogger('REMOTE_MCP_TEST')
@@ -35,7 +34,7 @@ const test = async () => {
   let response = await v1Chat({ integrations, prompt })
   log.info('INITIAL_MODEL_RESPONSE')
   console.log(JSON.stringify(response, null, 2))
-  await logModelResponse(response, log)
+  await logModelChatResponse(response, log)
 
   // DEBUG ONLY
   // log.info('FinalModelInput');
@@ -44,34 +43,5 @@ const test = async () => {
   // log.info('FinalModelOutput')
   // await logModelResponse(response, log)
 }
-const auth = async () => {
-  // import gpsoauth
 
-  // email = 'example@gmail.com'
-  //   password = 'my-password'
-  //   android_id = '0123456789abcdef'
-
-  //   master_response = gpsoauth.perform_master_login(email, password, android_id)
-  //   master_token = master_response['Token']
-
-  //   auth_response = gpsoauth.perform_oauth(
-  //     email, master_token, android_id,
-  //     service = 'sj', app = 'com.google.android.music',
-  //     client_sig = '...')
-  //   token = auth_response['Auth']
-
-  // Exchange a web OAuth token for a master token
-  const result = await GPSOAuth.GPSOAuth.exchangeToken(
-    'jchomephone@gmail.com',
-    ''
-    
-  );
-
-  if (result.error) {
-    console.error('Token exchange failed:', result.error);
-  } else {
-    console.log('Master token:', result.masterToken);
-  }
-}
-await auth()
 // await test()

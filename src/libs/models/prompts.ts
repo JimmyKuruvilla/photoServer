@@ -24,6 +24,15 @@ export const Prompts = {
   NumFacesPrompt: `
     Return the number of faces detected in this image. Return in a structured format as parseable json that looks like {faces: countOfFacesDetected}
     `,
+  ReorganizeShoppingIntoSectors: (email: string) => `
+    This is a list of items for shopping. Rearrange them so that they are grouped by category like would be found at a grocery store. Use categories in this order:
+    fruit and vegetables, bread, drinks, meat, nuts and candy, general items, baking, dairy, home goods. Organize each item alphabetically within each section. 
+    Vitamins, first aid hair and personal care all belong in pharmacy. 
+    Only return in this format:
+    # [SECTION_NAME]
+    - [item name]
+    - [other items]
+    ${email}`,
   CreateHWCalendarInvites: (email: string) => `
   All times should be in CST - central standard time timezone. 
   Take this email of items that are due and create calendar events on the 'primary' account for each item. 
