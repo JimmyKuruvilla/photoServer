@@ -1,7 +1,12 @@
 import path from 'node:path';
 import { log } from '../libs/log.ts';
 import { DirList, getListings } from './listings.ts';
+import { DbMediaWithTags } from '../db.ts';
 export const DirListingCache = new Map()
+export const PrefetchedRandoms: {
+  image: DbMediaWithTags[],
+  video: DbMediaWithTags[]
+} = { image: [], video: [] };
 
 export const encacheListings = async (dbPaths: string[]) => {
   await Promise.all(dbPaths.map(async dbPath => {

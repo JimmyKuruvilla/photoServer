@@ -1,9 +1,9 @@
 
 import { Knex } from 'knex';
-import { COLS, TABLES, TAGS, TableName } from './constants.js';
+import { COLS, TableName, TABLES, TAGS } from './constants.js';
 import { isImage, isVideo } from './guards.js';
 import { createLogger } from './libs/log.ts';
-import { encacheListings } from './services/media.ts';
+import { encacheListings, PrefetchedRandoms } from './services/media.ts';
 import { isIgnorePath } from './utils.ts';
 const log = createLogger('DB')
 export type MediaType = 'image' | 'video' | null
@@ -81,24 +81,17 @@ export async function getRandomListFromDb(db: Knex, type: 'image' | 'video' = 'i
   return result as DbMediaWithTags[];
 }
 
-// TODO the fn can stay here, but the caching should be in a separate module so the fn is standalone
-// put all the cache fns in one place. then in the router check the cache length and prefetch more in the background when it gets low
-export const PrefetchedRandoms: DbMediaWithTags[] = [];
+// TODO check the cache length on each request and prefetch more in the background when it gets low
 export async function getRandomFromDbWithCaching(db: Knex, type: 'image' | 'video' = 'image', limit: number = 1): Promise<DbMediaWithTags> {
-  /*
-  TODO: 
-  This has a problem. If there are 10 prefetched images, and then you ask for a video. You will still get images. 
-  The solution is to key the randoms by type and pick based on request. 
-  */
   let list: DbMediaWithTags[]
-  if (PrefetchedRandoms.length === 0) {
-    log(`Prefetching randoms: ${limit}`)
+  if (PrefetchedRandoms[type].length === 0) {
+    log(`Prefetching randoms:${type}: ${limit}`)
     list = await getRandomListFromDb(db, type, limit)
-    PrefetchedRandoms.push(...list)
-    await encacheListings(PrefetchedRandoms.map(dbMedia => dbMedia.path))
+    PrefetchedRandoms[type].push(...list)
+    await encacheListings(PrefetchedRandoms[type].map(dbMedia => dbMedia.path))
   }
-  log(`PrefetchedRandoms length ${PrefetchedRandoms.length}`)
-  return PrefetchedRandoms.pop() as DbMediaWithTags;
+  log(`PrefetchedRandoms:${type} length ${PrefetchedRandoms[type].length}`)
+  return PrefetchedRandoms[type].pop() as DbMediaWithTags;
 }
 
 export async function getById(db: Knex, tableName: TableName, id: number): Promise<DbMedia[]> {
