@@ -1,6 +1,7 @@
 
 import nodemailer from 'nodemailer'
 import { createLogger } from '../libs/pinologger.ts';
+import { Attachment } from 'nodemailer/lib/mailer/index.js';
 /*
 * https://nodemailer.com/usage/using-gmail
 */
@@ -16,14 +17,15 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendMail = async (
-  { from, to, subject, text }:
-    { from?: string, to: string, subject: string, text: string }
+  { from, to, subject, text, attachments }:
+    { from?: string, to: string, subject: string, text: string, attachments?: Attachment[] }
 ) => {
   const info = await transporter.sendMail({
     from: from ?? '"EmailBot"" <jchomephone@gmail.com>',
     to,
     subject,
-    text
+    text,
+    ...(attachments?.length ? { attachments } : null)
   });
 
   if (info.accepted.length) {

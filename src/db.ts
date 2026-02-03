@@ -85,6 +85,11 @@ export async function getRandomListFromDb(db: Knex, type: 'image' | 'video' = 'i
 // put all the cache fns in one place. then in the router check the cache length and prefetch more in the background when it gets low
 export const PrefetchedRandoms: DbMediaWithTags[] = [];
 export async function getRandomFromDbWithCaching(db: Knex, type: 'image' | 'video' = 'image', limit: number = 1): Promise<DbMediaWithTags> {
+  /*
+  TODO: 
+  This has a problem. If there are 10 prefetched images, and then you ask for a video. You will still get images. 
+  The solution is to key the randoms by type and pick based on request. 
+  */
   let list: DbMediaWithTags[]
   if (PrefetchedRandoms.length === 0) {
     log(`Prefetching randoms: ${limit}`)

@@ -21,13 +21,13 @@ export const constructInputForV1Responses = (options: ModelCallOptions) => {
  * Used to call local network model and returns a single response using the v1/responses API
  * Does support custom tool use but needs MCPAssist to handle mcp usage
  */
-export const v1Responses = async (options: ModelCallOptions): Promise<ModelResponse> => {
+export const v1Responses = async (options: ModelCallOptions, { quiet } = { quiet: true }): Promise<ModelResponse> => {
   const path = 'v1/responses'
   const modelName = options.modelName ?? DEFAULT_MODEL
   const modelOrigin = options.modelOrigin ?? JWIND_ORIGIN
 
   const input = constructInputForV1Responses(options)
-  log.info(input)
+  quiet ? null : log.info(input)
 
   const body = {
     model: modelName,
@@ -37,7 +37,6 @@ export const v1Responses = async (options: ModelCallOptions): Promise<ModelRespo
     ...(options.instructions ? { instructions: options.instructions } : null)
   }
 
-  console.log(process.env.LM_STUDIO_API_KEY)
   const response = await fetch(`${modelOrigin}/${path}`, {
     method: 'POST',
     headers: {
@@ -55,9 +54,9 @@ export const v1Responses = async (options: ModelCallOptions): Promise<ModelRespo
   return json;
 }
 
-export const v1ResponsesWithMcpAssist = async (mcpClient: Client, options: ModelCallOptions): Promise<ModelResponse> => {
+export const v1ResponsesWithMcpAssist = async (mcpClient: Client, options: ModelCallOptions, { quiet } = { quiet: true }): Promise<ModelResponse> => {
   let response = await v1Responses(options)
-  // await logModelResponse(response, log)
+  quiet ? null : await logModelResponse(response, log)
 
   let input = constructInputForV1Responses(options)
   while (isRequestingFnUse(response)) {
@@ -65,7 +64,7 @@ export const v1ResponsesWithMcpAssist = async (mcpClient: Client, options: Model
     input = input.concat(response.output, toolOutputs)
     response = await v1Responses({ tools: options.tools, input })
 
-    // await logModelResponse(response, log)
+    quiet ? null : await logModelResponse(response, log)
   }
 
   return response;
@@ -83,13 +82,13 @@ export const constructInputForV1Chat = (options: ModelCallOptions) => {
   ]
 }
 
-export const v1Chat = async (options: ModelCallOptions): Promise<ChatModelResponse> => {
+export const v1Chat = async (options: ModelCallOptions, { quiet } = { quiet: true }): Promise<ChatModelResponse> => {
   const path = 'api/v1/chat'
   const modelName = options.modelName ?? DEFAULT_MODEL
   const modelOrigin = options.modelOrigin ?? JWIND_ORIGIN
 
   const input = constructInputForV1Chat(options)
-  log.info(input)
+  quiet ? null : log.info(input)
 
   const body = {
     model: modelName,

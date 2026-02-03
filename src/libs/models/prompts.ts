@@ -1,11 +1,28 @@
+export type StructuredImageDescriptionResponseJson = {
+  shortDescription: string;
+  longDescription: string;
+  colors: string[];
+  weather: string,
+  distanceFromSubject: string;
+  inanimateObjectCount: number;
+  humanCount: number;
+  animalCount: number;
+  dogCount: number;
+  birdCount: number;
+  buildingCount: number;
+  humansUnder20YearsOld: number;
+  humansBetween20And60YearsOld: number;
+  humansGreaterThan60YearsOld: number;
+}
+
 export const Prompts = {
-  GeneralStructuredImagePrompt: `
-    Return a list of string tags that would be useful to categorize this image in search.
+  StructuredImageDescription: `
+    Return a structured json response of tags that would be useful to categorize this image in search.
     Only include each type of tag once. For example close-up, close-up shot and close distance are duplications and should be excluded. 
-    All tags should be lowercase in a single comma separated string, no newlines.
-    The following is the only tags that must be returned. 
+    All tag keys should match as described below in camelCase, tag values should be all lower case strings with no newlines.
+    If a tag value is a list return them as an array of strings in json.
+    The following are the only tags that can be returned. 
     They are formatted how they should be returned with either a description of the expected return value or a range of allowed values separated by | characters.
-    Sample return csv: colors: red:green:blue,humanCount:1, animalCount:0, shortDescription: a boy playing in water etc.
     shortDescription: text describing the image, short and succinct
     longDescription: text describing the image, elaborate description
     colors: names of colors present, 
@@ -20,6 +37,14 @@ export const Prompts = {
     humansUnder20YearsOld:number,
     humansBetween20And60YearsOld:number,
     humansGreaterThan60YearsOld:number,
+
+    Sample return json: 
+    {
+     "colors": ["red","green","blue"],
+     "humanCount": 1,
+     "animalCount": 0,
+     "shortDescription": "a boy playing in water"
+    }
     `,
   NumFacesPrompt: `
     Return the number of faces detected in this image. Return in a structured format as parseable json that looks like {faces: countOfFacesDetected}

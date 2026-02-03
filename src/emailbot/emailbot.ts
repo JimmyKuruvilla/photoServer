@@ -9,6 +9,8 @@ import { ModelResponse } from '../libs/models/types.ts';
 import { initMcpAssist } from '../libs/models/mcpAssist.ts';
 import { getModelRespText } from '../libs/models/mcpAssistUtils.ts';
 import { getModelChatRespText } from '../libs/models/utils.ts';
+import { EMAILS } from '../constants.ts';
+import { sendRandomImageEmail } from '../dailyRandom/dailyRandom.ts';
 
 /*
 TODO
@@ -18,19 +20,14 @@ TODO
  * add extra fields to photo descriptions and rerun it. Expose those in the photo site behind a query param. 
 */
 const log = createLogger('[EMAILBOT]')
-const EMAILS = {
-  jchomephone: 'jchomephone@gmail.com',
-  jimmyjk: 'jimmyjk@gmail.com',
-  eliImsa: 'ekuruvilla@imsa.edu',
-  eliHome: 'elihomephone@gmail.com'
-}
 
 const LLM = 'llm'
 const SUBJECTS = {
   HELP: 'help',
   CHAT: 'chat',
   HWCAL: 'hwcal',
-  SHOPPING: 'shopping'
+  SHOPPING: 'shopping',
+  RANDOM_IMAGE: 'random image'
 }
 
 const isLLMSubject = (subject: string | undefined) => {
@@ -51,6 +48,10 @@ const isHomeworkCalendar = (subject: string | undefined) => {
 
 const isShoppingList = (subject: string | undefined) => {
   return isLLMSubject(subject) && subject?.toLowerCase().includes(SUBJECTS.SHOPPING)
+}
+
+const isRandomImage = (subject: string | undefined) => {
+  return isLLMSubject(subject) && subject?.toLowerCase().includes(SUBJECTS.RANDOM_IMAGE)
 }
 
 const main = async () => {
@@ -105,6 +106,15 @@ const main = async () => {
         try {
           const resp = await v1Chat({ prompt: Prompts.ReorganizeShoppingIntoSectors(mail.text!), })
           const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: `${getModelChatRespText(resp)}\n You asked: ${mail.text}` })
+        } catch (error: any) {
+          log.error(error)
+          const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: error.message })
+        }
+      }
+
+      if (isRandomImage(mail.subject)) {
+        try {
+          await sendRandomImageEmail({ to: EMAILS.jimmyjk, subject: mail.subject })
         } catch (error: any) {
           log.error(error)
           const mailResp = await sendMail({ to: mail.from.text, subject: mail.subject, text: error.message })

@@ -24,7 +24,7 @@ const image = async () => {
     const modelRespData = await v1Responses({
       modelName: undefined,
       modelOrigin: JWIND_ORIGIN,
-      prompt: Prompts.GeneralStructuredImagePrompt,
+      prompt: Prompts.StructuredImageDescription,
       dataUrl
     })
     console.timeEnd('callmodel')
