@@ -62,12 +62,16 @@ export const Prompts = {
   All times should be in CST - central standard time timezone. 
   Take this email of items that are due and create calendar events on the 'primary' account for each item. 
   If a time is given use that as the start time for the event. If no time is given start them at 0700am and last 30 minutes.
-  Determine what date each event is due, then set a calendar event on that date for each item called 'Turn in X' where X is the assignment name. 
+  Determine what date each event is due, then set a calendar event on that date for each item called 'Eli: X' where X is the assignment name. 
   If a due time is Friday, ensure the date you are setting the event for is also a Friday.
+  If there is no clear date for an item, do not create an event for it. 
   Add jimmyjk@gmail.com as an invitee for each item.
   Do not create an event if it already exists. 
   Overlapping events are acceptable. 
-  if successful return the list of event names and their date + times, if failed return the reason why it failed.
+  if successful return the list of event names and their date + times as a list in this format:
+  requestedTime: [original event string]
+  actualDateTime: [date of calendar invite] 
+  if failed return the reason why it failed.
   email: ${email}
   `,
   LLMChat: (query: string) => `Answer the question below as best as you can with the info you have. 

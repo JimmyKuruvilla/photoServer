@@ -59,13 +59,7 @@ const main = async () => {
   const { emitter, events } = await initMailClient(30_000)
 
   emitter.on(events.NEW_MAIL, async (mail: NewMail) => {
-    log.info(`NEW_MAIL ${mail.subject} from ${mail?.from?.text}`)
-    await writeMailData({
-      lastSeenModSeq: mail.modSeq,
-      lastSeenDate: mail.date!.toString(),
-      from: mail.from!.text,
-      subject: mail.subject!
-    })
+    log.info(`NEW_MAIL ${mail.subject} from ${mail?.from?.text}, uid: ${mail.uid}`)
 
     if (mail?.from?.text && mail?.subject && !isFrom(mail, [EMAILS.jchomephone])) {
       if (isHelp(mail.subject)) {
