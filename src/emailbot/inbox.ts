@@ -3,7 +3,6 @@ import { ParsedMail, simpleParser } from 'mailparser';
 import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
 import { createLogger } from '../libs/pinologger.ts';
-import { string } from 'zod/v4';
 const log = createLogger('[INBOX]')
 
 const InboxEmitter = new EventEmitter();
@@ -26,22 +25,26 @@ const client: ImapFlow = new ImapFlow({
   logger: false
 });
 
-export const initMailClient = async (interval: number = 15_000) => {
+/*
+TODO
+  1. recover from disconnection
+*/
+export const initMailClient = async () => {
   await client.connect();
   log.info('MailClient connected successfully');
 
+  // may need reconnection logic if this disconnects often
   client.on('close', async () => {
     log.info('Connection closed');
-    // Implement reconnection logic here
   });
 
   client.on('error', (err) => {
     console.error('Connection error:', err);
   });
 
-  // Mailbox events (only when mailbox is selected)
-  client.on('exists', (data) => {
-    log.info(`New message count: ${data.count}`);
+  // Mailbox events only when mailbox is selected
+  client.on('exists', async (data) => {
+    await fetchAndEmit()
   });
 
   client.on('expunge', (data) => {
@@ -60,7 +63,15 @@ export const initMailClient = async (interval: number = 15_000) => {
     log.info(`Closed ${mailbox.path}`);
   });
 
-  setInterval(fetchAndEmit, interval)
+  // Get a mailbox selected so that exists events will fire
+  let lock = await client.getMailboxLock('INBOX');
+  try {
+    if (client.mailbox) {
+      log.info(`${client.mailbox.path}: ${client.mailbox.exists}`);
+    }
+  } finally {
+    lock.release();
+  }
 
   return { emitter: InboxEmitter, events: MAIL_EVENTS }
 }
@@ -68,8 +79,7 @@ export const initMailClient = async (interval: number = 15_000) => {
 export const fetchAndEmit = async () => {
   const mailData: WriteMailDataParams = JSON.parse(await fs.readFile(MAIL_STATE_FILE_PATH, 'utf8'))
   const lastSeenUid = BigInt(mailData.lastSeenUid)
-  log.debug(`Fetching from lastSeenUid: ${lastSeenUid.toString()}`)
-  const messages = await fetchAll(getNextInt(lastSeenUid))
+  const messages = await fetchAll(lastSeenUid)
 
   let maxUid = lastSeenUid;
 
@@ -101,7 +111,6 @@ export const fetchAndEmit = async () => {
 */
 export const fetchAll = async (lastSeenUid: bigint) => {
   let lock = await client.getMailboxLock('INBOX');
-  log.info(`Using uid range from ${lastSeenUid}`)
   try {
     const uidRange = `${lastSeenUid}:*`;
     const uids = (await client.search({ uid: uidRange }, { uid: true })) || [];
@@ -128,8 +137,6 @@ export const fetchAllParsed = async (lastSeenUid: bigint) => {
   }
   return mails;
 }
-
-const getNextInt = (uid: bigint) => (uid + 1n)
 
 export const getMailData = async () => JSON.parse(await fs.readFile(MAIL_STATE_FILE_PATH, 'utf8'))
 

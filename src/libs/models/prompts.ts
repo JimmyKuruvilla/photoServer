@@ -1,6 +1,8 @@
 export type StructuredImageDescriptionResponseJson = {
   shortDescription: string;
   longDescription: string;
+  emotionalDescription: string;
+  bogusDescription: string;
   colors: string[];
   weather: string,
   distanceFromSubject: string;
@@ -25,6 +27,8 @@ export const Prompts = {
     They are formatted how they should be returned with either a description of the expected return value or a range of allowed values separated by | characters.
     shortDescription: text describing the image, short and succinct
     longDescription: text describing the image, elaborate description
+    emotionalDescription: text describing the people in the image, describing their emotional state
+    bogusDescription: text describing the image but making up a wild story about how it came to this point
     colors: names of colors present, 
     weather: summer|winter|fall|spring, 
     distanceFromSubject: close|medium|far

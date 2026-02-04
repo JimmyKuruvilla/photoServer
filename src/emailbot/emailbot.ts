@@ -1,24 +1,14 @@
-import { ParsedMail } from 'mailparser';
-import fs from 'node:fs';
-import { createLogger } from '../libs/pinologger.ts';
-import { fetchAllParsed, fetchAndEmit, getMailData, initMailClient, isFrom, MAIL_STATE_FILE_PATH, NewMail, writeMailData } from './inbox.ts';
-import { v1Chat, v1Responses, v1ResponsesWithMcpAssist } from '../libs/models/models.ts';
-import { Prompts } from '../libs/models/prompts.ts';
-import { sendMail } from './outbox.ts';
-import { ModelResponse } from '../libs/models/types.ts';
-import { initMcpAssist } from '../libs/models/mcpAssist.ts';
-import { getModelRespText } from '../libs/models/mcpAssistUtils.ts';
-import { getModelChatRespText } from '../libs/models/utils.ts';
 import { EMAILS } from '../constants.ts';
 import { sendRandomImageEmail } from '../dailyRandom/dailyRandom.ts';
+import { initMcpAssist } from '../libs/models/mcpAssist.ts';
+import { getModelRespText } from '../libs/models/mcpAssistUtils.ts';
+import { v1Chat, v1Responses, v1ResponsesWithMcpAssist } from '../libs/models/models.ts';
+import { Prompts } from '../libs/models/prompts.ts';
+import { getModelChatRespText } from '../libs/models/utils.ts';
+import { createLogger } from '../libs/pinologger.ts';
+import { initMailClient, isFrom, NewMail } from './inbox.ts';
+import { sendMail } from './outbox.ts';
 
-/*
-TODO
-1. recover from disconnection
- * 1. email me a picture from local file system and describe it
- * 2. mcp server for accessing photo website, get a random and describe it in email
- * add extra fields to photo descriptions and rerun it. Expose those in the photo site behind a query param. 
-*/
 const log = createLogger('[EMAILBOT]')
 
 const LLM = 'llm'
@@ -56,7 +46,7 @@ const isRandomImage = (subject: string | undefined) => {
 
 const main = async () => {
   const { mcpClient, tools } = await initMcpAssist()
-  const { emitter, events } = await initMailClient(30_000)
+  const { emitter, events } = await initMailClient()
 
   emitter.on(events.NEW_MAIL, async (mail: NewMail) => {
     log.info(`NEW_MAIL ${mail.subject} from ${mail?.from?.text}, uid: ${mail.uid}`)
@@ -116,8 +106,6 @@ const main = async () => {
       }
     }
   })
-
-  await fetchAndEmit();
-
 }
+
 main()
