@@ -5,19 +5,23 @@ import { isImage, isVideo } from './guards.js';
 import { createLogger } from './libs/log.ts';
 import { encacheListings, PrefetchedRandoms } from './services/media.ts';
 import { isIgnorePath } from './utils.ts';
+import { StructuredImageDescriptionResponseJson } from './libs/models/prompts.ts';
 const log = createLogger('DB')
 export type MediaType = 'image' | 'video' | null
 
 export interface DbMedia {
   id: number;
   path: string;
-  thumbnail?: string;
-  face_count: number | null;
   created_at: Date,
   updated_at: Date,
-  media_type: MediaType,
   hash: string;
-  orientation?: string;
+  media_type: MediaType,
+  
+  // these fields don't exist on videos
+  face_count?: number | null;
+  metadata?: StructuredImageDescriptionResponseJson | null
+  thumbnail?: string;
+  orientation?: number;
   model?: string;
 }
 

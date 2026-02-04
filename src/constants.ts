@@ -34,6 +34,7 @@ export const COLS = {
     UPDATED_AT: 'updated_at',
     FAVORITE: 'favorite',
     MEDIA_TYPE: 'media_type',
+    METADATA: 'metadata',
     THUMBNAIL: 'thumbnail',
     MARKED: 'marked',
     FACE_COUNT: 'face_count',
@@ -66,3 +67,6 @@ export const EMAILS = {
   eliImsa: 'ekuruvilla@imsa.edu',
   eliHome: 'elihomephone@gmail.com'
 }
+
+export const TRASHED_PREFIX = '.trashed'
+export const PART = 'part'

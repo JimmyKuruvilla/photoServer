@@ -20,7 +20,7 @@ export const sendRandomImageEmail = async ({ to, subject }: { to: string, subjec
   const resp = await fetch(`${JUBUNTUS_ORIGIN}/random?type=image`)
   const json = await resp.json()
   const filePath = json.dbPath;
-  const description = await getImageDescriptors(filePath)
+  const description = await getImageDescriptors({ filePath })
 
   if (description) {
     await sendMail({

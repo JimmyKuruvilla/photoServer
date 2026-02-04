@@ -2,18 +2,19 @@
 
 import fs from 'node:fs/promises';
 import path from 'path';
-import { COLS, IMAGE, TABLES, VIDEO } from '../constants.ts';
+import { COLS, IMAGE, TABLES, TRASHED_PREFIX, VIDEO } from '../constants.ts';
+import { DbMediaWithTags } from '../db.ts';
 import { getDb } from '../db/initDb.ts';
-import { isImage, isMedia, isVideo } from '../guards.ts';
+import { isImage, isIngestable, isVideo } from '../guards.ts';
 import { getExifData } from '../libs/exif.ts';
-import { countFaces, } from '../libs/faces.ts';
 import { genFileHash, } from '../libs/hash.ts';
-import { createLogger } from '../libs/log.ts';
+import { getImageDescriptors } from '../libs/imageDescriptors.ts';
 import { moveToTarget } from '../libs/move.ts';
 import { generateTargetPathForImage, generateTargetPathForVideo } from '../libs/path.ts';
+import { createLogger } from '../libs/pinologger.ts';
 import { genB64Thumbnail } from '../libs/thumbnail.ts';
-import { isIgnorePath } from '../utils.ts';
-const log = createLogger('INGEST');
+import { Nullable } from '../types/types.ts';
+const log = createLogger('[INGEST]');
 
 /*
 Sample Data 
@@ -37,50 +38,35 @@ const db = await getDb();
  * Used from dropProcessor where paths can be from drop folder (include *any* file)
  */
 export async function ingest(sourceFilePath: string, targetPath: string, opts = { shouldMove: false }) {
-  const record: Record<string, string | null | number> = {
+  const record: Nullable<Partial<DbMediaWithTags>> = {
     path: null,
     hash: null,
     orientation: null,
     model: null,
     thumbnail: null,
     face_count: 0,
-    media_type: null
+    media_type: null,
+    metadata: null
   }
 
   const filename = path.basename(sourceFilePath);
   const ext = path.extname(sourceFilePath)
-  const containsHiddenPath = sourceFilePath.split(path.sep).some(f => f[0] === '.')
 
-  if (isIgnorePath(sourceFilePath)) {
-    log(`SKIPPING_IGNORE_PREFIX_PATH ${sourceFilePath}`)
-    return
-  }
-
-  if (containsHiddenPath) {
-    log(`SKIPPING_HIDDEN_FOLDER_OR_FILE ${sourceFilePath}`);
-    return
-  }
-
-  if (ext.includes('part')) {
-    log(`SKIPPING_PARTIAL_UPLOAD (part) ${filename}`);
-    return
-  }
-
-  if (filename.startsWith('.trashed')) {
-    log(`DELETING_TRASHED_FILE (.trashed) ${filename}`);
+  // isIngestable also checks trashed files, but this also deletes them. 
+  if (filename.startsWith(TRASHED_PREFIX)) {
+    log.warn(`DELETING_TRASHED_FILE (.trashed) ${filename}`);
     await fs.unlink(sourceFilePath)
     return
   }
 
-  if (!isMedia(filename)) {
-    log(`SKIPPING_NON_MEDIA_FILE ${sourceFilePath}`)
+  if (!isIngestable({ filePath: sourceFilePath, log })) {
     return
   }
 
   try {
     record.hash = await genFileHash(sourceFilePath)
   } catch (error) {
-    log(`GEN_HASH_ERROR: ${error}`)
+    log.warn(`GEN_HASH_ERROR: ${error}`)
     return
   }
 
@@ -88,7 +74,7 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
   const isDenyListed = (await db(TABLES.DELETED).where(COLS.DELETED.HASH, record.hash).limit(1)).length > 0;
 
   if (isDenyListed) {
-    log(`SKIPPING_DENY_LISTED_HASH ${sourceFilePath}`)
+    log.warn(`SKIPPING_DENY_LISTED_HASH ${sourceFilePath}`)
     return
   } else {
     let targetFolderName
@@ -114,8 +100,8 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
     if (record.path) {
       if (isImage(record.path)) {
         record.thumbnail = await genB64Thumbnail(record.path)
-        record.face_count = record.thumbnail ? await countFaces({ b64: record.thumbnail }) : 0
-        //DEBUG log(`FACE_COUNT: ${record.path} ${record.face_count}`)
+        record.metadata = record.thumbnail ? await getImageDescriptors({ b64: record.thumbnail }) : null
+        record.face_count = record.metadata?.humanCount ?? 0
 
         const exif = await getExifData(record.path)
         if (exif) {
@@ -132,17 +118,17 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
 
       if (isNotInDb) {
         try {
-          log(`INSERT_RECORD ${record.path}`);
+          log.info(`INSERT_RECORD ${record.path}`);
           await db(TABLES.MEDIA).insert(record);
         } catch (error) {
-          log(`INSERT_ERROR ${error}`);
+          log.info(`INSERT_ERROR ${error}`);
         }
       } else {
         try {
-          log(`UPDATE_RECORD ${record.path}`);
+          log.info(`UPDATE_RECORD ${record.path}`);
           await db(TABLES.MEDIA).where(COLS.MEDIA.PATH, record.path).update(record);
         } catch (error) {
-          log(`UPDATE_ERROR ${error}`);
+          log.info(`UPDATE_ERROR ${error}`);
         }
       }
     } else {

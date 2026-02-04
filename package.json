@@ -8,11 +8,11 @@
     "knex": "knex",
     "build": "tsc",
     "dev": "MEDIA_PATH=/mnt/backup/media tsx watch src/server.ts",
-    "migrate:make": "npm run knex -- migrate:make --migrations-directory ./src/db/migrations $NAME",
+    "migrate:make": "npm run knex -- migrate:make --migrations-directory ./src/db/migrations $1",
     "migrate:latest": "npm run knex migrate:latest -- --env prod",
     "migrate:rollback": "npm run knex migrate:rollback -- --env prod",
     "migrate:latest:test": "npm run knex migrate:latest -- --env test",
-    "test:ingest": "IS_TEST=true SOURCE_PATH=./test/source TARGET_PATH=./test/target tsx ./src/ingestion/runIngest.ts"
+    "test:ingest": "IS_TEST=true SOURCE_PATH=/home/j/scripts/photoServer/test/source TARGET_PATH=/home/j/scripts/photoServer/test/target tsx ./src/ingestion/runIngest.ts"
   },
   "author": "",
   "license": "ISC",
