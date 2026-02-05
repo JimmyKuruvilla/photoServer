@@ -341,6 +341,13 @@ const rotateRight = () => {
 
 const hasTag = (o, name) => !!o.tags.find(tag => tag.value === name)
 
+window.addEventListener('keydown', (e) => {
+  if (e.shiftKey && e.key === '?') {
+    e.preventDefault();
+    window.location = `${share.mediaItem.viewPath}?isDev=1`
+  }
+});
+
 // Make functions globally available
 window.pauseSlideShow = pauseSlideShow;
 window.goFullScreen = goFullScreen;

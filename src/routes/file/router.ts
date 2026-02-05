@@ -37,7 +37,7 @@ fileRouter.get('/fileView/:path(*)', async (req: Request, res: Response, next: N
     }
     const [item, [beforeItem, afterItem]] = await Promise.all([constructFileViewFromDb(dbItem), getBeforeAndAfterItems(dbItem.path)])
 
-    res.send(imgVidTemplate(item, '', null, beforeItem, afterItem));
+    res.send(imgVidTemplate(item, '', null, beforeItem, afterItem, !!req.query.isDev));
     return;
   }
   catch (e: any) {

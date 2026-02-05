@@ -1,3 +1,4 @@
+import { keyof } from 'zod/v4';
 import { NL } from '../constants.ts';
 import { FileItem } from '../services/listings.ts';
 import { createTagEl } from './createTagEl.ts';
@@ -10,7 +11,8 @@ export function imgVidTemplate(
   type: string, 
   interval: number | null, 
   beforeItem: FileItem | null, 
-  afterItem: FileItem | null
+  afterItem: FileItem | null,
+  isDev: boolean = false
 ): string {
   return `
     <html>
@@ -28,6 +30,12 @@ export function imgVidTemplate(
         <a href="${item.parentViewPath}"> 
           <h6 class="webpath">Parent Directory ↗</h6>
         </a>
+
+        <ul class="metadata ${isDev ? 'shown' : 'hidden'}">
+        ${item.metadata && Object.entries(item.metadata).map(([key, value]) => {
+          return '<li>' + key + ' : ' + value + '</li>'
+        }).join(NL)}
+        </ul>
         
         <div class="content-wrapper">
           ${getMediaHtmlFragment(item, interval, beforeItem, afterItem)}

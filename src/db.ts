@@ -115,16 +115,17 @@ export async function getLastId(db: Knex): Promise<{ id: number }> {
 
 export const MediaWithTagsQuery = (db: Knex) => db<DbMedia, DbMediaWithTags>(TABLES.MEDIA)
   .select([
-    'media.id',
-    'path',
-    'thumbnail',
-    'face_count',
-    'media.created_at',
-    'updated_at',
-    'media_type',
-    'hash',
-    'orientation',
-    'model',
+    `${TABLES.MEDIA}.${COLS.MEDIA.ID}`,
+    COLS.MEDIA.PATH,
+    COLS.MEDIA.THUMBNAIL,
+    COLS.MEDIA.FACE_COUNT,
+    `${TABLES.MEDIA}.${COLS.MEDIA.CREATED_AT}`,
+    COLS.MEDIA.UPDATED_AT,
+    COLS.MEDIA.MEDIA_TYPE,
+    COLS.MEDIA.HASH,
+    COLS.MEDIA.ORIENTATION,
+    COLS.MEDIA.MODEL,
+    COLS.MEDIA.METADATA,
     db.raw<DbTag>(`json_agg(json_build_object('id', media_tags.id, 'value', media_tags.value)) as tags`)
   ])
   .from(TABLES.MEDIA)

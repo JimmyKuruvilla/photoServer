@@ -165,7 +165,7 @@ button:hover a {
 
 .pic,
 video {
-  opacity: 0; 
+  opacity: 0;
   max-width: 100vw;
   max-height: calc(100vh - 100px);
   margin: 0 auto;
@@ -235,4 +235,13 @@ video:hover {
   display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;
+}
+
+.metadata {
+  color: white;
+}
+
+.metadata.shown {
+  display: block;
+  margin-left: 20px;
 }

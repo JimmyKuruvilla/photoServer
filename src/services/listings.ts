@@ -12,6 +12,7 @@ const statAsync = promisify(fs.stat);
 const readdirAsync = promisify(fs.readdir);
 
 import { getDb } from '../db/initDb.ts';
+import { StructuredImageDescriptionResponseJson } from '../libs/models/prompts.ts';
 const db = await getDb();
 
 export interface FileItem {
@@ -26,6 +27,7 @@ export interface FileItem {
   id: number | null;
   tags?: Array<{ id: number; value: string }>;
   faceCount?: number | null;
+  metadata?: StructuredImageDescriptionResponseJson | null;
 }
 
 interface VideoInfo {
@@ -166,7 +168,8 @@ export async function constructFileViewFromDb(dbItem: DbMediaWithTags): Promise<
     duration,
     id: dbItem.id,
     tags,
-    faceCount: dbItem.face_count
+    faceCount: dbItem.face_count,
+    metadata: dbItem.metadata
   };
 }
 
