@@ -1,0 +1,19 @@
+.tags {
+  color: white;
+  margin-top: 10px;
+
+  button {
+    padding: 0;
+    height: 20px;
+    min-width: 20px;
+    font-size: 15px;
+  }
+
+  .tag-group {
+    display: flex;
+
+    .add-tag-input {
+      width: 100%;
+    }
+  }
+}

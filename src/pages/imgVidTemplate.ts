@@ -5,6 +5,7 @@ import { createTagEl } from './createTagEl.ts';
 import { cssAndJs } from './cssAndJs.ts';
 import { getMediaHtmlFragment } from './getMediaHtmlFragment.ts';
 import { generalToolbar } from './toolbar.ts';
+import { searchBox } from './searchBox.ts';
 
 export function imgVidTemplate(
   item: FileItem, 
@@ -23,6 +24,8 @@ export function imgVidTemplate(
       </head>
 
       <body>
+        ${searchBox()}
+
         <div class="toolbar">
           ${generalToolbar(item as any)}
         </div>

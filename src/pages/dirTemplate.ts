@@ -2,6 +2,7 @@ import { isVideo } from '../guards.ts';
 import { generalToolbar } from './toolbar.ts';
 import { FileItem } from '../services/listings.ts';
 import { cssAndJs } from './cssAndJs.ts';
+import { searchBox } from './searchBox.ts';
 
 export function dirTemplate(locals: {
   dirs: FileItem[];
@@ -15,6 +16,8 @@ export function dirTemplate(locals: {
     </head>
     
     <body>
+      ${searchBox()}
+      
       <div class="toolbar">
         ${generalToolbar()}
         </div>

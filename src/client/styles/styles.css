@@ -1,0 +1,13 @@
+@import url("/basic.css");
+@import url("/utils.css");
+@import url("/toolbar.css");
+@import url("/dir.css");
+@import url("/imgVid/imgVid.css");
+@import url("/metadata.css");
+@import url("/searchBox.css");
+
+@media all and (display-mode: fullscreen) {
+  .toolbar {
+    display: none;
+  }
+}

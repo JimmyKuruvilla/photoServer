@@ -1,0 +1,80 @@
+@import url("/imgVid/tags.css");
+
+.webpath {
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+
+  &.log {
+    color: white;
+  }
+
+  .content-and-controls {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    position: relative;
+
+
+    .pic,
+    video {
+      opacity: 0;
+      max-width: 100vw;
+      max-height: calc(100vh - 100px);
+      margin: 0 auto;
+    }
+
+    .pic:hover,
+    video:hover {
+      border: none;
+      transform: none;
+    }
+
+    .transition-opacity {
+      transition: opacity 0.2s linear;
+      opacity: 1;
+    }
+
+    .rotate-right {
+      position: absolute;
+      top: 0;
+      right: -10px;
+      z-index: 20;
+      background-color: transparent;
+    }
+
+    .arrow {
+      text-decoration: none;
+      z-index: 10;
+      height: 100%;
+      position: absolute;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-items: center;
+      color: white;
+      font-size: 100px;
+      opacity: 10%;
+
+      &:hover {
+        opacity: 100%;
+        transition: opacity 0.7s ease;
+      }
+
+      &.left {
+        left: 0;
+        justify-content: right;
+        display: flex;
+      }
+
+      &.right {
+        right: 0;
+      }
+    }
+  }
+
+}

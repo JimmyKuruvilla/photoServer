@@ -1,0 +1,52 @@
+.section {
+  margin: 20px 0;
+}
+
+.dir {
+  margin: 5px 0;
+
+  &.section {
+    column-width: 150px;
+  }
+}
+
+.media label,
+.dir label,
+.file label {
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.file label {
+  max-width: initial;
+}
+
+.media {
+  margin: 20px 0;
+
+  &.section {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+  }
+
+  a {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+
+    img.thumbnail {
+      width: 200px;
+      border-radius: 5px;
+      transition: transform 200ms;
+
+      &:hover {
+        border: 3px solid white;
+        transform: scale(1.5);
+      }
+    }
+
+  }
+}
