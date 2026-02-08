@@ -4,10 +4,9 @@ const __dirname = import.meta.dirname;
 
 export const clientRouter = express.Router();
 
-// clientRouter.get(/.*[/]{1,1}(.*)\.css$/, (req: Request, res: Response, next: NextFunction) => {
+// TODO: refactor to use app.use(express.static('public'));
+// can we put styles, js and server templates in the same folder ?
 clientRouter.get(/(.*)\.css$/, (req: Request, res: Response, next: NextFunction) => {
-  console.log(req.url)
-  console.log(req.params)
   console.log(path.join(__dirname, `../../client/styles/${req.params[0]}.css`))
   res.sendFile(path.join(__dirname, `../../client/styles/${req.params[0]}.css`));
 });

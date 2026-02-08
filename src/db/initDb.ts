@@ -16,11 +16,8 @@ export const getDb = async (): Promise<Knex> => {
       ? 'local'
       : 'prod'
 
-  const db = knex({
-    client: dbConfig[env].client,
-    pool: dbConfig[env].pool,
-    connection: dbConfig[env].connection
-  });
+  const envDbConfig = dbConfig[env];
+  const db = knex(envDbConfig);
 
   await testConnection(db);
   initializedClient = db;

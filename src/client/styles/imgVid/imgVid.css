@@ -5,14 +5,7 @@
   font-weight: 400;
 }
 
-.content-wrapper {
-  display: flex;
-  flex-flow: column nowrap;
-
-  &.log {
-    color: white;
-  }
-
+.content-wrapper.img-vid {
   .content-and-controls {
     display: flex;
     flex-flow: row nowrap;

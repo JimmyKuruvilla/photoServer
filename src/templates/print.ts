@@ -3,7 +3,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-export const printPage = (): string => `
+export const PrintPage = (): string => `
 <html>
 <body>
 <form action="/print/upload" method="post" enctype="multipart/form-data">

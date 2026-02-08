@@ -1,0 +1,9 @@
+.content-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+
+  &.log,
+  &.not-found {
+    color: white;
+  }
+}

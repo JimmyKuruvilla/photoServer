@@ -1,12 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { printFile, printPage } from '../../pages/print.ts';
+import { printFile, PrintPage } from '../../templates/print.ts';
 import multer from 'multer';
 export const printRouter = express.Router();
 const upload = multer({ dest: 'share/__print' });
 
 printRouter.get('/print', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    res.send(printPage())
+    res.send(PrintPage())
   } catch (e) {
     next(e)
   }
@@ -19,7 +19,7 @@ printRouter.post('/print/upload', upload.single('fileToPrint'), async (req: Requ
     if (req.file) {
       await printFile(req.file.path)
     }
-    res.status(201).send(printPage())
+    res.status(201).send(PrintPage())
   } catch (e) {
     next(e)
   }

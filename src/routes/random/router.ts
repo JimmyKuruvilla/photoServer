@@ -2,10 +2,10 @@ import express, { NextFunction, Request, Response } from 'express';
 import { defaultInterval } from '../../constants.ts';
 import { getRandomFromDbWithCaching } from '../../db.ts';
 import { getDb } from '../../db/initDb.ts';
-import { getMediaHtmlFragment } from '../../pages/getMediaHtmlFragment.ts';
-import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
+import { ItemPage } from '../../templates/item.ts';
 import { constructFileViewFromDb } from '../../services/listings.ts';
 import { getBeforeAndAfterItems } from '../../services/media.ts';
+import { media } from '../../templates/fragments/media.ts';
 export const randomRouter = express.Router();
 const db = await getDb();
 type RandomType = 'image' | 'video'
@@ -22,7 +22,7 @@ randomRouter.get('/randomView', async (req: Request, res: Response, next: NextFu
     // extract the dirListingCache to its own file
     // then when background the prefetch of the randoms. so the randoms get prefetched, then their associated directories get cached. 
 
-    res.send(imgVidTemplate(item as any, '', null, beforeItem, afterItem));
+    res.send(ItemPage(item as any, '', null, beforeItem, afterItem));
   } catch (e) {
     next(e);
   }
@@ -36,7 +36,7 @@ randomRouter.get('/random/slideshow', async (req: Request, res: Response, next: 
   const [beforeItem, afterItem] = await getBeforeAndAfterItems(item.dbPath)
 
   res.send(
-    imgVidTemplate(item, type, (req.query.interval ? parseInt(req.query.interval as string) : defaultInterval), beforeItem, afterItem)
+    ItemPage(item, type, (req.query.interval ? parseInt(req.query.interval as string) : defaultInterval), beforeItem, afterItem)
   );
 });
 
@@ -45,5 +45,5 @@ randomRouter.get('/random', async (req: Request, res: Response, next: NextFuncti
   const type = req.query.type as RandomType
   const dbItem = await getRandomFromDbWithCaching(db, type, 10);
   const item = await constructFileViewFromDb(dbItem);
-  res.json({ ...item, html: getMediaHtmlFragment(item, defaultInterval, null, null) });
+  res.json({ ...item, html: media(item, defaultInterval, null, null) });
 });

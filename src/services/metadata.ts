@@ -3,7 +3,7 @@ import { StructuredImageDescriptionResponseJson } from '../libs/models/prompts.t
 export type SupportedMetadata = {
   type: 'number' | 'text';
   order: number;
-  name: keyof StructuredImageDescriptionResponseJson;
+  name: keyof (StructuredImageDescriptionResponseJson & { tags: string });
 };
 
 const UNSORTED_METADATA = [
@@ -23,6 +23,9 @@ const UNSORTED_METADATA = [
   { type: 'text', order: 0, name: 'shortDescription' },
   { type: 'text', order: 0, name: 'distanceFromSubject' },
   { type: 'text', order: 0, name: 'emotionalDescription' },
+  { type: 'text', order: 0, name: 'tags' },
+
 ] satisfies SupportedMetadata[];
 
 export const SUPPORTED_METADATA = [...UNSORTED_METADATA].sort((a, b) => b.order - a.order);
+export const METADATA_BY_NAME = Object.fromEntries(UNSORTED_METADATA.map(m => ([m.name, m])))

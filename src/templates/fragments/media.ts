@@ -1,8 +1,7 @@
-import path from 'path';
-import { isVideo } from '../guards.ts';
-import { FileItem } from '../services/listings.ts';
+import { isVideo } from '../../guards.ts';
+import { FileItem } from '../../services/listings.ts';
 
-export function getMediaHtmlFragment(
+export function media(
   item: FileItem,
   interval: number | null,
   beforeItem: FileItem | null,

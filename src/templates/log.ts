@@ -1,6 +1,6 @@
-import { cssAndJs } from './cssAndJs.ts';
+import { cssAndJs } from './utils/cssAndJs.ts';
 
-export function logTemplate(
+export function LogPage(
   logContents: string, 
 ): string {
   return `

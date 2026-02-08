@@ -1,13 +1,14 @@
 import { keyof } from 'zod/v4';
 import { NL } from '../constants.ts';
 import { FileItem } from '../services/listings.ts';
-import { createTagEl } from './createTagEl.ts';
-import { cssAndJs } from './cssAndJs.ts';
-import { getMediaHtmlFragment } from './getMediaHtmlFragment.ts';
-import { generalToolbar } from './toolbar.ts';
-import { searchBox } from './searchBox.ts';
+import { createTagEl } from './fragments/createTagEl.ts';
+import { cssAndJs } from './utils/cssAndJs.ts';
 
-export function imgVidTemplate(
+import { generalToolbar } from './toolbar/toolbar.ts';
+import { searchBox } from './fragments/searchBox.ts';
+import { media } from './fragments/media.ts';
+
+export function ItemPage(
   item: FileItem, 
   type: string, 
   interval: number | null, 
@@ -40,8 +41,8 @@ export function imgVidTemplate(
         }).join(NL)}
         </ul>
         
-        <div class="content-wrapper">
-          ${getMediaHtmlFragment(item, interval, beforeItem, afterItem)}
+        <div class="content-wrapper img-vid">
+          ${media(item, interval, beforeItem, afterItem)}
         </div>
 
         

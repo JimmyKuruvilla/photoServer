@@ -3,8 +3,8 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { getItemByPath } from '../../db.ts';
 import { getDb } from '../../db/initDb.ts';
-import { imgVidTemplate } from '../../pages/imgVidTemplate.ts';
-import { logTemplate } from '../../pages/logTemplate.ts';
+import { ItemPage } from '../../templates/item.ts';
+import { LogPage } from '../../templates/log.ts';
 import { constructFileViewFromDb } from '../../services/listings.ts';
 import { getBeforeAndAfterItems } from '../../services/media.ts';
 const db = await getDb();
@@ -17,7 +17,7 @@ fileRouter.get('/fileView/:path(.*__logs.*)', async (req: Request, res: Response
   const targetPath = path.join(path.sep, req.params.path);
   try {
     const fileContents = await readFileSync(targetPath, { encoding: 'utf-8' })
-    res.send(logTemplate(fileContents));
+    res.send(LogPage(fileContents));
   }
   catch (e: any) {
     res.status(404).send({ error: e.message });
@@ -37,7 +37,7 @@ fileRouter.get('/fileView/:path(*)', async (req: Request, res: Response, next: N
     }
     const [item, [beforeItem, afterItem]] = await Promise.all([constructFileViewFromDb(dbItem), getBeforeAndAfterItems(dbItem.path)])
 
-    res.send(imgVidTemplate(item, '', null, beforeItem, afterItem, !!req.query.isDev));
+    res.send(ItemPage(item, '', null, beforeItem, afterItem, !!req.query.isDev));
     return;
   }
   catch (e: any) {

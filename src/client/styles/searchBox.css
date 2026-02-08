@@ -13,6 +13,11 @@
     columns: 3 auto;
     column-fill: auto;
 
+    .search-submit-btn {
+      position: absolute;
+      bottom: 0px;
+    }
+
     form {
       height: 100%;
       margin: 0;
