@@ -3,8 +3,8 @@ import { SUPPORTED_METADATA, SupportedMetadata } from '../../services/metadata.t
 let metadataForm = ''
 SUPPORTED_METADATA.forEach(metadata => {
   metadataForm += `<li>`
-  metadataForm += `<label for="${metadata.name}">${metadata.name}</label>`
-  metadataForm += `<input type="${metadata.type}" name="${metadata.name}" id="${metadata.name}">`
+  metadataForm += `<label for="${metadata.dbName}">${metadata.displayName}</label>`
+  metadataForm += `<input type="${metadata.htmlType}" name="${metadata.dbName}" id="${metadata.dbName}">`
   metadataForm += `</li>`
 })
 
@@ -20,7 +20,3 @@ export const searchBox = () => {
     </button>
   </div>`
 }
-// 
-// todo 1. click off, hide search
-// press esc hide search
-// hit enter, do search

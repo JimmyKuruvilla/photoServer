@@ -13,7 +13,8 @@ tagsRouter.get('/tags', async (req: Request, res: Response, next: NextFunction) 
   const search = req.query.search as string;
   const dbItems = await searchOnTags(db, search);
   const listings = constructMediaListingsFromDb(dbItems);
-  res.send(listings.media.length ? ListingsPage(listings as any) : NotFoundPage(search));
+  // TODO refactor to send a form, and just res.send the page back rather than updating html
+  res.json({ html: listings.media.length ? ListingsPage(listings as any) : NotFoundPage(search) });
 });
 
 tagsRouter.post('/tags', async (req: Request, res: Response, next: NextFunction) => {

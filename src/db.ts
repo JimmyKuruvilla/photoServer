@@ -6,6 +6,7 @@ import { createLogger } from './libs/log.ts';
 import { encacheListings, PrefetchedRandoms } from './services/media.ts';
 import { isIgnorePath } from './utils.ts';
 import { StructuredImageDescriptionResponseJson } from './libs/models/prompts.ts';
+import { METADATA_BY_NAME } from './services/metadata.ts';
 const log = createLogger('DB')
 export type MediaType = 'image' | 'video' | null
 
@@ -16,7 +17,7 @@ export interface DbMedia {
   updated_at: Date,
   hash: string;
   media_type: MediaType,
-  
+
   // these fields don't exist on videos
   face_count?: number | null;
   metadata?: StructuredImageDescriptionResponseJson | null
@@ -204,12 +205,29 @@ export async function searchOnTags(db: Knex, searchParam: string): Promise<Array
     throw e;
   }
 }
-// handle colors array, text search, number search, include tag search
-export async function searchOnMetadata(db: Knex, search: any): Promise<Array<DbMedia & DbTag>> {
-  try {
-    const dbRes = await db(TABLES.MEDIA)
-      .where(db.raw(`${COLS.MEDIA.METADATA} @> ?`, [JSON.stringify(search)]))
 
+// TODO add index for metadata fields
+/**
+ * Returns records that match metadata jsonb 
+ * array fields have to be formatted like {"colors":["white", "green"]}
+ * combines longDescription and emotionalDescription in text searches, but bogusDescription is kept separate.
+ */
+export async function searchOnMetadata(db: Knex, textFields: any = {}, nonTextSearchFields: any = {}): Promise<Array<DbMedia & DbTag>> {
+  try {
+    let query = db(TABLES.MEDIA);
+    if (Object.keys(nonTextSearchFields).length) {
+      query = query.where(db.raw(`${COLS.MEDIA.METADATA} @> ?`, [JSON.stringify(nonTextSearchFields)]))
+    }
+
+    if (Object.keys(textFields).length) {
+      Object.entries(textFields).forEach(([fieldName, fieldValue]) => {
+        query = query
+        .where(db.raw(`${COLS.MEDIA.METADATA} ->> ? ILIKE '%' || ? || '%'`, [fieldName, fieldValue]))
+        .orWhereRaw(db.raw(`${COLS.MEDIA.METADATA} ->> ? ILIKE '%' || ? || '%'`, ['emotionalDescription', fieldValue]))
+      })
+    }
+
+    const dbRes = await query
     return dbRes;
   } catch (e) {
     throw e;

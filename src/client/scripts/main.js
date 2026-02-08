@@ -228,38 +228,6 @@ function search(query) {
   });
 }
 
-function searchAll(query) {
-  /**
-   * 1. show a thing on ~
-   * get the metadata -- send the metadata on pageload
-   * 2. make a search json
-   * 3. send it
-   * 4. return the html and show it. 
-   */
-  const formdata = new URLSearchParams({
-    'first-name': 'Frida',
-    'last-name': 'Kahlo',
-    'location': 'Mexico City, Mexico',
-    'favorite-number': 8
-  })
-
-  fatch(`/metadata?${formdata}`, 'get')
-    .then((metadata) => {
-      console.log(metadata)
-      // make a form with this. 
-    })
-
-  // TODO  temp disabled, put back
-  // fatch(`/media/tags?search=${query}`).then((data) => {
-  //   const htmlElement = $('html');
-  //   if (htmlElement) {
-  //     htmlElement.innerHTML = data.html;
-  //   }
-  // }).catch((e) => {
-  //   console.log(e);
-  // });
-}
-
 function searchByTag(inputLocator) {
   const input = $(inputLocator);
   if (input) {
