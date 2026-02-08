@@ -204,6 +204,17 @@ export async function searchOnTags(db: Knex, searchParam: string): Promise<Array
     throw e;
   }
 }
+// handle colors array, text search, number search, include tag search
+export async function searchOnMetadata(db: Knex, search: any): Promise<Array<DbMedia & DbTag>> {
+  try {
+    const dbRes = await db(TABLES.MEDIA)
+      .where(db.raw(`${COLS.MEDIA.METADATA} @> ?`, [JSON.stringify(search)]))
+
+    return dbRes;
+  } catch (e) {
+    throw e;
+  }
+}
 
 export async function getFavoritesFromDb(db: Knex) {
   return searchOnTags(db, TAGS.FAVORITE)

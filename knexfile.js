@@ -1,5 +1,6 @@
-const base = ({ database, port }) => ({
+const base = ({ database, port, debug }) => ({
   client: 'pg',
+  debug: debug ?? false,
   connection: {
     database,
     host: 'localhost',
@@ -18,7 +19,7 @@ const base = ({ database, port }) => ({
 })
 
 export const dbConfig = {
-  local: base({ database: 'local', port: 5432 }),
+  local: base({ database: 'local', port: 5432, debug: true }),
   prod: base({ database: 'postgres', }),
   test: base({ database: 'test' }),
 };
