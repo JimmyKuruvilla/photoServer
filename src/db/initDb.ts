@@ -10,7 +10,11 @@ let initializedClient: Knex | null = null;
 export const getDb = async (): Promise<Knex> => {
   if (initializedClient) { return initializedClient; }
 
-  const env = process.env.IS_TEST === true.toString() ? 'test' : 'prod'
+  const env = process.env.IS_TEST === true.toString()
+    ? 'test'
+    : process.env.IS_LOCAL === true.toString()
+      ? 'local'
+      : 'prod'
 
   const db = knex({
     client: dbConfig[env].client,

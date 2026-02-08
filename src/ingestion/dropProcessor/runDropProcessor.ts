@@ -17,6 +17,6 @@ import { ingest } from '../ingestion.ts';
     .on('error', error => log(`WATCHER::ERROR: ${error}`))
     .on('add', async (absSourceFilePath) => {
       log(`WATCHER::PROCESSING_NEW_FILE ${absSourceFilePath}`);
-      await ingest(absSourceFilePath, targetPath, { shouldMove: true });
+      await ingest(absSourceFilePath, targetPath, { shouldMove: true, shouldAI: true });
     })
 })();

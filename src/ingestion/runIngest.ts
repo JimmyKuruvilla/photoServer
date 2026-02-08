@@ -12,6 +12,8 @@ import { ingest } from './ingestion.ts';
 const db = await getDb();
 const sourcePath = process.env.SOURCE_PATH;
 const targetPath = process.env.TARGET_PATH;
+const shouldMove = process.env.SHOULD_MOVE === true.toString();
+const shouldAI = process.env.SHOULD_AI === true.toString();
 
 if (!sourcePath || !targetPath) {
   throw new Error('Need both source and target dirs');
@@ -23,7 +25,7 @@ if (!sourcePath || !targetPath) {
 
   const count = await recursiveTraverseDir(
     sourcePath,
-    (filepath: string) => ingest(filepath, targetPath, { shouldMove: false })
+    (filepath: string) => ingest(filepath, targetPath, { shouldMove, shouldAI })
   );
 
   const sizes = await getTableSizes(db)

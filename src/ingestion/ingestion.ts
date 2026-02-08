@@ -37,7 +37,7 @@ const db = await getDb();
  * Used from full ingestion where paths can be from media folder (vetted media files)
  * Used from dropProcessor where paths can be from drop folder (include *any* file)
  */
-export async function ingest(sourceFilePath: string, targetPath: string, opts = { shouldMove: false }) {
+export async function ingest(sourceFilePath: string, targetPath: string, opts = { shouldMove: false, shouldAI: false }) {
   const record: Nullable<Partial<DbMediaWithTags>> = {
     path: null,
     hash: null,
@@ -100,8 +100,10 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
     if (record.path) {
       if (isImage(record.path)) {
         record.thumbnail = await genB64Thumbnail(record.path)
-        record.metadata = record.thumbnail ? await getImageDescriptors({ b64: record.thumbnail }) : null
-        record.face_count = record.metadata?.humanCount ?? 0
+        if (opts.shouldAI) {
+          record.metadata = record.thumbnail ? await getImageDescriptors({ b64: record.thumbnail }) : null
+          record.face_count = record.metadata?.humanCount ?? 0
+        }
 
         const exif = await getExifData(record.path)
         if (exif) {

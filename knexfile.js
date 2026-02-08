@@ -1,40 +1,26 @@
-export const dbConfig = {
-  prod: {
-    client: 'pg',
-    connection: {
-      host: 'localhost',
-      port: '54320',
-      database: 'postgres',
-      user: 'postgres',
-      password: 'example'
-    },
-    pool: {
-      min: 2,
-      max: 10
-    },
-    migrations: {
-      directory: 'src/db/migrations',
-      tableName: 'knex_migrations'
-    }
+const base = ({ database, port }) => ({
+  client: 'pg',
+  connection: {
+    database,
+    host: 'localhost',
+    port: port ?? '54320',
+    user: 'postgres',
+    password: 'example'
   },
-  test: {
-    client: 'pg',
-    connection: {
-      host: 'localhost',
-      port: '54320',
-      database: 'test',
-      user: 'postgres',
-      password: 'example'
-    },
-    pool: {
-      min: 2,
-      max: 10
-    },
-    migrations: {
-      directory: 'src/db/migrations',
-      tableName: 'knex_migrations'
-    }
+  pool: {
+    min: 2,
+    max: 10
+  },
+  migrations: {
+    directory: 'src/db/migrations',
+    tableName: 'knex_migrations'
   }
+})
+
+export const dbConfig = {
+  local: base({ database: 'local', port: 5432 }),
+  prod: base({ database: 'postgres', }),
+  test: base({ database: 'test' }),
 };
 
 export default dbConfig;
