@@ -10,14 +10,14 @@ const db = await getDb();
 mediaRouter.get('/media/favorites', async (req: Request, res: Response, next: NextFunction) => {
   const dbItems = await getFavoritesFromDb(db);
   const listings = constructMediaListingsFromDb(dbItems);
-  res.send(listings(listings as any));
+  res.send(ListingsPage(listings as any));
 });
 
 
 mediaRouter.get('/media/marked', async (req: Request, res: Response, next: NextFunction) => {
   const dbItems = await getMarkedFromDb(db);
   const listings = constructMediaListingsFromDb(dbItems);
-  res.send(listings(listings as any));
+  res.send(ListingsPage(listings as any));
 });
 
 mediaRouter.use('/media', tagsRouter)
