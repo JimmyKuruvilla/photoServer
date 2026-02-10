@@ -10,10 +10,12 @@ import { getExifData } from '../libs/exif.ts';
 import { genFileHash, } from '../libs/hash.ts';
 import { getImageDescriptors } from '../libs/imageDescriptors.ts';
 import { moveToTarget } from '../libs/move.ts';
-import { generateTargetPathForImage, generateTargetPathForVideo } from '../libs/path.ts';
+import { generateTargetPath, generateTargetPathForImage, generateTargetPathForVideo } from '../libs/path.ts';
 import { createLogger } from '../libs/pinologger.ts';
 import { genB64Thumbnail } from '../libs/thumbnail.ts';
 import { Nullable } from '../types/types.ts';
+import { getMediaCaptureDate } from '../libs/creationTime.ts';
+import { formatToLocalDateString } from '../libs/date.ts';
 const log = createLogger('[INGEST]');
 
 /*
@@ -46,7 +48,8 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
     thumbnail: null,
     face_count: 0,
     media_type: null,
-    metadata: null
+    metadata: null,
+    captured_at: null
   }
 
   const filename = path.basename(sourceFilePath);
@@ -77,26 +80,18 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
     log.warn(`SKIPPING_DENY_LISTED_HASH ${sourceFilePath}`)
     return
   } else {
-    let targetFolderName
-    let targetFilePath
+    const capturedAt = await getMediaCaptureDate(sourceFilePath)
+    record.captured_at = capturedAt
 
     if (opts.shouldMove) {
-      if (isImage(sourceFilePath)) {
-        const pathData = await generateTargetPathForImage(sourceFilePath, targetPath)
-        targetFolderName = pathData.targetFolderName
-        targetFilePath = pathData.targetFilePath
-      } else if (isVideo(sourceFilePath)) {
-        const pathData = await generateTargetPathForVideo(sourceFilePath, targetPath)
-        targetFolderName = pathData.targetFolderName
-        targetFilePath = pathData.targetFilePath
-      }
-
+      const { targetFolderName, targetFilePath } = generateTargetPath(sourceFilePath, targetPath, capturedAt)
       const movedFilePath = await moveToTarget(sourceFilePath, targetPath, targetFolderName!, targetFilePath!)
       record.path = movedFilePath
     } else {
       record.path = sourceFilePath
     }
-
+    log.debug(`${formatToLocalDateString(capturedAt)}__${sourceFilePath}`)
+    
     if (record.path) {
       if (isImage(record.path)) {
         record.thumbnail = await genB64Thumbnail(record.path)

@@ -3,15 +3,15 @@ import { Logger } from 'pino';
 import { isIgnorePath } from './utils.ts';
 import { PART, TRASHED_PREFIX } from './constants.ts';
 
-export function isMedia(name: string): boolean {
+export const isMedia = (name: string): boolean => {
   return isImage(name) || isVideo(name);
 }
 
-export function isImage(name: string): boolean {
+export const isImage = (name: string): boolean => {
   return /.+\.jpg$|jpeg$|png$/i.test(name);
 }
 
-export function isVideo(name: string): boolean {
+export const isVideo = (name: string): boolean => {
   return /.+\.mp4$/i.test(name);
 }
 

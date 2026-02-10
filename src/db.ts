@@ -15,6 +15,7 @@ export interface DbMedia {
   path: string;
   created_at: Date,
   updated_at: Date,
+  captured_at: Date,
   hash: string;
   media_type: MediaType,
 
@@ -222,8 +223,8 @@ export async function searchOnMetadata(db: Knex, textFields: any = {}, nonTextSe
     if (Object.keys(textFields).length) {
       Object.entries(textFields).forEach(([fieldName, fieldValue]) => {
         query = query
-        .where(db.raw(`${COLS.MEDIA.METADATA} ->> ? ILIKE '%' || ? || '%'`, [fieldName, fieldValue]))
-        .orWhereRaw(db.raw(`${COLS.MEDIA.METADATA} ->> ? ILIKE '%' || ? || '%'`, ['emotionalDescription', fieldValue]))
+          .where(db.raw(`${COLS.MEDIA.METADATA} ->> ? ILIKE '%' || ? || '%'`, [fieldName, fieldValue]))
+          .orWhereRaw(db.raw(`${COLS.MEDIA.METADATA} ->> ? ILIKE '%' || ? || '%'`, ['emotionalDescription', fieldValue]))
       })
     }
 
