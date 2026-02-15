@@ -7,13 +7,10 @@
   "scripts": {
     "knex": "knex",
     "build": "tsc",
-    
     "dev:local": "IS_LOCAL=true MEDIA_PATH=/Users/jimmykuruvilla/code/photoServer/test tsx watch src/server.ts",
     "test:local": "IS_LOCAL=true SHOULD_MOVE=false SHOULD_AI=false SOURCE_PATH=/Users/jimmykuruvilla/code/photoServer/test/source TARGET_PATH=/Users/jimmykuruvilla/code/photoServer/test/target tsx ./src/ingestion/runIngest.ts",
-    
     "dev:prod": "MEDIA_PATH=/mnt/backup/media tsx watch src/server.ts",
     "test:prod": "IS_TEST=true SHOULD_MOVE=false SHOULD_AI=false SOURCE_PATH=/home/j/scripts/photoServer/test/source TARGET_PATH=/home/j/scripts/photoServer/test/target tsx ./src/ingestion/runIngest.ts",
-    
     "migrate:make": "npm run knex -- migrate:make --migrations-directory ./src/db/migrations $1",
     "migrate:latest": "npm run knex migrate:latest -- --env $1",
     "migrate:rollback": "npm run knex migrate:rollback -- --env $1"
@@ -37,6 +34,8 @@
     "zod": "^3.25.76"
   },
   "dependencies": {
+    "@js-joda/core": "^5.7.0",
+    "@js-joda/timezone": "^2.23.0",
     "chokidar": "^3.5.3",
     "exifreader": "^4.12.0",
     "ffprobe": "^1.1.2",
