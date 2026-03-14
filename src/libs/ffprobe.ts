@@ -1,12 +1,21 @@
-import ffprobe from 'ffprobe';
+import ffprobe, { FFProbeResult } from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { log } from './log.ts';
+import { createLogger } from './pinologger.ts';
+const log = createLogger('[FFPROBE]')
 
-export const getFFProbeData = (filepath: string) => {
+export const getFFProbeData = async (filepath: string) => {
   try {
-    return ffprobe(filepath, { path: ffprobeStatic.path })
+    const data = await ffprobe(filepath, { path: ffprobeStatic.path })
+    return { ...data, creationTime: getCreationTimeFromFFProbeData(data) }
   } catch (error) {
-    log(`GET_FFPROBE_ERROR: ${error}`)
+    log.error(`GET_FFPROBE_ERROR: ${error}`)
     return null
   }
+}
+
+const getCreationTimeFromFFProbeData = (result: FFProbeResult | null) => {
+  const date = result?.streams?.[0]?.tags?.creation_time
+  return date
+    ? new Date(date)
+    : null
 }

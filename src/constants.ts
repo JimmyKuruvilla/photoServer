@@ -31,6 +31,7 @@ export const COLS = {
     ...COMMON_COLS,
     ...PATH,
     ...HASH,
+    CAPTURED_AT: 'captured_at',
     UPDATED_AT: 'updated_at',
     FAVORITE: 'favorite',
     MEDIA_TYPE: 'media_type',
@@ -39,7 +40,7 @@ export const COLS = {
     MARKED: 'marked',
     FACE_COUNT: 'face_count',
     ORIENTATION: 'orientation',
-    MODEL: 'model'
+    MODEL: 'model',
   },
   MEDIA_TAGS: {
     ...COMMON_COLS,

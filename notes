@@ -8,42 +8,25 @@ CREATE USER postgres WITH SUPERUSER PASSWORD 'example';
 CREATE DATABASE local;
 
 
-DONE
-
-store the type of video or picture in the db so that the select random can use it to pick. 
-
-add last updated at with default now() so that upserts can change time. can be used to query script changes
-
-- on image load, prefetch left and right. load left and right from cache first if available, if not fetch. cache ttl of 30s. 
-
-permadelete : deletions stored in deleted table, rejected from ingestion, manual delete by tag. 
-
 TODO
-make random work with media_type
 
-if random could generate a set of 10 randoms, and go and fetch and load those into cache, then random would be faster as well. 
+ad creation time to db to allow range queries
+- modify metadata query to allow > x < y
+-- be able to explore in a direction given a date, not just within a folder
 
 videos need a thumbnail as well. 
 - take first frame or 2seconds in. 
 
-leave original service alone and build a new one along side it. 
+- refactor utils + guards
 
-1. add search by any db param and return as listing to UI
-2. face recognition is the key
-
-0. refactor utils + guards
-
-1. use express 5
+= use express 5
 // refactor listings
 
-3. convert to react + vite
+dev improvements
+- organize clientside js, css, and server render into verticals
+ convert to react + vite
 -- convert to use vite  + react
 -- make buttons bigger on touch devices
-
--- be able to explore in a direction given a date, not just within a folder
-
 -- spacebar to be pause start and then stop. 
 -- remove media html `content` classes
 - install postfix to get crontab logs, install mutt for better mail handling
-
-refacotr db into "models"
