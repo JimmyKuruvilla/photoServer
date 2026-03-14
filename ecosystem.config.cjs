@@ -18,7 +18,9 @@ module.exports = {
       log_file: '/mnt/backup/media/__logs/dropProcessor.log',
       env: {
         SOURCE_PATH: '/mnt/backup/media/__dropoff',
-        TARGET_PATH: '/mnt/backup/media'
+        TARGET_PATH: '/mnt/backup/media',
+        SHOULD_MOVE: true,
+        SHOULD_AI: true
       }
     },
     {

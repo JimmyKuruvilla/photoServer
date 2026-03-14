@@ -12,23 +12,27 @@ const log = createLogger('[MEDIA_CREATION_TIME]')
  * falls back to file creation time
  */
 export const getMediaCaptureDate = async (filePath: string): Promise<Date> => {
-  let creationTime;
+  try {
+    let creationTime;
 
-  if (isImage(filePath)) {
-    const exifData = await getExifData(filePath)
-    creationTime = exifData?.gpsIsoCreationDate ?? exifData?.captureDate
-    if (creationTime) {
-      return creationTime
+    if (isImage(filePath)) {
+      const exifData = await getExifData(filePath)
+      creationTime = exifData?.gpsIsoCreationDate ?? exifData?.captureDate
+      if (creationTime) {
+        return creationTime
+      }
     }
-  }
 
-  if (isVideo(filePath)) {
-    const ffResult = await getFFProbeData(filePath)
-    if (ffResult?.creationTime) {
-      return ffResult.creationTime
+    if (isVideo(filePath)) {
+      const ffResult = await getFFProbeData(filePath)
+      if (ffResult?.creationTime) {
+        return ffResult.creationTime
+      }
     }
-  }
 
-  const stats = await stat(filePath)
-  return stats.birthtime
+    const stats = await stat(filePath)
+    return stats.birthtime
+  } catch (error) {
+    throw new Error(`MEDIA_CREATION_TIME__UNKNOWN`, { cause: error })
+  }
 }

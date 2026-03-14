@@ -5,6 +5,8 @@ import { ingest } from '../ingestion.ts';
 (async () => {
   const sourcePath = process.env.SOURCE_PATH;
   const targetPath = process.env.TARGET_PATH;
+  const shouldMove = process.env.SHOULD_MOVE === true.toString();
+  const shouldAI = process.env.SHOULD_AI === true.toString();
 
   if (!sourcePath || !targetPath) {
     throw new Error('Need both source and target dirs');
@@ -17,6 +19,6 @@ import { ingest } from '../ingestion.ts';
     .on('error', error => log(`WATCHER::ERROR: ${error}`))
     .on('add', async (absSourceFilePath) => {
       log(`WATCHER::PROCESSING_NEW_FILE ${absSourceFilePath}`);
-      await ingest(absSourceFilePath, targetPath, { shouldMove: true, shouldAI: true });
+      await ingest(absSourceFilePath, targetPath, { shouldMove, shouldAI });
     })
 })();
