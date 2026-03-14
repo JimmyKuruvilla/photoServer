@@ -7,12 +7,18 @@
 CREATE USER postgres WITH SUPERUSER PASSWORD 'example';
 CREATE DATABASE local;
 
+# knex
+// .count('* as count')
+// .toSQL().toNative()
 
 TODO
+- add reingest in stages selectable with options for every single stage
+- add script to reprocess folders with creationdate > x - bash script
 
-ad creation time to db to allow range queries
+add creation time to db to allow range queries
 - modify metadata query to allow > x < y
 -- be able to explore in a direction given a date, not just within a folder
+-- db part and ingestion done, now need to add queries
 
 videos need a thumbnail as well. 
 - take first frame or 2seconds in. 

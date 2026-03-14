@@ -14,14 +14,17 @@ const sourcePath = process.env.SOURCE_PATH;
 const targetPath = process.env.TARGET_PATH;
 const shouldMove = process.env.SHOULD_MOVE === true.toString();
 const shouldAI = process.env.SHOULD_AI === true.toString();
+const shouldPurge = process.env.SHOULD_PURGE === true.toString();
 
 if (!sourcePath || !targetPath) {
   throw new Error('Need both source and target dirs');
 }
 
 (async () => {
-  log(`PURGING_ANY_DEAD_DB_LINKS_TO_FILESYSTEM`)
-  await purgeDeadDbLinks()
+  if (shouldPurge) {
+    log(`PURGING_ANY_DEAD_DB_LINKS_TO_FILESYSTEM`)
+    await purgeDeadDbLinks()
+  }
 
   const count = await recursiveTraverseDir(
     sourcePath,
