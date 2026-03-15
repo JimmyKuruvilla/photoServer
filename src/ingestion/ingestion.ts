@@ -130,7 +130,7 @@ export async function ingest(sourceFilePath: string, targetPath: string, opts = 
       }
     }
   } catch (error) {
-    log.error(`ERROR ${error}`)
+    log.error(error)
     if (opts.shouldMove && cleanupTargetPath) {
       try {
         await deleteTarget(cleanupTargetPath)

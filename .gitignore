@@ -8,3 +8,5 @@ dist
 csvs/**
 **/venv
 src/mcp/others
+test/source
+test/target

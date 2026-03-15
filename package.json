@@ -12,7 +12,7 @@
     "test:mac": "IS_LOCAL=true SHOULD_MOVE=false SHOULD_AI=false SOURCE_PATH=/Users/jimmykuruvilla/code/photoServer/test/source TARGET_PATH=/Users/jimmykuruvilla/code/photoServer/test/target tsx ./src/ingestion/runIngest.ts",
     
     "dev:prod": "MEDIA_PATH=/mnt/backup/media tsx watch src/server.ts",
-    "test": "IS_TEST=true SHOULD_MOVE=false SHOULD_AI=false SOURCE_PATH=/home/j/scripts/photoServer/test/source TARGET_PATH=/home/j/scripts/photoServer/test/target tsx ./src/ingestion/runIngest.ts",
+    "test": "pwd; ./test/run.sh",
     
     "migrate:make": "npm run knex -- migrate:make --migrations-directory ./src/db/migrations $1",
     "migrate:latest": "npm run knex migrate:latest -- --env $1",
