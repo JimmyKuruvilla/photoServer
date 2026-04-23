@@ -16,9 +16,8 @@ export const PrintPage = (): string => `
 
 export const printFile = async (filepath: string): Promise<void> => {
   try {
-    // it's just a config problem. Need to set the printer in cups. 
-    const { stdout, stderr } = await execAsync(`PRINTER="HL-2270DW" lpr "${filepath}"`);
-    // const { stdout, stderr } = await execAsync(`cat "${filepath}" > /dev/tcp/192.168.2.111/9100`);
+    // lpstat -p -d should output the printer queue name
+    const { stdout, stderr } = await execAsync(`lpr -P "ModBrother_HL-2270DW_series" "${filepath}"`);
     console.log(stdout, stderr);
   } catch (error) {
     throw new Error(`PRINT_ERROR: ${(error as any).stderr}`);
