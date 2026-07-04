@@ -12,7 +12,10 @@ import { ingest } from '../ingestion.ts';
     throw new Error('Need both source and target dirs');
   }
 
-  const watcher = chokidar.watch(sourcePath, { awaitWriteFinish: { pollInterval: 1000 } });
+  /**
+   * Copying over the network with finder is a multi step process and stabilityThreshold ensures the process can complete before processing starts. Starting too soon can show up as trying to get exif data from empty files and files getting copied to the wrong paths.
+   */
+  const watcher = chokidar.watch(sourcePath, { awaitWriteFinish: { stabilityThreshold: 5000, pollInterval: 100 } });
 
   watcher
     .on('ready', () => log('WATCHER::READY'))

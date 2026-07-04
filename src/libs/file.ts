@@ -12,9 +12,9 @@ export const doesFileExist = async (filePath: string) => {
     return true;
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      log(`File "${filePath}" does not exist.`);
+      log.info(`File "${filePath}" does not exist.`);
     } else {
-      log(`Error checking file "${filePath}": ${error}`);
+      log.error(`Error checking file "${filePath}": ${error}`);
     }
     return false;
   }

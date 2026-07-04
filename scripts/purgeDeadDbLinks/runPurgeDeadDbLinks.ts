@@ -2,7 +2,7 @@
 
 /*
  Check if db file path exists, and if not delete it from db
- tsx purgeDeadDbLinks.ts
+ tsx scripts/purgeDeadDbLinks/runPurgeDeadDbLinks.ts 
 */
 
 import { purgeDeadDbLinks } from './purgeDeadDbLinks.ts';

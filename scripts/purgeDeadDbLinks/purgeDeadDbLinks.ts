@@ -17,7 +17,7 @@ export const purgeDeadDbLinks = async () => {
 
   for await (const record of recordsStream) {
     try {
-      log.info(`CHECKING_IF_FILE_EXISTS ${record.path}`)
+      // log.info(`CHECKING_IF_FILE_EXISTS ${record.path}`)
       const fileExists = await doesFileExist(record.path)
 
       if (!fileExists) {
